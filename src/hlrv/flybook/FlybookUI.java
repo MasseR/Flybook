@@ -9,9 +9,13 @@ import com.vaadin.ui.UI;
 @SuppressWarnings("serial")
 public class FlybookUI extends UI {
 
-	@Override
-	protected void init(VaadinRequest request) {
+    @Override
+    protected void init(VaadinRequest request) {
 
-	}
+        LoginViewExample view = new LoginViewExample();
+
+        setContent(view);
+
+    }
 
 }
