@@ -2,6 +2,7 @@ package hlrv.flybook;
 
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * Main UI class
@@ -9,13 +10,16 @@ import com.vaadin.ui.UI;
 @SuppressWarnings("serial")
 public class FlybookUI extends UI {
 
+    private VerticalLayout layout;
+
     @Override
     protected void init(VaadinRequest request) {
 
-        LoginViewExample view = new LoginViewExample();
+        layout = new VerticalLayout();
 
-        setContent(view);
+        layout.addComponent(new LoginViewExample());
+
+        setContent(layout);
 
     }
-
 }

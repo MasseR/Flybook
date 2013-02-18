@@ -1,7 +1,5 @@
 package hlrv.flybook;
 
-import com.vaadin.data.Property.ValueChangeEvent;
-import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -15,7 +13,9 @@ import com.vaadin.ui.VerticalLayout;
 
 /**
  * This class demonstrates a view with a single component inside it. This method
- * of programming creates a large amount of divs, I think.
+ * of programming creates a large amount of divs, I think. This class will be
+ * divided into two classes and a form generator will be implemented in place of
+ * individual fields as demonstrated in RegisterForm class.
  * 
  * @author Esa Halsti
  */
@@ -37,7 +37,7 @@ public class LoginViewExample extends GridLayout {
         this.setWidth("100%");
 
         /*
-         * Set the component in the vertical layout
+         * Set the components in the vertical layout
          */
         this.addComponent(comp);
 
@@ -53,39 +53,17 @@ public class LoginViewExample extends GridLayout {
     private class LoginComponentExample extends CustomComponent {
 
         /*
-         * Listener to capture user input
-         */
-        private class PasswordListener implements ValueChangeListener {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                password = event.getProperty().getValue().toString();
-                System.err.println(password);
-            }
-
-        }
-
-        /*
-         * Listener to capture user input
-         */
-        private class LoginNameListener implements ValueChangeListener {
-
-            @Override
-            public void valueChange(ValueChangeEvent event) {
-                loginName = event.getProperty().getValue().toString();
-                System.err.println(loginName);
-            }
-
-        }
-
-        /*
-         * Listener to capture mouse click DEPRECATED
+         * Listener to capture mouse click DEPRECATED how is this implemented?!
          */
         private class OkClickListener implements ClickListener {
 
             @SuppressWarnings("deprecation")
             @Override
             public void buttonClick(ClickEvent event) {
+
+                /**
+                 * How are notifications shown? Is everything deprecated?
+                 */
                 FlybookUI
                         .getCurrent()
                         .getUI()
@@ -96,9 +74,19 @@ public class LoginViewExample extends GridLayout {
         }
 
         /*
+         * Button to open register view
+         */
+        private final Button register;
+
+        /*
          * Panel used as the composition root
          */
         private final Panel rootPanel;
+
+        /*
+         * The variables beneath should be transformed to use a form and a
+         * BeanItem. Example in registerform.
+         */
 
         /*
          * Layout used inside the rootPanel
@@ -118,12 +106,12 @@ public class LoginViewExample extends GridLayout {
         /*
          * String to capture user input
          */
-        private String loginName;
+        private final String loginName;
 
         /*
          * String to capture user input
          */
-        private String password;
+        private final String password;
 
         /*
          * Submit Button
@@ -145,28 +133,31 @@ public class LoginViewExample extends GridLayout {
             nameField = new TextField("Login:");
             passwordField = new PasswordField("Password:");
             ok = new Button("Submit");
-
-            /*
-             * Create listeners
-             */
-            PasswordListener passwordListener = new PasswordListener();
-            LoginNameListener nameListener = new LoginNameListener();
+            register = new Button("Register");
+            register.setStyleName("link");
             OkClickListener buttonListener = new OkClickListener();
 
-            /*
-             * How is this done the Vaadin 7 way? The example in the Book of
-             * Vaadin 7 shows new Property.ValueChangeListener() which is also
-             * deprecated. WTH?
-             */
-            nameField.addListener(nameListener);
-            passwordField.addListener(passwordListener);
-            ok.addListener(buttonListener);
+            ok.addClickListener(buttonListener);
+            register.addClickListener(new ClickListener() {
+
+                /*
+                 * !!! This is a hack you need to implement this properly. But
+                 * how?
+                 */
+                @Override
+                public void buttonClick(ClickEvent event) {
+
+                    FlybookUI.getCurrent().addWindow(new RegisterView());
+
+                }
+            });
 
             /*
              * Set the fields inside the Layout
              */
             panelLayout.addComponent(nameField);
             panelLayout.addComponent(passwordField);
+            panelLayout.addComponent(register);
             panelLayout.addComponent(ok);
             panelLayout.setComponentAlignment(ok, Alignment.BOTTOM_RIGHT);
 
@@ -180,8 +171,17 @@ public class LoginViewExample extends GridLayout {
              * Set component as large as elements contained inside
              */
             panelLayout.setSizeUndefined();
-            panelLayout.setMargin(true);
             rootPanel.setSizeUndefined();
+
+            /*
+             * Spacing between each component
+             */
+            panelLayout.setSpacing(true);
+
+            /*
+             * Margin
+             */
+            panelLayout.setMargin(true);
         }
     }
 }
