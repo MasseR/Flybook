@@ -10,15 +10,19 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * This class provides the form for RegisterView
+ * 
+ * @author Esa Halsti
+ */
 public class RegisterForm extends CustomComponent {
 
     /**
      * This listener is provided to commit changes to the underlying BeanItem
-     * which in turn can be saved to the database. Because the listener is so
-     * small it could be implemented as an anonymous class as well.
+     * which in turn can be saved to the database. Because the listener performs
+     * a trivial action it could be implemented as an anonymous class as well.
      * 
      * @author Esa Halsti
-     * 
      */
     private class SaveListener implements ClickListener {
 
@@ -98,19 +102,12 @@ public class RegisterForm extends CustomComponent {
              * !!! This is a hack. We do not want show the admin field in the
              * registration form. How to implement this robustly?
              */
-
             if (!propertyID.toString().equals("admin")) {
 
                 /**
                  * Add a component to form
                  */
                 layout.addComponent(fields.buildAndBind(propertyID));
-
-                /**
-                 * Set component caption to an empty String. Default value is
-                 * null.
-                 */
-
             }
 
         }
@@ -125,6 +122,9 @@ public class RegisterForm extends CustomComponent {
          */
         save.addClickListener(new SaveListener());
 
+        /**
+         * Remember to setCompositionRoot for CustomComponent
+         */
         this.setCompositionRoot(layout);
     }
 

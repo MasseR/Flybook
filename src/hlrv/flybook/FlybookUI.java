@@ -17,7 +17,7 @@ public class FlybookUI extends UI {
 
         layout = new VerticalLayout();
 
-        layout.addComponent(new LoginViewExample());
+        layout.addComponent(new LoginView());
 
         setContent(layout);
 
