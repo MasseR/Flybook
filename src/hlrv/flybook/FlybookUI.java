@@ -12,6 +12,7 @@ import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
+import hlrv.flybook.auth.Auth;
 
 /**
  * Main UI class
@@ -45,6 +46,8 @@ public class FlybookUI extends UI {
                     "",
                     "");
             this.dbPool = pool;
+            Auth auth = new Auth(pool);
+            auth.login("foo", "bar");
         } catch(Exception e) {
             System.out.println(e);
         }
