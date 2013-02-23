@@ -4,12 +4,21 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.vaadin.data.Item;
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.VerticalSplitPanel;
 
-public class FlightDetailsPanel extends Panel {
+public class FlightDetailsPanel extends CustomComponent implements
+        Property.ValueChangeListener {
+
+    private SessionContext ctx;
 
     private TextField fieldId;
     private TextField fieldDate;
@@ -22,56 +31,142 @@ public class FlightDetailsPanel extends Panel {
 
     private TextField fieldNotes;
 
-    public FlightDetailsPanel() {
-        setCaption("Flight Details");
+    private FieldGroup fieldGroup;
 
-        VerticalLayout layout0 = new VerticalLayout();
-        layout0.setSpacing(true);
-        layout0.setMargin(true);
+    private FlightMap mapView;
 
-        fieldId = new TextField("Flight ID:", "123");
+    private DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+    public FlightDetailsPanel(SessionContext ctx) throws Exception {
+
+        this.ctx = ctx;
+
+        ctx.getCurrentFlightEntry().addValueChangeListener(this);
+
+        fieldId = new TextField("Flight ID");
         fieldId.setReadOnly(true);
 
-        fieldDate = new TextField("Date: ", currentDateAsString());
+        fieldDate = new TextField("Date Added");
         fieldDate.setReadOnly(true);
 
-        HorizontalLayout layout1 = new HorizontalLayout();
-        layout1.setSpacing(true);
-        layout1.addComponent(fieldId);
-        layout1.addComponent(fieldDate);
+        HorizontalLayout layout10 = new HorizontalLayout();
+        layout10.setSpacing(true);
+        layout10.addComponent(fieldId);
+        layout10.addComponent(fieldDate);
 
-        VerticalLayout layout11 = new VerticalLayout();
-        fieldDeparturePort = new TextField("Port", "Helsinki");
-        fieldDepartureTime = new TextField("Time", "1234");
-        layout11.addComponent(fieldDeparturePort);
-        layout11.addComponent(fieldDepartureTime);
-        layout11.setSpacing(true);
-
+        /**
+         * Create departure panel
+         */
         Panel departurePanel = new Panel("Departure");
-        departurePanel.setContent(layout11);
+        VerticalLayout layoutDeparture = new VerticalLayout();
+        fieldDeparturePort = new TextField("Port");
+        fieldDepartureTime = new TextField("Time");
+        layoutDeparture.addComponent(fieldDeparturePort);
+        layoutDeparture.addComponent(fieldDepartureTime);
+        layoutDeparture.setSpacing(true);
+        // layoutDeparture.setMargin(true);
+        departurePanel.setContent(layoutDeparture);
 
-        VerticalLayout layout12 = new VerticalLayout();
-        fieldLandingPort = new TextField("Port", "London");
-        fieldLandingTime = new TextField("Time", "4321");
-        layout12.addComponent(fieldLandingPort);
-        layout12.addComponent(fieldLandingTime);
-        layout12.setSpacing(true);
-
+        /**
+         * Create landing panel
+         */
         Panel landingPanel = new Panel("Landing");
-        landingPanel.setContent(layout12);
+        VerticalLayout layoutLanding = new VerticalLayout();
+        fieldLandingPort = new TextField("Port");
+        fieldLandingTime = new TextField("Time");
+        layoutLanding.addComponent(fieldLandingPort);
+        layoutLanding.addComponent(fieldLandingTime);
+        layoutLanding.setSpacing(true);
+        // layoutLanding.setMargin(true);
+        landingPanel.setContent(layoutLanding);
 
         fieldNotes = new TextField("Notes");
 
-        layout0.addComponent(layout1);
+        VerticalLayout layout0 = new VerticalLayout();
+        // layout0.setSpacing(true);
+        layout0.setMargin(true);
+        layout0.setSizeUndefined();
+        layout0.addComponent(layout10);
         layout0.addComponent(departurePanel);
         layout0.addComponent(landingPanel);
         layout0.addComponent(fieldNotes);
+        // layout0.setExpandRatio(layout10, 0);
+        // layout0.setExpandRatio(departurePanel, 0);
+        // layout0.setExpandRatio(landingPanel, 0);
+        // layout0.setExpandRatio(fieldNotes, 0);
 
-        setContent(layout0);
+        Panel panel = new Panel();
+        panel.setCaption("Flight Details");
+        panel.setSizeFull();
+        panel.setContent(layout0);
+
+        fieldGroup = new FieldGroup();
+
+        mapView = new FlightMap(ctx);
+        mapView.setSizeFull();
+
+        VerticalSplitPanel verticalSplitPanel = new VerticalSplitPanel(panel,
+                mapView);
+        verticalSplitPanel.setSplitPosition(50f);
+        verticalSplitPanel.setSizeFull();
+
+        setCompositionRoot(verticalSplitPanel);
     }
 
     public String currentDateAsString() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         return dateFormat.format(new Date());
     }
+
+    @Override
+    public void valueChange(ValueChangeEvent event) {
+
+        Item fe = ctx.getCurrentFlightEntry().getValue();
+
+        fieldId.setReadOnly(false);
+        fieldId.setValue(String.valueOf((Integer) fe.getItemProperty(
+                DBConstants.FLIGHTENTRIES_FLIGHT_ID).getValue()));
+        fieldId.setReadOnly(true);
+
+        fieldDate.setReadOnly(false);
+        fieldDate.setValue(dateFormat.format(new Date((Integer) fe
+                .getItemProperty(DBConstants.FLIGHTENTRIES_DATE).getValue())));
+        fieldDate.setReadOnly(true);
+
+        fieldDeparturePort.setValue((String) fe.getItemProperty(
+                "c_departure_airport_string").getValue());
+
+        fieldDepartureTime.setValue(dateFormat.format(new Date((Integer) fe
+                .getItemProperty(DBConstants.FLIGHTENTRIES_DEPARTURE_TIME)
+                .getValue())));
+
+        fieldLandingPort.setValue((String) fe.getItemProperty(
+                "c_landing_airport_string").getValue());
+
+        fieldLandingTime.setValue(dateFormat.format(new Date((Integer) fe
+                .getItemProperty(DBConstants.FLIGHTENTRIES_LANDING_TIME)
+                .getValue())));
+
+        fieldNotes.setValue((String) fe.getItemProperty(
+                DBConstants.FLIGHTENTRIES_NOTES).getValue());
+
+        // FlightEntry fe = ctx.getCurrentFlightEntry().getValue();
+
+        // fieldId.setValue(String.valueOf(fe.getFlightID()));
+        //
+        // fieldDate.setValue(dateFormat.format(fe.getDate()));
+        //
+        // fieldDeparturePort.setValue(fe.getDepartureAirportString());
+        //
+        // fieldDepartureTime.setValue(dateFormat.format(fe.getDepartureTime()));
+        //
+        // fieldLandingPort.setValue(fe.getLandingAirportString());
+        //
+        // fieldLandingTime.setValue(dateFormat.format(fe.getLandingTime()));
+        //
+        // fieldNotes.setValue(fe.getNotes());
+    }
+    // public void setItem(Item item) {
+    //
+    // mapView.setFlightItem(item);
+    // }
 }

@@ -1,7 +1,5 @@
 package hlrv.flybook;
 
-import java.sql.SQLException;
-
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
@@ -17,27 +15,25 @@ public class FlybookUI extends UI {
     protected void init(VaadinRequest request) {
 
         try {
-            DBConnection connection = new DBConnection();
-            getSession().setAttribute("db", connection);
-        } catch (SQLException e) {
+
+            SessionContext ctx = new SessionContext(getSession());
+
+            TabSheet tabs = new TabSheet();
+
+            tabs.setSizeFull();
+
+            FlightsTab flightsTab = new FlightsTab(ctx);
+
+            tabs.addTab(flightsTab, "Flights");
+
+            tabs.addTab(new Panel(), "Reports");
+
+            tabs.addTab(new Panel(), "Account");
+
+            setContent(tabs);
+
+        } catch (Exception e) {
             System.err.println(e.toString());
         }
-
-        TabSheet tabs = new TabSheet();
-
-        tabs.setSizeFull();
-
-        PersonalView personalView = new PersonalView();
-        SearchView searchView = new SearchView();
-
-        tabs.addTab(personalView, "My Flights");
-
-        tabs.addTab(searchView, "Search");
-
-        tabs.addTab(new Panel(), "Account");
-
-        setContent(tabs);
-
     }
-
 }
