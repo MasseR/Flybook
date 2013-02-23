@@ -75,14 +75,14 @@ public class FlightEntriesFSDeletegate implements FreeformStatementDelegate {
 
         StringBuilder sql = new StringBuilder("");
         sql.append("SELECT ");
-        sql.append("u.c_firstname || ' ' || u.c_lastname AS c_pilot, ");
-        sql.append("datetime(fe.c_date, 'unixepoch') AS c_date_hr, ");
+        sql.append("u.c_firstname || ' ' || u.c_lastname AS c_pilot_fullname, ");
+        sql.append("datetime(fe.c_date, 'unixepoch') AS c_date_string, ");
 
         sql.append("ap1.c_name || ',' || ap1.c_city || ',' || ap1.c_country AS c_departure_airport_string, ");
-        sql.append("datetime(fe.c_departure_time, 'unixepoch') AS c_departure_time_hr, ");
+        sql.append("datetime(fe.c_departure_time, 'unixepoch') AS c_departure_time_string, ");
 
         sql.append("ap2.c_name || ',' || ap2.c_city || ',' || ap2.c_country AS c_landing_airport_string, ");
-        sql.append("datetime(fe.c_landing_time, 'unixepoch') AS c_landing_time_hr, ");
+        sql.append("datetime(fe.c_landing_time, 'unixepoch') AS c_landing_time_string, ");
 
         sql.append("time(fe.c_landing_time - fe.c_departure_time, 'unixepoch') AS c_flight_time, ");
 
@@ -98,7 +98,7 @@ public class FlightEntriesFSDeletegate implements FreeformStatementDelegate {
         // sql.append("fe.c_flight_type, ");
         //
         sql.append("ac.c_class ");
- 
+
         sql.append("FROM FlightEntries fe ");
         sql.append("INNER JOIN Users u ON u.c_username = fe.c_username ");
         sql.append("INNER JOIN Airports ap1 ON fe.c_departure_airport = ap1.c_id ");
