@@ -1,5 +1,9 @@
 package hlrv.flybook;
 
+import hlrv.flybook.conv.CustomConverterFactory;
+
+import java.util.Locale;
+
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
@@ -17,6 +21,9 @@ public class FlybookUI extends UI {
         try {
 
             SessionContext ctx = new SessionContext(getSession());
+
+            getSession().setConverterFactory(new CustomConverterFactory());
+            getSession().setLocale(Locale.getDefault());
 
             TabSheet tabs = new TabSheet();
 

@@ -3,7 +3,9 @@ package hlrv.flybook;
 import com.vaadin.data.Item;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.shared.ui.MarginInfo;
+import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
@@ -15,7 +17,7 @@ public class FlightForm extends CustomComponent {
     private FieldGroup fieldGroup;
 
     private TextField fieldId;
-    private TextField fieldDate;
+    private DateField fieldDate;
 
     private TextField fieldPilotUsername;
     private TextField fieldPilotFullname;
@@ -37,7 +39,8 @@ public class FlightForm extends CustomComponent {
         fieldId.setColumns(5);
         fieldId.setReadOnly(true);
 
-        fieldDate = new TextField("Date Added");
+        fieldDate = new DateField("Date Added");
+        fieldDate.setResolution(Resolution.SECOND);
         fieldDate.setReadOnly(true);
 
         HorizontalLayout idAndDateLayout = new HorizontalLayout();
@@ -112,7 +115,8 @@ public class FlightForm extends CustomComponent {
 
         fieldGroup = new FieldGroup();
         fieldGroup.bind(fieldId, "c_flight_id");
-        fieldGroup.bind(fieldDate, "c_date_string");
+        fieldGroup.bind(fieldDate, "c_date");
+        // fieldGroup.bind(fieldDate, "c_date_string");
 
         fieldGroup.bind(fieldPilotUsername, "c_username");
         fieldGroup.bind(fieldPilotFullname, "c_pilot_fullname");
