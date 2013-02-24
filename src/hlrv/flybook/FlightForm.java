@@ -1,12 +1,12 @@
 package hlrv.flybook;
 
-import com.vaadin.data.Item;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
@@ -23,10 +23,10 @@ public class FlightForm extends CustomComponent {
     private TextField fieldPilotFullname;
 
     private TextField fieldDeparturePort;
-    private TextField fieldDepartureTime;
+    private DateField fieldDepartureTime;
 
     private TextField fieldLandingPort;
-    private TextField fieldLandingTime;
+    private DateField fieldLandingTime;
 
     private TextArea fieldNotes;
 
@@ -76,7 +76,9 @@ public class FlightForm extends CustomComponent {
         Panel departurePanel = new Panel("Departure");
         VerticalLayout layoutDeparture = new VerticalLayout();
         fieldDeparturePort = new TextField("Port");
-        fieldDepartureTime = new TextField("Time");
+        fieldDeparturePort.setColumns(30);
+        fieldDepartureTime = new DateField("Time");
+        fieldDepartureTime.setResolution(Resolution.SECOND);
         layoutDeparture.addComponent(fieldDeparturePort);
         layoutDeparture.addComponent(fieldDepartureTime);
         layoutDeparture.setSpacing(true);
@@ -89,7 +91,9 @@ public class FlightForm extends CustomComponent {
         Panel landingPanel = new Panel("Landing");
         VerticalLayout layoutLanding = new VerticalLayout();
         fieldLandingPort = new TextField("Port");
-        fieldLandingTime = new TextField("Time");
+        fieldLandingPort.setColumns(30);
+        fieldLandingTime = new DateField("Time");
+        fieldLandingTime.setResolution(Resolution.SECOND);
         layoutLanding.addComponent(fieldLandingPort);
         layoutLanding.addComponent(fieldLandingTime);
         layoutLanding.setSpacing(true);
@@ -97,6 +101,7 @@ public class FlightForm extends CustomComponent {
         landingPanel.setContent(layoutLanding);
 
         fieldNotes = new TextArea("Notes");
+        fieldNotes.setColumns(40);
 
         VerticalLayout topLayout = new VerticalLayout();
         // layout0.setSpacing(true);
@@ -113,34 +118,93 @@ public class FlightForm extends CustomComponent {
         // layout0.setExpandRatio(landingPanel, 0);
         // layout0.setExpandRatio(fieldNotes, 0);
 
-        fieldGroup = new FieldGroup();
-        fieldGroup.bind(fieldId, "c_flight_id");
-        fieldGroup.bind(fieldDate, "c_date");
-        // fieldGroup.bind(fieldDate, "c_date_string");
-
-        fieldGroup.bind(fieldPilotUsername, "c_username");
-        fieldGroup.bind(fieldPilotFullname, "c_pilot_fullname");
-
-        fieldGroup.bind(fieldDeparturePort, "c_departure_airport_string");
-        fieldGroup.bind(fieldDepartureTime, "c_departure_time_string");
-
-        fieldGroup.bind(fieldLandingPort, "c_landing_airport_string");
-        fieldGroup.bind(fieldLandingTime, "c_landing_time_string");
-
-        fieldGroup.bind(fieldNotes, "c_notes");
+        fieldGroup = createFieldGroup();
 
         setCompositionRoot(topLayout);
-
     }
 
-    public void setDataSource(Item flightItem) {
+    public boolean isEditable() {
+        return !fieldGroup.isReadOnly();
+    }
 
-        fieldGroup.setItemDataSource(flightItem);
+    /**
+     * Sets whether or not contained fields are editable.
+     * 
+     * @param editable
+     */
+    public void setEditable(boolean editable) {
+
+        if (fieldGroup.getItemDataSource() != null) {
+            fieldGroup.setReadOnly(!editable);
+        }
 
         fieldId.setReadOnly(true);
         fieldDate.setReadOnly(true);
         fieldPilotUsername.setReadOnly(true);
         fieldPilotFullname.setReadOnly(true);
+    }
+
+    /**
+     * Sets field data source.
+     * 
+     * @param flightItem
+     */
+    public void setDataSource(FlightEntry flightItem) {
+
+        if (flightItem != null) {
+            fieldGroup.setItemDataSource(flightItem.getItem());
+        } else {
+            fieldGroup = createFieldGroup();
+        }
+
+        fieldId.setReadOnly(true);
+        fieldDate.setReadOnly(true);
+        fieldPilotUsername.setReadOnly(true);
+        fieldPilotFullname.setReadOnly(true);
+    }
+
+    /**
+     * Commits values to data source.
+     */
+    public void commit() {
+
+        try {
+
+            fieldGroup.commit();
+        } catch (FieldGroup.CommitException e) {
+
+            Notification.show("Commit Error", e.toString(),
+                    Notification.TYPE_WARNING_MESSAGE);
+        }
+    }
+
+    /**
+     * Sets original values from time of last call of setDataSource()
+     */
+    public void reset() {
+        fieldGroup.discard();
+    }
+
+    private FieldGroup createFieldGroup() {
+
+        FieldGroup fg = new FieldGroup();
+
+        fg.bind(fieldId, "c_flight_id");
+        fg.bind(fieldDate, "c_date");
+        // fieldGroup.bind(fieldDate, "c_date_string");
+
+        fg.bind(fieldPilotUsername, "c_username");
+        fg.bind(fieldPilotFullname, "c_pilot_fullname");
+
+        fg.bind(fieldDeparturePort, "c_departure_airport_string");
+        fg.bind(fieldDepartureTime, "c_departure_time");
+
+        fg.bind(fieldLandingPort, "c_landing_airport_string");
+        fg.bind(fieldLandingTime, "c_landing_time");
+
+        fg.bind(fieldNotes, "c_notes");
+
+        return fg;
     }
 
 }

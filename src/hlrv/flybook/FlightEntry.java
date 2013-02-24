@@ -1,106 +1,218 @@
 package hlrv.flybook;
 
-import java.sql.Date;
+import hlrv.flybook.db.DBConstants;
 
 import com.vaadin.data.Item;
 
+/**
+ * Wrapper class of Item.
+ */
 public class FlightEntry {
 
-    private Item source;
-
-    private int flight_id;
-
-    private Date date;
-
-    private int departure_airport;
-
-    private String departure_airport_string;
-
-    private Date departure_time;
-
-    private int landing_airport;
-
-    private String landing_airport_string;
-
-    private Date landing_time;
-
-    private String notes;
-
-    public FlightEntry() {
-        source = null;
-    }
+    private Item item;
 
     public FlightEntry(Item source) {
 
-        this.source = source;
+        this.item = source;
+    }
 
-        flight_id = (Integer) source.getItemProperty(
+    public Item getItem() {
+        return item;
+    }
+
+    /**
+     * FlightEntries properties accessors.
+     * 
+     * @return
+     */
+
+    /**
+     * Table primary key is special case. This can be null when row is being
+     * inserted and not yet committed. Otherwise should return value.
+     */
+    public Integer getFlightID() {
+        return (Integer) item.getItemProperty(
                 DBConstants.FLIGHTENTRIES_FLIGHT_ID).getValue();
-
-        date = new Date((Integer) source.getItemProperty(
-                DBConstants.FLIGHTENTRIES_DATE).getValue());
-
-        departure_airport = (Integer) source.getItemProperty(
-                DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT).getValue();
-
-        departure_airport_string = (String) source.getItemProperty(
-                "c_departure_airport_string").getValue();
-
-        departure_time = new Date((Integer) source.getItemProperty(
-                DBConstants.FLIGHTENTRIES_DEPARTURE_TIME).getValue());
-
-        landing_airport = (Integer) source.getItemProperty(
-                DBConstants.FLIGHTENTRIES_LANDING_AIRPORT).getValue();
-
-        landing_airport_string = (String) source.getItemProperty(
-                "c_landing_airport_string").getValue();
-
-        landing_time = new Date((Integer) source.getItemProperty(
-                DBConstants.FLIGHTENTRIES_LANDING_TIME).getValue());
-
-        notes = (String) source
-                .getItemProperty(DBConstants.FLIGHTENTRIES_NOTES).getValue();
-
     }
 
-    public Item getSource() {
-        return source;
+    public String getPilot() {
+        return (String) item
+                .getItemProperty(DBConstants.FLIGHTENTRIES_USERNAME).getValue();
     }
 
-    public int getFlightID() {
-        return flight_id;
+    public int getDate() {
+        return (Integer) item.getItemProperty(DBConstants.FLIGHTENTRIES_DATE)
+                .getValue();
     }
 
-    public Date getDate() {
-        return date;
+    public String getAircraft() {
+        return (String) item
+                .getItemProperty(DBConstants.FLIGHTENTRIES_AIRCRAFT).getValue();
     }
 
     public int getDepartureAirport() {
-        return departure_airport;
+        return (Integer) item.getItemProperty(
+                DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT).getValue();
     }
 
-    public String getDepartureAirportString() {
-        return departure_airport_string;
-    }
-
-    public Date getDepartureTime() {
-        return departure_time;
+    public int getDepartureTime() {
+        return (Integer) item.getItemProperty(
+                DBConstants.FLIGHTENTRIES_DEPARTURE_TIME).getValue();
     }
 
     public int getLandingAirport() {
-        return landing_airport;
+        return (Integer) item.getItemProperty(
+                DBConstants.FLIGHTENTRIES_LANDING_AIRPORT).getValue();
     }
 
-    public String getLandingAirportString() {
-        return landing_airport_string;
+    public int getLandingTime() {
+        return (Integer) item.getItemProperty(
+                DBConstants.FLIGHTENTRIES_LANDING_TIME).getValue();
     }
 
-    public Date getLandingTime() {
-        return landing_time;
+    public int getOnBlockTime() {
+        return (Integer) item.getItemProperty(
+                DBConstants.FLIGHTENTRIES_ONBLOCK_TIME).getValue();
+    }
+
+    public int getOffBlockTime() {
+        return (Integer) item.getItemProperty(
+                DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME).getValue();
+    }
+
+    public int getFlightType() {
+        return (Integer) item.getItemProperty(
+                DBConstants.FLIGHTENTRIES_FLIGHT_TYPE).getValue();
+    }
+
+    public String getIFRTime() {
+        return (String) item
+                .getItemProperty(DBConstants.FLIGHTENTRIES_IFR_TIME).getValue();
     }
 
     public String getNotes() {
-        return notes;
+        return (String) item.getItemProperty(DBConstants.FLIGHTENTRIES_NOTES)
+                .getValue();
+    }
+
+    /**
+     * Derived column accessors.
+     * 
+     * @return
+     */
+
+    public String getPilotFullname() {
+        return (String) item.getItemProperty("c_pilot_fullname").getValue();
+    }
+
+    public String getDateString() {
+        return (String) item.getItemProperty("c_date_string").getValue();
+    }
+
+    public String getDepartureAirportString() {
+        return (String) item.getItemProperty("c_departure_airport_string")
+                .getValue();
+    }
+
+    public String getLandingAirportString() {
+        return (String) item.getItemProperty("c_landing_airport_string")
+                .getValue();
+    }
+
+    public String getFlightTime() {
+        return (String) item.getItemProperty("c_flight_time").getValue();
+    }
+
+    /**
+     * FlightEntries properties setters.
+     * 
+     * @return
+     */
+    public void setFlightID(int id) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_FLIGHT_ID).setValue(id);
+    }
+
+    public void setPilot(String username) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_USERNAME).setValue(
+                username);
+    }
+
+    public void setDate(int time_s) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_DATE).setValue(time_s);
+    }
+
+    public void setAircraft(String aircraft) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_AIRCRAFT).setValue(
+                aircraft);
+    }
+
+    public void setDepartureAirport(int airport) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT)
+                .setValue(airport);
+    }
+
+    public void setDepartureTime(int time_s) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_DEPARTURE_TIME)
+                .setValue(time_s);
+    }
+
+    public void setLandingAirport(int airport) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_LANDING_AIRPORT)
+                .setValue(airport);
+    }
+
+    public void setLandingTime(int time_s) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_LANDING_TIME).setValue(
+                time_s);
+    }
+
+    public void setOnBlockTime(int time_s) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_ONBLOCK_TIME).setValue(
+                time_s);
+    }
+
+    public void setOffBlockTime(int time_s) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME).setValue(
+                time_s);
+    }
+
+    public void setFlightType(int type) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_FLIGHT_TYPE).setValue(
+                type);
+    }
+
+    public void setIFRTime(String time) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_IFR_TIME).setValue(time);
+    }
+
+    public void setNotes(String notes) {
+        item.getItemProperty(DBConstants.FLIGHTENTRIES_NOTES).setValue(notes);
+    }
+
+    /**
+     * Derived column setters.
+     * 
+     * @return
+     */
+
+    public void setPilotFullname(String fullname) {
+        item.getItemProperty("c_pilot_fullname").setValue(fullname);
+    }
+
+    public void setDateString(String date) {
+        item.getItemProperty("c_date_string").setValue(date);
+    }
+
+    public void setDepartureAirportString(String ap) {
+        item.getItemProperty("c_departure_airport_string").setValue(ap);
+    }
+
+    public void setLandingAirportString(String ap) {
+        item.getItemProperty("c_landing_airport_string").setValue(ap);
+    }
+
+    public void setFlightTime(String time) {
+        item.getItemProperty("c_flight_time").setValue(time);
     }
 
 }

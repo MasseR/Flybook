@@ -1,11 +1,12 @@
 package hlrv.flybook;
 
+import hlrv.flybook.db.DBConstants;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.ExternalResource;
@@ -98,12 +99,20 @@ public class FlightMap extends CustomComponent implements Runnable,
 
     private void updateImageSource() {
 
-        String[] ports = departureAndLandingPortStrings();
+        ExternalResource res = null;
 
-        System.out.println("Departure: " + ports[0] + ", Landing: " + ports[1]);
+        FlightEntry flightItem = ctx.getCurrentFlightEntry().getValue();
 
-        ExternalResource res = new ExternalResource(
-                createGoogleStaticMapApiURL(ports[0], ports[1]), "image/png");
+        if (flightItem != null) {
+
+            String[] ports = departureAndLandingPortStrings(flightItem);
+
+            System.out.println("Departure: " + ports[0] + ", Landing: "
+                    + ports[1]);
+
+            res = new ExternalResource(createGoogleStaticMapApiURL(ports[0],
+                    ports[1]), "image/png");
+        }
 
         // Image newImage = new Image(null, res);
         // newImage.setAlternateText("No flight entries selected");
@@ -116,24 +125,12 @@ public class FlightMap extends CustomComponent implements Runnable,
         image.setSource(res);
     }
 
-    private String[] departureAndLandingPortStrings() {
+    private String[] departureAndLandingPortStrings(FlightEntry flightItem) {
 
         String[] ports = new String[2];
 
-        // Object rowid = table.getCurrentSelection(); // selected row
-
-        // FlightEntry current = ctx.getCurrentFlightEntry().getValue();
-
-        // int departurePort = current.getDepartureAirport();
-        // int landingPort = current.getLandingAirport();
-
-        Item flightItem = ctx.getCurrentFlightEntry().getValue();
-
-        int departurePort = (Integer) flightItem.getItemProperty(
-                DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT).getValue();
-
-        int landingPort = (Integer) flightItem.getItemProperty(
-                DBConstants.FLIGHTENTRIES_LANDING_AIRPORT).getValue();
+        int departurePort = flightItem.getDepartureAirport();
+        int landingPort = flightItem.getLandingAirport();
 
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
@@ -185,7 +182,8 @@ public class FlightMap extends CustomComponent implements Runnable,
         // sb.append("?center=");
 
         // sb.append("&size=640x640");
-        sb.append("&size=512x512");
+        // sb.append("&size=512x512");
+        sb.append("&size=256x256");
 
         // sb.append("&markers=color:green%7Clabel:D%7CHelsinki,Finland");
         // sb.append("&markers=color:blue%7Clabel:L%7CLondon,England");

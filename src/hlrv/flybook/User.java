@@ -35,7 +35,6 @@ public class User {
     /**
      * Alternate constructor to be used in conjunction with RegisterForm
      */
-
     public User(boolean admin) {
         this.admin = admin;
     }

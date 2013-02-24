@@ -1,4 +1,4 @@
-package hlrv.flybook;
+package hlrv.flybook.db;
 
 public final class DBConstants {
 

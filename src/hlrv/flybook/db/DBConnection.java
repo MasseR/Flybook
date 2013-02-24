@@ -1,4 +1,5 @@
-package hlrv.flybook;
+package hlrv.flybook.db;
+
 
 import java.sql.Connection;
 import java.sql.SQLException;

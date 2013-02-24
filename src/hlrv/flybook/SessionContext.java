@@ -1,18 +1,39 @@
 package hlrv.flybook;
 
-import com.vaadin.data.Item;
+import hlrv.flybook.db.DBConnection;
+import hlrv.flybook.db.DBConstants;
+
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.ObjectProperty;
+import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
 import com.vaadin.server.VaadinSession;
 
 public class SessionContext {
 
-    private ObjectProperty<User> currentUser;
-
-    private ObjectProperty<Item> currentFlightEntry;
-
+    /**
+     * Wrapper around jdbc connections.
+     */
     private DBConnection dbconn;
 
+    /**
+     * Current user item, won't be changing per session.
+     */
+    private BeanItem<User> currentUser;
+
+    /**
+     * Current selected FlightItem in table, can be changed so wrap in property
+     * others can listen for changes.
+     */
+    private ObjectProperty<FlightEntry> currentFlightEntry;
+
+    /**
+     * SQLContainer wrapper for FlightEntries.
+     */
+    private FlightsContainer flightsContainer;
+
     public SessionContext(VaadinSession session) throws Exception {
+
+        dbconn = new DBConnection();
 
         // Add test user, assume login success
 
@@ -21,21 +42,22 @@ public class SessionContext {
                 "$2a$10$7K/3f8Kl1sAzRlPXR1n6MOJDRDjlcPUe0IuDG/rcx.eCKCIsAB.Le|$2a$10$7K/3f8Kl1sAzRlPXR1n6MO",
                 "Andre", "Venter", "Andre.Venter@mail.com", false);
 
-        dbconn = new DBConnection();
+        currentUser = new BeanItem<User>(user);
 
-        currentUser = new ObjectProperty<User>(user, User.class, false);
+        currentFlightEntry = new ObjectProperty<FlightEntry>(null,
+                FlightEntry.class, false);
 
-        currentFlightEntry = new ObjectProperty<Item>(null, Item.class, false);
+        flightsContainer = createFlightsContainer(dbconn);
 
         session.setAttribute("ctx", this);
 
     }
 
-    public ObjectProperty<User> getCurrentUser() {
+    public BeanItem<User> getCurrentUser() {
         return currentUser;
     }
 
-    public ObjectProperty<Item> getCurrentFlightEntry() {
+    public ObjectProperty<FlightEntry> getCurrentFlightEntry() {
         return currentFlightEntry;
     }
 
@@ -43,9 +65,41 @@ public class SessionContext {
         return dbconn;
     }
 
+    public FlightsContainer getFlightsContainer() {
+        return flightsContainer;
+    }
+
     public static SessionContext getContext() {
 
         return (SessionContext) VaadinSession.getCurrent().getAttribute("ctx");
     }
 
+    /***
+     * Helper method that returns true if current selected flight entry has been
+     * created/owned by current user.
+     */
+    public boolean isCurrentFlightEntryCreatedByUser() {
+        if (currentFlightEntry.getValue() == null) {
+            return false;
+        }
+
+        return currentFlightEntry.getValue().getPilot()
+                .equals(currentUser.getBean().getUsername());
+    }
+
+    private FlightsContainer createFlightsContainer(DBConnection dbconn)
+            throws Exception {
+
+        FreeformQuery fq = new FreeformQuery("SELECT * FROM FlightEntries",
+                dbconn.getPool(), DBConstants.FLIGHTENTRIES_FLIGHT_ID);
+
+        FlightEntriesFSDeletegate delegate = new FlightEntriesFSDeletegate();
+
+        fq.setDelegate(delegate);
+
+        FlightsContainer container = new FlightsContainer(fq);
+
+        return container;
+
+    }
 }
