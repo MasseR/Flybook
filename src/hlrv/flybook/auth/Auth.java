@@ -17,12 +17,10 @@ import java.sql.SQLException;
 
 public class Auth
 {
-    private JDBCConnectionPool dbPool;
     private SQLContainer container;
 
     public Auth(JDBCConnectionPool dbPool) throws SQLException
     {
-        this.dbPool = dbPool;
         TableQuery tq = new TableQuery("users", dbPool);
         tq.setVersionColumn("optlock");
         this.container = new SQLContainer(tq);
