@@ -14,11 +14,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
-import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
-import com.vaadin.data.util.sqlcontainer.query.TableQuery;
-import com.vaadin.data.util.sqlcontainer.SQLContainer;
-import hlrv.flybook.auth.Auth;
 
 /**
  * Main UI class
