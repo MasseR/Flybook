@@ -4,13 +4,17 @@ public class User
 {
     private String username;
     private String email;
+    private String firstname;
+    private String lastname;
     private boolean admin;
 
-    public User(String username, String email, boolean admin)
+    public User(String username, String firstname, String lastname, String email, boolean admin)
     {
-        this.username = username;
-        this.email    = email;
-        this.admin    = adin;
+        this.username  = username;
+        this.email     = email;
+        this.admin     = admin;
+        this.firstname = firstname;
+        this.lastname  = lastname;
     }
 
     public String getUsername()
