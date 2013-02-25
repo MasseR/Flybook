@@ -1,6 +1,7 @@
 package hlrv.flybook.auth;
 
 import hlrv.flybook.auth.User;
+import hlrv.flybook.SessionContext;
 import hlrv.flybook.auth.Hash;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
@@ -35,7 +36,7 @@ public class Auth
      * throwing general exception as I can't be bothered with finding /
      * creating a proper exception at this point in time
      */
-    public User login(String username, String password) throws Exception
+    public User login(String username, String password, SessionContext context) throws Exception
     {
         this.container.addContainerFilter(new Equal("username", username));
         Object id = this.container.firstItemId();
@@ -51,6 +52,7 @@ public class Auth
             User user = new User(username, firstname, lastname, email, admin);
             // XXX: Esa, set the session here
 
+            context.setCurrentUser(user);
             return user;
         }
         throw new Exception("Password incorrect");
