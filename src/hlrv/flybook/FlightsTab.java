@@ -52,14 +52,15 @@ public class FlightsTab extends AbstractMainViewTab implements
         /**
          * Create components above table.
          */
+        String username = ((FlybookUI) UI.getCurrent()).getUser().getBean().getUsername();
         pilotCombo = new ComboBox("Pilot");
         pilotCombo.setNullSelectionAllowed(false);
         pilotCombo.addValueChangeListener(this);
         pilotCombo.setImmediate(true);
         pilotCombo.addItem("All");
-        pilotCombo.addItem(ctx.getCurrentUser().getBean().getUsername());
+        pilotCombo.addItem(username);
 
-        pilotCombo.setValue(ctx.getCurrentUser().getBean().getUsername());
+        pilotCombo.setValue(username);
 
         /**
          * Create components below table.
@@ -132,7 +133,7 @@ public class FlightsTab extends AbstractMainViewTab implements
 
             String value = (String) event.getProperty().getValue();
 
-            if (value.equals(ctx.getCurrentUser().getBean().getUsername())) {
+            if (value.equals(((FlybookUI) UI.getCurrent()).getUser().getBean().getUsername())) {
                 ctx.getFlightsContainer().filterByUser(value);
                 // flightsTable.filterByUser(value);
             } else if (value.equals("All")) {

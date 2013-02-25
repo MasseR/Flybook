@@ -3,6 +3,7 @@ package hlrv.flybook.auth;
 import hlrv.flybook.auth.User;
 import hlrv.flybook.SessionContext;
 import hlrv.flybook.auth.Hash;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
@@ -18,6 +19,7 @@ import java.sql.SQLException;
 public class Auth
 {
     private SQLContainer container;
+    private User user;
 
     public Auth(JDBCConnectionPool dbPool) throws SQLException
     {
@@ -47,20 +49,28 @@ public class Auth
             String email = (String)item.getItemProperty("email").getValue();
             boolean admin = (Boolean)item.getItemProperty("admin").getValue();
             User user = new User(username, firstname, lastname, email, admin);
-            // XXX: Esa, set the session here
 
-            context.setCurrentUser(user);
+            this.user = user;
             return user;
         }
         throw new Exception("Password incorrect");
     }
 
-    public void logout()
+    public BeanItem<User> getCurrentUser() throws Exception
     {
+        if(this.user == null)
+            throw new Exception("User not logged in");
+        return new BeanItem<User>(this.user);
     }
 
-    public void getUser()
+    public boolean isLoggedIn()
     {
+        return this.user != null;
+    }
+
+    public void logout()
+    {
+        this.user = null;
     }
 
     public void register(String username, String password)
