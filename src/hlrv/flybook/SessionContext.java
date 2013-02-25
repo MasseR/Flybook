@@ -2,6 +2,7 @@ package hlrv.flybook;
 
 import hlrv.flybook.db.DBConnection;
 import hlrv.flybook.db.DBConstants;
+import hlrv.flybook.auth.User;
 
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.ObjectProperty;
@@ -39,7 +40,6 @@ public class SessionContext {
 
         User user = new User(
                 "andven",
-                "$2a$10$7K/3f8Kl1sAzRlPXR1n6MOJDRDjlcPUe0IuDG/rcx.eCKCIsAB.Le|$2a$10$7K/3f8Kl1sAzRlPXR1n6MO",
                 "Andre", "Venter", "Andre.Venter@mail.com", false);
 
         currentUser = new BeanItem<User>(user);

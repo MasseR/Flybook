@@ -1,5 +1,6 @@
 package hlrv.flybook;
 
+import hlrv.flybook.auth.User;
 import java.util.Date;
 
 import com.vaadin.data.util.filter.Compare.Equal;
