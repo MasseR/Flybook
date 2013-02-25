@@ -57,6 +57,11 @@ public class SessionContext {
         return currentUser;
     }
 
+    public void setCurrentUser(User user)
+    {
+        this.currentUser = new BeanItem<User>(user);
+    }
+
     public ObjectProperty<FlightEntry> getCurrentFlightEntry() {
         return currentFlightEntry;
     }
