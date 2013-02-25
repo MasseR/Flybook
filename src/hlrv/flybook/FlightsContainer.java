@@ -11,6 +11,7 @@ import com.vaadin.data.util.sqlcontainer.RowId;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.UI;
 
 public class FlightsContainer {
 
@@ -79,7 +80,7 @@ public class FlightsContainer {
         /**
          * Initialize item with some sane values.
          */
-        User curUser = ctx.getCurrentUser().getBean();
+        User curUser = ((FlybookUI) UI.getCurrent()).getUser().getBean();
 
         Date curTime = new Date();
         Integer curTimeSecs = (int) (curTime.getTime() / 1000L);

@@ -32,9 +32,9 @@ public class SessionContext {
      */
     private FlightsContainer flightsContainer;
 
-    public SessionContext(VaadinSession session) throws Exception {
+    public SessionContext(VaadinSession session, DBConnection connection) throws Exception {
 
-        dbconn = new DBConnection();
+        dbconn = connection;
 
         // Add test user, assume login success
 
@@ -53,14 +53,14 @@ public class SessionContext {
 
     }
 
-    public BeanItem<User> getCurrentUser() {
-        return currentUser;
-    }
+    // public BeanItem<User> getCurrentUser() {
+    //     return currentUser;
+    // }
 
-    public void setCurrentUser(User user)
-    {
-        this.currentUser = new BeanItem<User>(user);
-    }
+    // public void setCurrentUser(User user)
+    // {
+    //     this.currentUser = new BeanItem<User>(user);
+    // }
 
     public ObjectProperty<FlightItem> getCurrentFlightEntry() {
         return currentFlightEntry;

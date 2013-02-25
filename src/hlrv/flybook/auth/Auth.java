@@ -5,6 +5,7 @@ import hlrv.flybook.SessionContext;
 import java.sql.SQLException;
 
 import com.vaadin.data.Item;
+import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.filter.Compare.Equal;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
@@ -16,11 +17,10 @@ import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 // method so I'm hardcoding the behaviour here.
 
 public class Auth {
-    private JDBCConnectionPool dbPool;
     private SQLContainer container;
+    private User user;
 
     public Auth(JDBCConnectionPool dbPool) throws SQLException {
-        this.dbPool = dbPool;
         TableQuery tq = new TableQuery("users", dbPool);
         tq.setVersionColumn("optlock");
         this.container = new SQLContainer(tq);
@@ -51,18 +51,26 @@ public class Auth {
             String email = (String) item.getItemProperty("email").getValue();
             boolean admin = (Boolean) item.getItemProperty("admin").getValue();
             User user = new User(username, firstname, lastname, email, admin);
-            // XXX: Esa, set the session here
 
-            context.setCurrentUser(user);
+            this.user = user;
             return user;
         }
         throw new Exception("Password incorrect");
     }
 
-    public void logout() {
+    public BeanItem<User> getCurrentUser() /* throws Exception */{
+        // if (this.user == null) {
+        // throw new Exception("User not logged in");
+        // }
+        return new BeanItem<User>(this.user);
     }
 
-    public void getUser() {
+    public boolean isLoggedIn() {
+        return this.user != null;
+    }
+
+    public void logout() {
+        this.user = null;
     }
 
     public void register(String username, String password) {
