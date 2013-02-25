@@ -24,6 +24,7 @@ public class FlightEntriesFSDeletegate implements FreeformStatementDelegate {
     public FlightEntriesFSDeletegate() {
         // Bug fix:
         // https://vaadin.com/forum/-/message_boards/view_message/715285?_19_delta=20&_19_keywords=&_19_advancedSearch=false&_19_andOperator=true&cur=5
+        // Must be set this way so that filters work
         QueryBuilder.setStringDecorator(new StringDecorator("", ""));
     }
 
@@ -57,7 +58,7 @@ public class FlightEntriesFSDeletegate implements FreeformStatementDelegate {
         StringBuilder sql = new StringBuilder();
 
         sql.append("SELECT COUNT(*) ");
-        sql.append("FROM FlightEntries fe ");
+        sql.append("FROM FlightEntries");
 
         if (filters != null) {
             sql.append(QueryBuilder.getWhereStringForFilters(filters, sh));
@@ -78,37 +79,22 @@ public class FlightEntriesFSDeletegate implements FreeformStatementDelegate {
         StringBuilder sql = new StringBuilder("");
         sql.append("SELECT ");
 
-        sql.append("fe.*,  ");
+        sql.append("FlightEntries.*,  ");
 
-        sql.append("u.c_firstname || ' ' || u.c_lastname AS c_pilot_fullname, ");
-        sql.append("datetime(fe.c_date, 'unixepoch') AS c_date_string, ");
+        sql.append("u.firstname || ' ' || u.lastname AS pilot_fullname, ");
+        sql.append("time(FlightEntries.landing_time - FlightEntries.departure_time, 'unixepoch') AS flight_time, ");
+        sql.append("ap1.name || ',' || ap1.city || ',' || ap1.country AS departure_airport_string, ");
+        sql.append("ap2.name || ',' || ap2.city || ',' || ap2.country AS landing_airport_string, ");
+        sql.append("ac.make_model || ',' || ac.engine_count || ' engines,' || ac.capacity || ' passengers' AS aircraft_string ");
 
-        sql.append("ap1.c_name || ',' || ap1.c_city || ',' || ap1.c_country AS c_departure_airport_string, ");
-        sql.append("datetime(fe.c_departure_time, 'unixepoch') AS c_departure_time_string, ");
-
-        sql.append("ap2.c_name || ',' || ap2.c_city || ',' || ap2.c_country AS c_landing_airport_string, ");
-        sql.append("datetime(fe.c_landing_time, 'unixepoch') AS c_landing_time_string, ");
-
-        sql.append("time(fe.c_landing_time - fe.c_departure_time, 'unixepoch') AS c_flight_time, ");
-
-        // sql.append("fe.c_flight_id, ");
-        // sql.append("fe.c_date, ");
-        // sql.append("fe.c_username, ");
-        // sql.append("fe.c_departure_airport, ");
-        // sql.append("fe.c_departure_time, ");
-        // sql.append("fe.c_landing_airport, ");
-        // sql.append("fe.c_landing_time, ");
-        // sql.append("fe.c_flight_type, ");
-        //
-        sql.append("ac.c_class ");
-
-        sql.append("FROM FlightEntries fe ");
-        sql.append("INNER JOIN Users u ON u.c_username = fe.c_username ");
-        sql.append("INNER JOIN Airports ap1 ON fe.c_departure_airport = ap1.c_id ");
-        sql.append("INNER JOIN Airports ap2 ON fe.c_landing_airport = ap2.c_id ");
-        sql.append("INNER JOIN Aircrafts ac ON fe.c_aircraft = ac.c_register ");
+        sql.append("FROM FlightEntries ");
+        sql.append("INNER JOIN Users u ON u.username = FlightEntries.username ");
+        sql.append("INNER JOIN Airports ap1 ON FlightEntries.departure_airport = ap1.id ");
+        sql.append("INNER JOIN Airports ap2 ON FlightEntries.landing_airport = ap2.id ");
+        sql.append("INNER JOIN Aircrafts ac ON FlightEntries.aircraft = ac.register");
 
         if (filters != null) {
+            // Returned string is empty or first char is space
             sql.append(QueryBuilder.getWhereStringForFilters(filters, sh));
         }
 
@@ -154,8 +140,8 @@ public class FlightEntriesFSDeletegate implements FreeformStatementDelegate {
         StatementHelper sh = new StatementHelper();
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT c_id FROM FlightEntries");
-        sql.append("WHERE c_flight_id = ?");
+        sql.append("SELECT id FROM FlightEntries");
+        sql.append("WHERE flight_id = ?");
 
         sh.addParameterValue(keys[0]);
         sh.setQueryString(sql.toString());
@@ -184,18 +170,18 @@ public class FlightEntriesFSDeletegate implements FreeformStatementDelegate {
 
             StringBuilder dml = new StringBuilder();
             dml.append("INSERT INTO FlightEntries ( ");
-            dml.append("c_username, ");
-            dml.append("c_date, ");
-            dml.append("c_aircraft, ");
-            dml.append("c_departure_time, ");
-            dml.append("c_departure_airport, ");
-            dml.append("c_landing_time, ");
-            dml.append("c_landing_airport, ");
-            dml.append("c_onblock_time, ");
-            dml.append("c_offblock_time, ");
-            dml.append("c_flight_type, ");
-            dml.append("c_ifr_time, ");
-            dml.append("c_notes ) ");
+            dml.append("username, ");
+            dml.append("date, ");
+            dml.append("aircraft, ");
+            dml.append("departure_time, ");
+            dml.append("departure_airport, ");
+            dml.append("landing_time, ");
+            dml.append("landing_airport, ");
+            dml.append("onblock_time, ");
+            dml.append("offblock_time, ");
+            dml.append("flight_type, ");
+            dml.append("ifr_time, ");
+            dml.append("notes ) ");
             dml.append("VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )");
 
             System.out.println("FlightEntries INSERT: " + dml.toString());
@@ -206,26 +192,26 @@ public class FlightEntriesFSDeletegate implements FreeformStatementDelegate {
 
             StringBuilder dml = new StringBuilder();
             dml.append("UPDATE FlightEntries SET ");
-            dml.append("c_username = ?, ");
-            dml.append("c_date = ?, ");
-            dml.append("c_aircraft = ?, ");
-            dml.append("c_departure_time = ?, ");
-            dml.append("c_departure_airport = ?, ");
-            dml.append("c_landing_time = ?, ");
-            dml.append("c_landing_airport = ?, ");
-            dml.append("c_onblock_time = ?, ");
-            dml.append("c_offblock_time = ?, ");
-            dml.append("c_flight_type = ?, ");
-            dml.append("c_ifr_time = ?, ");
-            dml.append("c_notes = ? ");
-            dml.append("WHERE c_flight_id = ?");
+            dml.append("username = ?, ");
+            dml.append("date = ?, ");
+            dml.append("aircraft = ?, ");
+            dml.append("departure_time = ?, ");
+            dml.append("departure_airport = ?, ");
+            dml.append("landing_time = ?, ");
+            dml.append("landing_airport = ?, ");
+            dml.append("onblock_time = ?, ");
+            dml.append("offblock_time = ?, ");
+            dml.append("flight_type = ?, ");
+            dml.append("ifr_time = ?, ");
+            dml.append("notes = ? ");
+            dml.append("WHERE flight_id = ?");
 
             System.out.println("FlightEntries UPDATE: " + dml.toString());
 
             statement = conn.prepareStatement(dml.toString());
 
             setRowValues(statement, row);
-            statement.setInt(13, (Integer) row.getItemProperty("c_flight_id")
+            statement.setInt(13, (Integer) row.getItemProperty("flight_id")
                     .getValue());
         }
 
@@ -237,28 +223,28 @@ public class FlightEntriesFSDeletegate implements FreeformStatementDelegate {
     private void setRowValues(PreparedStatement statement, RowItem row)
             throws SQLException {
 
-        statement.setString(1, (String) row.getItemProperty("c_username")
+        statement.setString(1, (String) row.getItemProperty("username")
                 .getValue());
-        statement.setInt(2, (Integer) row.getItemProperty("c_date").getValue());
-        statement.setString(3, (String) row.getItemProperty("c_aircraft")
+        statement.setInt(2, (Integer) row.getItemProperty("date").getValue());
+        statement.setString(3, (String) row.getItemProperty("aircraft")
                 .getValue());
-        statement.setInt(4, (Integer) row.getItemProperty("c_departure_time")
+        statement.setInt(4, (Integer) row.getItemProperty("departure_time")
                 .getValue());
-        statement.setInt(5, (Integer) row
-                .getItemProperty("c_departure_airport").getValue());
-        statement.setInt(6, (Integer) row.getItemProperty("c_landing_time")
+        statement.setInt(5, (Integer) row.getItemProperty("departure_airport")
                 .getValue());
-        statement.setInt(7, (Integer) row.getItemProperty("c_landing_airport")
+        statement.setInt(6, (Integer) row.getItemProperty("landing_time")
                 .getValue());
-        statement.setInt(8, (Integer) row.getItemProperty("c_onblock_time")
+        statement.setInt(7, (Integer) row.getItemProperty("landing_airport")
                 .getValue());
-        statement.setInt(9, (Integer) row.getItemProperty("c_offblock_time")
+        statement.setInt(8, (Integer) row.getItemProperty("onblock_time")
                 .getValue());
-        statement.setInt(10, (Integer) row.getItemProperty("c_flight_type")
+        statement.setInt(9, (Integer) row.getItemProperty("offblock_time")
                 .getValue());
-        statement.setString(11, (String) row.getItemProperty("c_ifr_time")
+        statement.setInt(10, (Integer) row.getItemProperty("flight_type")
                 .getValue());
-        statement.setString(12, (String) row.getItemProperty("c_notes")
+        statement.setInt(11, (Integer) row.getItemProperty("ifr_time")
+                .getValue());
+        statement.setString(12, (String) row.getItemProperty("notes")
                 .getValue());
     }
 
@@ -267,9 +253,9 @@ public class FlightEntriesFSDeletegate implements FreeformStatementDelegate {
             throws UnsupportedOperationException, SQLException {
 
         PreparedStatement statement = conn
-                .prepareStatement("DELETE FROM FlightEntries WHERE c_flight_id = ?");
+                .prepareStatement("DELETE FROM FlightEntries WHERE flight_id = ?");
 
-        statement.setInt(1, (Integer) row.getItemProperty("c_flight_id")
+        statement.setInt(1, (Integer) row.getItemProperty("flight_id")
                 .getValue());
         int rowsChanged = statement.executeUpdate();
         statement.close();

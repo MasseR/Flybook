@@ -1,11 +1,8 @@
 package hlrv.flybook;
 
-import java.sql.SQLException;
-
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
@@ -45,7 +42,7 @@ public class NewFlightDialog extends Window implements Button.ClickListener {
         setContent(topLayout);
     }
 
-    public void setDataSource(FlightEntry flightItem) {
+    public void setDataSource(FlightItem flightItem) {
 
         flightForm.setDataSource(flightItem);
     }
@@ -54,27 +51,15 @@ public class NewFlightDialog extends Window implements Button.ClickListener {
     public void buttonClick(ClickEvent event) {
 
         if (event.getButton() == closeButton) {
-            try {
 
-                flightForm.reset();
-                ctx.getFlightsContainer().rollback();
-            } catch (SQLException e) {
-                Notification.show("OH shit", e.toString(),
-                        Notification.TYPE_ERROR_MESSAGE);
-            }
-
+            flightForm.reset();
+            ctx.getFlightsContainer().rollback();
         } else {
-            try {
 
-                flightForm.commit();
-                ctx.getFlightsContainer().commit();
-            } catch (SQLException e) {
-                Notification.show("OH shit", e.toString(),
-                        Notification.TYPE_ERROR_MESSAGE);
-            }
+            flightForm.commit();
+            ctx.getFlightsContainer().commit();
         }
 
         this.close();
     }
-
 }

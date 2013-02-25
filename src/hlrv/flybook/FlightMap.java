@@ -101,7 +101,7 @@ public class FlightMap extends CustomComponent implements Runnable,
 
         ExternalResource res = null;
 
-        FlightEntry flightItem = ctx.getCurrentFlightEntry().getValue();
+        FlightItem flightItem = ctx.getCurrentFlightEntry().getValue();
 
         if (flightItem != null) {
 
@@ -125,7 +125,7 @@ public class FlightMap extends CustomComponent implements Runnable,
         image.setSource(res);
     }
 
-    private String[] departureAndLandingPortStrings(FlightEntry flightItem) {
+    private String[] departureAndLandingPortStrings(FlightItem flightItem) {
 
         String[] ports = new String[2];
 

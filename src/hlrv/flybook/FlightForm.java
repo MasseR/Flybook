@@ -1,5 +1,7 @@
 package hlrv.flybook;
 
+import hlrv.flybook.db.DBConstants;
+
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
@@ -149,7 +151,7 @@ public class FlightForm extends CustomComponent {
      * 
      * @param flightItem
      */
-    public void setDataSource(FlightEntry flightItem) {
+    public void setDataSource(FlightItem flightItem) {
 
         if (flightItem != null) {
             fieldGroup.setItemDataSource(flightItem.getItem());
@@ -189,20 +191,21 @@ public class FlightForm extends CustomComponent {
 
         FieldGroup fg = new FieldGroup();
 
-        fg.bind(fieldId, "c_flight_id");
-        fg.bind(fieldDate, "c_date");
-        // fieldGroup.bind(fieldDate, "c_date_string");
+        fg.bind(fieldId, DBConstants.FLIGHTENTRIES_FLIGHT_ID);
+        fg.bind(fieldDate, DBConstants.FLIGHTENTRIES_DATE);
 
-        fg.bind(fieldPilotUsername, "c_username");
-        fg.bind(fieldPilotFullname, "c_pilot_fullname");
+        fg.bind(fieldPilotUsername, DBConstants.FLIGHTENTRIES_USERNAME);
+        fg.bind(fieldPilotFullname, DBConstants.FLIGHTENTRIES_PILOT_FULLNAME);
 
-        fg.bind(fieldDeparturePort, "c_departure_airport_string");
-        fg.bind(fieldDepartureTime, "c_departure_time");
+        fg.bind(fieldDeparturePort,
+                DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT_STRING);
+        fg.bind(fieldDepartureTime, DBConstants.FLIGHTENTRIES_DEPARTURE_TIME);
 
-        fg.bind(fieldLandingPort, "c_landing_airport_string");
-        fg.bind(fieldLandingTime, "c_landing_time");
+        fg.bind(fieldLandingPort,
+                DBConstants.FLIGHTENTRIES_LANDING_AIRPORT_STRING);
+        fg.bind(fieldLandingTime, DBConstants.FLIGHTENTRIES_LANDING_TIME);
 
-        fg.bind(fieldNotes, "c_notes");
+        fg.bind(fieldNotes, DBConstants.FLIGHTENTRIES_NOTES);
 
         return fg;
     }

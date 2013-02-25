@@ -25,7 +25,7 @@ public class SessionContext {
      * Current selected FlightItem in table, can be changed so wrap in property
      * others can listen for changes.
      */
-    private ObjectProperty<FlightEntry> currentFlightEntry;
+    private ObjectProperty<FlightItem> currentFlightEntry;
 
     /**
      * SQLContainer wrapper for FlightEntries.
@@ -44,8 +44,8 @@ public class SessionContext {
 
         currentUser = new BeanItem<User>(user);
 
-        currentFlightEntry = new ObjectProperty<FlightEntry>(null,
-                FlightEntry.class, false);
+        currentFlightEntry = new ObjectProperty<FlightItem>(null,
+                FlightItem.class, false);
 
         flightsContainer = createFlightsContainer(dbconn);
 
@@ -62,7 +62,7 @@ public class SessionContext {
         this.currentUser = new BeanItem<User>(user);
     }
 
-    public ObjectProperty<FlightEntry> getCurrentFlightEntry() {
+    public ObjectProperty<FlightItem> getCurrentFlightEntry() {
         return currentFlightEntry;
     }
 

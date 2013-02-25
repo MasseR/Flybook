@@ -1,7 +1,5 @@
 package hlrv.flybook;
 
-import java.sql.SQLException;
-
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.Button;
@@ -9,7 +7,6 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -164,7 +161,7 @@ public class FlightsTab extends AbstractMainViewTab implements
              * FlightEntry with some default values.
              */
             FlightsContainer container = ctx.getFlightsContainer();
-            FlightEntry flightItem = container.addEntry(ctx);
+            FlightItem flightItem = container.addEntry(ctx);
 
             /**
              * Set the entry as datasource for dialog.
@@ -180,15 +177,10 @@ public class FlightsTab extends AbstractMainViewTab implements
         } else if (event.getButton() == deleteButton) {
 
             FlightsContainer container = ctx.getFlightsContainer();
-            FlightEntry flightItem = ctx.getCurrentFlightEntry().getValue();
+            FlightItem flightItem = ctx.getCurrentFlightEntry().getValue();
             if (flightItem != null) {
                 if (container.removeEntry(flightItem)) {
-                    try {
-                        container.commit();
-                    } catch (SQLException e) {
-                        Notification.show("Error", e.toString(),
-                                Notification.TYPE_ERROR_MESSAGE);
-                    }
+                    container.commit();
                 }
             }
         }

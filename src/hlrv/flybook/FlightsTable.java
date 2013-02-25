@@ -33,9 +33,9 @@ public class FlightsTable extends CustomComponent implements
 
         FlightsContainer container = ctx.getFlightsContainer();
 
-        table.setContainerDataSource(container);
+        table.setContainerDataSource(container.getContainer());
 
-        container.addRowIdChangeListener(this);
+        container.getContainer().addRowIdChangeListener(this);
 
         setCompositionRoot(table);
     }
@@ -50,7 +50,7 @@ public class FlightsTable extends CustomComponent implements
 
         Item currentItem = table.getItem(rowid);
 
-        FlightEntry entry = currentItem != null ? new FlightEntry(currentItem)
+        FlightItem entry = currentItem != null ? new FlightItem(currentItem)
                 : null;
 
         ctx.getCurrentFlightEntry().setValue(entry);
@@ -59,16 +59,16 @@ public class FlightsTable extends CustomComponent implements
     @Override
     public void containerItemSetChange(ItemSetChangeEvent event) {
 
-        Item selectedItem = table.getItem(table.getValue());
-        if (selectedItem == null) {
-            ctx.getCurrentFlightEntry().setValue(null);
-        } else {
-            FlightEntry fe = ctx.getCurrentFlightEntry().getValue();
-            if (fe == null || fe.getItem() != selectedItem) {
-                ctx.getCurrentFlightEntry().setValue(
-                        new FlightEntry(selectedItem));
-            }
-        }
+        // Item selectedItem = table.getItem(table.getValue());
+        // if (selectedItem == null) {
+        // ctx.getCurrentFlightEntry().setValue(null);
+        // } else {
+        // FlightItem fe = ctx.getCurrentFlightEntry().getValue();
+        // if (fe == null || fe.getItem() != selectedItem) {
+        // ctx.getCurrentFlightEntry().setValue(
+        // new FlightItem(selectedItem));
+        // }
+        // }
     }
 
     @Override

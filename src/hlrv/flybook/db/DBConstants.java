@@ -7,7 +7,7 @@ public final class DBConstants {
     public final static String FILENAME = "flybook.db";
 
     public final static String TBLPREFIX = "";
-    public final static String COLPREFIX = "c_";
+    public final static String COLPREFIX = "";
 
     public final static String TABLE_USERS                              = TBLPREFIX + "Users";
     public final static String TABLE_FLIGHTENTRIES                      = TBLPREFIX + "FlightEntries";
@@ -16,7 +16,6 @@ public final class DBConstants {
 
     public final static String USERS_USERNAME                           = COLPREFIX + "username";
     public final static String USERS_PASSWD                             = COLPREFIX + "passwd";
-    public final static String USERS_PASSWD_SALT                        = COLPREFIX + "passwd_salt";
     public final static String USERS_FIRSTNAME                          = COLPREFIX + "firstname";
     public final static String USERS_LASTNAME                           = COLPREFIX + "lastname";
     public final static String USERS_ROLE                               = COLPREFIX + "role";
@@ -37,6 +36,11 @@ public final class DBConstants {
     public final static String FLIGHTENTRIES_IFR_TIME                   = COLPREFIX + "ifr_time";
     public final static String FLIGHTENTRIES_NOTES                      = COLPREFIX + "notes";
     public final static String FLIGHTENTRIES_OPTLOCK                    = COLPREFIX + "optlock";
+    public final static String FLIGHTENTRIES_PILOT_FULLNAME             = COLPREFIX + "pilot_fullname";
+    public final static String FLIGHTENTRIES_FLIGHT_TIME                = COLPREFIX + "flight_time";
+    public final static String FLIGHTENTRIES_AIRCRAFT_STRING            = COLPREFIX + "aircraft_string";
+    public final static String FLIGHTENTRIES_DEPARTURE_AIRPORT_STRING   = COLPREFIX + "departure_airport_string";
+    public final static String FLIGHTENTRIES_LANDING_AIRPORT_STRING     = COLPREFIX + "landing_airport_string";
 
     public final static String AIRPORTS_ID                              = COLPREFIX + "id";
     public final static String AIRPORTS_CODE                            = COLPREFIX + "code";
@@ -47,12 +51,16 @@ public final class DBConstants {
     public final static String AIRPORTS_OPTLOCK                         = COLPREFIX + "optlock";
 
     public final static String AIRCRAFTS_REGISTER                       = COLPREFIX + "register";
-    public final static String AIRCRAFTS_CLASS                          = COLPREFIX + "class";
+    public final static String AIRCRAFTS_USERNAME                       = COLPREFIX + "username";
+    public final static String AIRCRAFTS_MAKE_MODEL                     = COLPREFIX + "make_model";
+    public final static String AIRCRAFTS_ENGINE_COUNT                   = COLPREFIX + "engine_count";
+    public final static String AIRCRAFTS_YEAR                           = COLPREFIX + "year";
+    public final static String AIRCRAFTS_MAX_WEIGHT                     = COLPREFIX + "max_weight";
     public final static String AIRCRAFTS_CAPACITY                       = COLPREFIX + "capacity";
-    public final static String AIRCRAFTS_WEIGHT                         = COLPREFIX + "weight";
+    public final static String AIRCRAFTS_OWNER                          = COLPREFIX + "owner";
+    public final static String AIRCRAFTS_ADDRESS                        = COLPREFIX + "address";
     public final static String AIRCRAFTS_OPTLOCK                        = COLPREFIX + "optlock";
 
     // @formatter:on
 
 }
-

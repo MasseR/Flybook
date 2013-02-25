@@ -1,14 +1,11 @@
 package hlrv.flybook;
 
-import java.sql.SQLException;
-
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
@@ -82,7 +79,7 @@ public class FlightDetailsPanel extends CustomComponent implements
     @Override
     public void valueChange(ValueChangeEvent event) {
 
-        FlightEntry flightItem = ctx.getCurrentFlightEntry().getValue();
+        FlightItem flightItem = ctx.getCurrentFlightEntry().getValue();
 
         /**
          * Disable/enable some components based on whether or not current item
@@ -110,12 +107,8 @@ public class FlightDetailsPanel extends CustomComponent implements
             /**
              * Must also commit to database (we have autocommit == false)
              */
-            try {
-                ctx.getFlightsContainer().commit();
-            } catch (SQLException e) {
-                Notification.show("Error", e.toString(),
-                        Notification.TYPE_ERROR_MESSAGE);
-            }
+            ctx.getFlightsContainer().commit();
+
         } else if (event.getButton() == resetButton) {
 
             flightForm.reset();

@@ -1,44 +1,80 @@
 package hlrv.flybook;
 
 import hlrv.flybook.auth.User;
+
+import java.sql.SQLException;
 import java.util.Date;
 
+import com.vaadin.data.Container.Filter;
 import com.vaadin.data.util.filter.Compare.Equal;
 import com.vaadin.data.util.sqlcontainer.RowId;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
+import com.vaadin.ui.Notification;
 
-public class FlightsContainer extends SQLContainer {
+public class FlightsContainer {
+
+    private SQLContainer container;
 
     private Filter usernameFilter;
 
     public FlightsContainer(QueryDelegate qd) throws Exception {
-        super(qd);
 
-        setAutoCommit(false);
+        container = new SQLContainer(qd);
 
-        setPageLength(5 * size());
+        container.setAutoCommit(false);
+
+        // container.setPageLength(5 * container.size());
+    }
+
+    public SQLContainer getContainer() {
+        return container;
+    }
+
+    public void commit() {
+
+        try {
+            container.commit();
+        } catch (SQLException e) {
+            Notification.show("FlightsContainer Commit Error", e.toString(),
+                    Notification.TYPE_ERROR_MESSAGE);
+        }
+    }
+
+    public void rollback() {
+
+        try {
+            container.rollback();
+        } catch (SQLException e) {
+            Notification.show("FlightsContainer Rollback Error", e.toString(),
+                    Notification.TYPE_ERROR_MESSAGE);
+        }
     }
 
     public void filterByUser(String username) {
 
         if (usernameFilter != null) {
-            removeContainerFilter(usernameFilter);
+            container.removeContainerFilter(usernameFilter);
             usernameFilter = null;
         }
 
         if (username != null) {
-            usernameFilter = new Equal("fe.c_username", username);
-            addContainerFilter(usernameFilter);
+            /**
+             * Must use table prefix for filter to work. Also requires some
+             * trickery in FlightEntriesFSDelegate constructor (something to do
+             * with quotes)
+             */
+            usernameFilter = new Equal("FlightEntries.username", username);
+            container.addContainerFilter(usernameFilter);
         }
     }
 
-    public FlightEntry addEntry(SessionContext ctx) {
+    public FlightItem addEntry(SessionContext ctx) {
 
-        Object obj = addItem(); // returns temporary row id
+        Object obj = container.addItem(); // returns temporary row id
 
         // getItem() by ignores filtered objects, so must use this one.
-        FlightEntry flightItem = new FlightEntry(getItemUnfiltered(obj));
+        FlightItem flightItem = new FlightItem(container.getItemUnfiltered(obj));
 
         /**
          * Initialize item with some sane values.
@@ -70,18 +106,18 @@ public class FlightsContainer extends SQLContainer {
 
         flightItem.setFlightType(0);
 
-        flightItem.setIFRTime("");
+        flightItem.setIFRTime(0);
 
         flightItem.setNotes("");
 
         return flightItem;
     }
 
-    public boolean removeEntry(FlightEntry e) {
+    public boolean removeEntry(FlightItem e) {
 
         Object[] pkey = { new Integer(e.getFlightID()) };
         RowId id = new RowId(pkey);
 
-        return removeItem(id);
+        return container.removeItem(id);
     }
 }
