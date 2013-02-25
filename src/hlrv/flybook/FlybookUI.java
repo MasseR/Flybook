@@ -1,6 +1,12 @@
 package hlrv.flybook;
 
+import hlrv.flybook.conv.CustomConverterFactory;
+
+import java.util.Locale;
+
 import com.vaadin.server.VaadinRequest;
+import com.vaadin.ui.Panel;
+import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.TextField;
@@ -20,36 +26,33 @@ import hlrv.flybook.auth.Auth;
 @SuppressWarnings("serial")
 public class FlybookUI extends UI {
     private JDBCConnectionPool dbPool;
+
     @Override
     protected void init(VaadinRequest request) {
-        final VerticalLayout layout = new VerticalLayout();
-        layout.setMargin(true);
-        setContent(layout);
-
-        Button button = new Button("Click me");
-        final TextField username = new TextField();
-        TextField password = new TextField();
-        button.addClickListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                layout.addComponent(new Label("Thank you " + username.getValue() + " for clicking"));
-            }
-        });
-
-        layout.addComponent(username);
-        layout.addComponent(password);
-        layout.addComponent(button);
 
         try {
-            JDBCConnectionPool pool = new SimpleJDBCConnectionPool(
-                    "org.sqlite.JDBC",
-                    "jdbc:sqlite:sample.db",
-                    "",
-                    "");
-            this.dbPool = pool;
-            Auth auth = new Auth(pool);
-            auth.login("foo", "bar");
-        } catch(Exception e) {
-            System.out.println(e);
+
+            SessionContext ctx = new SessionContext(getSession());
+
+            getSession().setConverterFactory(new CustomConverterFactory());
+            getSession().setLocale(Locale.getDefault());
+
+            TabSheet tabs = new TabSheet();
+
+            tabs.setSizeFull();
+
+            FlightsTab flightsTab = new FlightsTab(ctx);
+
+            tabs.addTab(flightsTab, "Flights");
+
+            tabs.addTab(new Panel(), "Reports");
+
+            tabs.addTab(new Panel(), "Account");
+
+            setContent(tabs);
+
+        } catch (Exception e) {
+            System.err.println(e.toString());
         }
     }
 }
