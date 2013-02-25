@@ -44,7 +44,11 @@ public class Auth
             throw new Exception("User not found");
         Hash hash = new Hash((String)item.getItemProperty("hash").getValue());
         if(hash.check(password)) {
-            User user = new User(username);
+            String firstname = (String)item.getItemProperty("firstname").getValue();
+            String lastname = (String)item.getItemProperty("lastname").getValue();
+            String email = (String)item.getItemProperty("email").getValue();
+            boolean admin = (Boolean)item.getItemProperty("admin").getValue();
+            User user = new User(username, firstname, lastname, email, admin);
             // XXX: Esa, set the session here
 
             return user;
