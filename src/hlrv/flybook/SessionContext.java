@@ -79,7 +79,7 @@ public class SessionContext {
         return (SessionContext) VaadinSession.getCurrent().getAttribute("ctx");
     }
 
-    /***
+    /**
      * Helper method that returns true if current selected flight entry has been
      * created/owned by current user.
      */
