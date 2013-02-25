@@ -5,7 +5,6 @@ import hlrv.flybook.SessionContext;
 import hlrv.flybook.auth.Hash;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
-import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.filter.Compare.*;
 import com.vaadin.data.Item;
