@@ -63,6 +63,7 @@ public class Auth {
         if (this.user == null) {
             throw new Exception("User not logged in");
         }
+        return new BeanItem<User>(this.user);
     }
 
     public boolean isLoggedIn() {
