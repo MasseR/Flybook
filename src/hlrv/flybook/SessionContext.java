@@ -9,6 +9,7 @@ import java.sql.SQLException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.server.VaadinSession;
+import com.vaadin.ui.UI;
 
 public class SessionContext {
 
@@ -88,6 +89,6 @@ public class SessionContext {
         }
 
         return currentFlightEntry.getValue().getPilot()
-                .equals(currentUser.getBean().getUsername());
+                .equals(((FlybookUI) UI.getCurrent()).getUser().getBean().getUsername());
     }
 }

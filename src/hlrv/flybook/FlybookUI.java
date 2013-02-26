@@ -6,12 +6,16 @@ import hlrv.flybook.conv.CustomConverterFactory;
 import hlrv.flybook.db.DBConnection;
 
 import java.util.Locale;
+import java.util.logging.Logger;
+import java.util.logging.LogRecord;
+import java.util.logging.Level;
 
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
+import com.vaadin.data.util.BeanItem;
 
 /**
  * Main UI class
@@ -25,8 +29,17 @@ public class FlybookUI extends UI {
     private static DBConnection pool = null;
 
     public BeanItem<User> getUser() /* throws Exception */{
-        // return this.authenticator.getCurrentUser();
-        return context.getCurrentUser();
+        // XXX: This is a temporary solution until registration is working
+        User testUser = new User("andven", "Andre", "Venter", "Andre.Venter@mail.com", false);
+        BeanItem<User> user = new BeanItem<User>(testUser);
+        try
+        {
+            user = this.authenticator.getCurrentUser();
+        } catch(Exception e) {
+            Logger logger = Logger.getLogger("FlybookUI");
+            logger.log(new LogRecord(Level.WARNING, "User not logged in"));
+        }
+        return user;
     }
 
     @Override
