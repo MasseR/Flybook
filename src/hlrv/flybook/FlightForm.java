@@ -5,6 +5,7 @@ import hlrv.flybook.db.DBConstants;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
@@ -16,6 +17,8 @@ import com.vaadin.ui.VerticalLayout;
 
 public class FlightForm extends CustomComponent {
 
+    private SessionContext context;
+
     private FieldGroup fieldGroup;
 
     private TextField fieldId;
@@ -26,13 +29,17 @@ public class FlightForm extends CustomComponent {
 
     private TextField fieldDeparturePort;
     private DateField fieldDepartureTime;
+    private ComboBox comboDeparturePortCountries;
 
     private TextField fieldLandingPort;
     private DateField fieldLandingTime;
 
     private TextArea fieldNotes;
 
-    public FlightForm() {
+    public FlightForm(SessionContext context) {
+        super();
+
+        this.context = context;
 
         /**
          * Create id and date
@@ -77,11 +84,22 @@ public class FlightForm extends CustomComponent {
          */
         Panel departurePanel = new Panel("Departure");
         VerticalLayout layoutDeparture = new VerticalLayout();
+        HorizontalLayout layoutDeparturePort = new HorizontalLayout();
         fieldDeparturePort = new TextField("Port");
         fieldDeparturePort.setColumns(30);
+        comboDeparturePortCountries = new ComboBox("Countries");
+        comboDeparturePortCountries.setNewItemsAllowed(false);
+        comboDeparturePortCountries.setContainerDataSource(context
+                .getAirportsContainer().getCountriesContainer());
+        comboDeparturePortCountries.setNullSelectionAllowed(false);
+        // comboDeparturePortCountries
+        // .setItemCaptionPropertyId(DBConstants.AIRPORTS_COUNTRY);
+        layoutDeparturePort.addComponent(fieldDeparturePort);
+        layoutDeparturePort.addComponent(comboDeparturePortCountries);
+        layoutDeparturePort.setSpacing(true);
         fieldDepartureTime = new DateField("Time");
         fieldDepartureTime.setResolution(Resolution.SECOND);
-        layoutDeparture.addComponent(fieldDeparturePort);
+        layoutDeparture.addComponent(layoutDeparturePort);
         layoutDeparture.addComponent(fieldDepartureTime);
         layoutDeparture.setSpacing(true);
         layoutDeparture.setMargin(new MarginInfo(false, true, true, true));

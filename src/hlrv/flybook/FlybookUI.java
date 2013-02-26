@@ -21,19 +21,23 @@ public class FlybookUI extends UI {
 
     private Auth authenticator = null;
     private BeanItem<User> user = null;
+    private SessionContext context = null;
     private static DBConnection pool = null;
 
     public BeanItem<User> getUser() /* throws Exception */{
-        return this.authenticator.getCurrentUser();
+        // return this.authenticator.getCurrentUser();
+        return context.getCurrentUser();
     }
 
     @Override
     protected void init(VaadinRequest request) {
         try {
-            this.pool = new DBConnection();
-            this.authenticator = new Auth(this.pool.getPool());
 
-            SessionContext ctx = new SessionContext(getSession(), this.pool);
+            FlybookUI.pool = new DBConnection();
+
+            this.authenticator = new Auth(FlybookUI.pool.getPool());
+
+            this.context = new SessionContext(getSession(), FlybookUI.pool);
 
             getSession().setConverterFactory(new CustomConverterFactory());
             getSession().setLocale(Locale.getDefault());
@@ -42,7 +46,7 @@ public class FlybookUI extends UI {
 
             tabs.setSizeFull();
 
-            FlightsTab flightsTab = new FlightsTab(ctx);
+            FlightsTab flightsTab = new FlightsTab(this.context);
 
             tabs.addTab(flightsTab, "Flights");
 

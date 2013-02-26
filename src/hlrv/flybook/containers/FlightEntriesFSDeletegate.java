@@ -1,4 +1,4 @@
-package hlrv.flybook;
+package hlrv.flybook.containers;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

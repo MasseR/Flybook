@@ -37,7 +37,7 @@ public class FlightDetailsPanel extends CustomComponent implements
         applyButton.addClickListener(this);
         resetButton.addClickListener(this);
 
-        flightForm = new FlightForm();
+        flightForm = new FlightForm(ctx);
         flightForm.setSizeFull();
 
         HorizontalLayout buttonLayout = new HorizontalLayout();

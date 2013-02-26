@@ -1,5 +1,7 @@
 package hlrv.flybook;
 
+import hlrv.flybook.containers.FlightsContainer;
+
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.Button;

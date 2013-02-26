@@ -1,5 +1,7 @@
 package hlrv.flybook;
 
+import hlrv.flybook.containers.FlightsContainer;
+
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Item;

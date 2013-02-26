@@ -1,6 +1,11 @@
-package hlrv.flybook;
+package hlrv.flybook.containers;
 
+import hlrv.flybook.FlightItem;
+import hlrv.flybook.FlybookUI;
+import hlrv.flybook.SessionContext;
 import hlrv.flybook.auth.User;
+import hlrv.flybook.db.DBConnection;
+import hlrv.flybook.db.DBConstants;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -9,7 +14,8 @@ import com.vaadin.data.Container.Filter;
 import com.vaadin.data.util.filter.Compare.Equal;
 import com.vaadin.data.util.sqlcontainer.RowId;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
-import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
+import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
+import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 
@@ -19,9 +25,18 @@ public class FlightsContainer {
 
     private Filter usernameFilter;
 
-    public FlightsContainer(QueryDelegate qd) throws Exception {
+    public FlightsContainer(DBConnection dbconn) throws SQLException {
 
-        container = new SQLContainer(qd);
+        JDBCConnectionPool pool = dbconn.getPool();
+
+        FreeformQuery query = new FreeformQuery("SELECT * FROM FlightEntries",
+                pool, DBConstants.FLIGHTENTRIES_FLIGHT_ID);
+
+        FlightEntriesFSDeletegate delegate = new FlightEntriesFSDeletegate();
+
+        query.setDelegate(delegate);
+
+        container = new SQLContainer(query);
 
         container.setAutoCommit(false);
 
