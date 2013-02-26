@@ -27,4 +27,9 @@ public class Hash
     {
         return BCrypt.checkpw(str, this.hashString);
     }
+
+    public String raw()
+    {
+        return this.hashString;
+    }
 }

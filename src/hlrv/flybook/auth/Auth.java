@@ -74,7 +74,15 @@ public class Auth {
         this.user = null;
     }
 
-    public void register(User user, String hash)
+    public void register(User user, String password) throws SQLException
     {
+        Item newUser = (Item)this.container.addItem();
+        Hash hash = Hash.hash(password);
+        newUser.getItemProperty("username").setValue(user.getUsername());
+        newUser.getItemProperty("firstname").setValue(user.getFirstname());
+        newUser.getItemProperty("lastname").setValue(user.getLastname());
+        newUser.getItemProperty("email").setValue(user.getEmail());
+        newUser.getItemProperty("password").setValue(hash.raw());
+        this.container.commit();
     }
 }
