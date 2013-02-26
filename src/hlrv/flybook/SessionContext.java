@@ -1,6 +1,5 @@
 package hlrv.flybook;
 
-import hlrv.flybook.auth.User;
 import hlrv.flybook.containers.AirportsContainer;
 import hlrv.flybook.containers.FlightsContainer;
 import hlrv.flybook.db.DBConnection;
@@ -18,10 +17,6 @@ public class SessionContext {
      */
     private DBConnection dbconn;
 
-    /**
-     * Current user item, won't be changing per session.
-     */
-    private BeanItem<User> currentUser;
 
     /**
      * Current selected FlightItem in table, can be changed so wrap in property
@@ -44,11 +39,6 @@ public class SessionContext {
 
         dbconn = connection;
 
-        // Add test user, assume login success
-        User testUser = new User("andven", "Andre", "Venter",
-                "Andre.Venter@mail.com", false);
-        currentUser = new BeanItem<User>(testUser);
-
         currentFlightEntry = new ObjectProperty<FlightItem>(null,
                 FlightItem.class, false);
 
@@ -64,14 +54,6 @@ public class SessionContext {
         }
 
         session.setAttribute("context", this);
-    }
-
-    public BeanItem<User> getCurrentUser() {
-        return currentUser;
-    }
-
-    public void setCurrentUser(User user) {
-        this.currentUser = new BeanItem<User>(user);
     }
 
     public ObjectProperty<FlightItem> getCurrentFlightEntry() {
