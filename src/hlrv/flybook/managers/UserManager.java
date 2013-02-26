@@ -4,6 +4,8 @@ import com.vaadin.data.util.filter.Compare.Equal;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
+import com.vaadin.data.Item;
+import java.sql.SQLException;
 import hlrv.flybook.auth.User;
 import hlrv.flybook.auth.Hash;
 
@@ -13,7 +15,7 @@ public class UserManager
 
     public UserManager(JDBCConnectionPool pool) throws SQLException
     {
-        TableQuery tq = new TableQuery("users", dbPool);
+        TableQuery tq = new TableQuery("users", pool);
         tq.setVersionColumn("optlock");
         this.container = new SQLContainer(tq);
     }
@@ -31,31 +33,31 @@ public class UserManager
 
     public User getFromUsername(String username) throws Exception
     {
-        Item = this.getItemFromUsername(username);
-        String firstname = (String) item.getProperty("firstname").getValue();
-        String lastname = (String) item.getProperty("lastname").getValue();
-        String email = (String) item.getProperty("email").getValue();
+        Item item        = this.getItemFromUsername(username);
+        String firstname = (String) item.getItemProperty("firstname").getValue();
+        String lastname  = (String) item.getItemProperty("lastname").getValue();
+        String email     = (String) item.getItemProperty("email").getValue();
         return new User(username, firstname, lastname, email, false);
     }
 
     public String getHashCode(String username) throws Exception
     {
-        return (String) this.getItemFromUsername(String username).getProperty("password");
+        Item item = this.getItemFromUsername(username);
+        return (String) item.getItemProperty("password").getValue();
     }
 
-    public void createUser(User user, Hash password)
+    public void createUser(User user, Hash password) throws Exception
     {
         Item newUser = (Item)this.container.addItem();
-        Hash hash = Hash.hash(password);
         newUser.getItemProperty("username").setValue(user.getUsername());
         newUser.getItemProperty("firstname").setValue(user.getFirstname());
         newUser.getItemProperty("lastname").setValue(user.getLastname());
         newUser.getItemProperty("email").setValue(user.getEmail());
-        newUser.getItemProperty("password").setValue(hash.raw());
+        newUser.getItemProperty("password").setValue(password.raw());
         this.container.commit();
     }
 
-    public void modifyUser(User user)
+    public void modifyUser(User user) throws Exception
     {
         Item item = this.getItemFromUsername(user.getUsername());
         item.getItemProperty("username").setValue(user.getUsername());
@@ -65,7 +67,7 @@ public class UserManager
         this.container.commit();
     }
 
-    public void modifyUser(User user, Hash hash)
+    public void modifyUser(User user, Hash hash) throws Exception
     {
         Item item = this.getItemFromUsername(user.getUsername());
         item.getItemProperty("username").setValue(user.getUsername());

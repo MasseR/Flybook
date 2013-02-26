@@ -1,6 +1,6 @@
 package hlrv.flybook.auth;
 
-import hlrv.flybook.SessionContext;
+import hlrv.flybook.managers.UserManager;
 
 import java.sql.SQLException;
 
@@ -17,13 +17,12 @@ import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 // method so I'm hardcoding the behaviour here.
 
 public class Auth {
-    private SQLContainer container;
+    private UserManager manager;
     private User user;
 
-    public Auth(JDBCConnectionPool dbPool) throws SQLException {
-        TableQuery tq = new TableQuery("users", dbPool);
-        tq.setVersionColumn("optlock");
-        this.container = new SQLContainer(tq);
+    public Auth(UserManager manager)
+    {
+        this.manager = manager;
     }
 
     /**
@@ -34,24 +33,11 @@ public class Auth {
      * general exception as I can't be bothered with finding / creating a proper
      * exception at this point in time
      */
-    public User login(String username, String password, SessionContext context)
-            throws Exception {
-        this.container.addContainerFilter(new Equal("username", username));
-        Object id = this.container.firstItemId();
-        Item item = this.container.getItem(id);
-        if (id == null) {
-            throw new Exception("User not found");
-        }
-        Hash hash = new Hash((String) item.getItemProperty("passwd").getValue());
+    public User login(String username, String password) throws Exception
+    {
+        User user = this.manager.getFromUsername(username);
+        Hash hash = new Hash(this.manager.getHashCode(username));
         if (hash.check(password)) {
-            String firstname = (String) item.getItemProperty("firstname")
-                    .getValue();
-            String lastname = (String) item.getItemProperty("lastname")
-                    .getValue();
-            String email = (String) item.getItemProperty("email").getValue();
-            boolean admin = (Boolean) item.getItemProperty("admin").getValue();
-            User user = new User(username, firstname, lastname, email, admin);
-
             this.user = user;
             return user;
         }
@@ -76,13 +62,7 @@ public class Auth {
 
     public void register(User user, String password) throws SQLException
     {
-        Item newUser = (Item)this.container.addItem();
         Hash hash = Hash.hash(password);
-        newUser.getItemProperty("username").setValue(user.getUsername());
-        newUser.getItemProperty("firstname").setValue(user.getFirstname());
-        newUser.getItemProperty("lastname").setValue(user.getLastname());
-        newUser.getItemProperty("email").setValue(user.getEmail());
-        newUser.getItemProperty("password").setValue(hash.raw());
-        this.container.commit();
+        this.manager.createUser(user, hash);
     }
 }
