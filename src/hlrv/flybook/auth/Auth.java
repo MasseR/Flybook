@@ -58,11 +58,11 @@ public class Auth {
         throw new Exception("Password incorrect");
     }
 
-    public BeanItem<User> getCurrentUser() /* throws Exception */{
-        // if (this.user == null) {
-        // throw new Exception("User not logged in");
-        // }
-        return new BeanItem<User>(this.user);
+    public BeanItem<User> getCurrentUser() throws Exception
+    {
+        if (this.user == null) {
+            throw new Exception("User not logged in");
+        }
     }
 
     public boolean isLoggedIn() {
@@ -73,6 +73,7 @@ public class Auth {
         this.user = null;
     }
 
-    public void register(String username, String password) {
+    public void register(User user, String hash)
+    {
     }
 }
