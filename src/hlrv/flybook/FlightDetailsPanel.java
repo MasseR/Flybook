@@ -16,7 +16,7 @@ public class FlightDetailsPanel extends CustomComponent implements
 
     private FlightForm flightForm;
 
-    private FlightMap flightMap;
+    // private FlightMap flightMap;
 
     private Button applyButton;
     private Button resetButton;
@@ -36,7 +36,7 @@ public class FlightDetailsPanel extends CustomComponent implements
         applyButton.addClickListener(this);
         resetButton.addClickListener(this);
 
-        flightForm = new FlightForm(ctx);
+        flightForm = new FlightForm();
         flightForm.setSizeFull();
 
         HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -45,11 +45,11 @@ public class FlightDetailsPanel extends CustomComponent implements
         buttonLayout.setSpacing(true);
         buttonLayout.setMargin(true);
 
-        /**
-         * Flight map component, splitter bottom part
-         */
-        flightMap = new FlightMap(ctx);
-        flightMap.setSizeFull();
+        // /**
+        // * Flight map component, splitter bottom part
+        // */
+        // flightMap = new FlightMap(ctx);
+        // flightMap.setSizeFull();
 
         /**
          * Form fields panel, splitter top part
@@ -58,7 +58,7 @@ public class FlightDetailsPanel extends CustomComponent implements
         VerticalLayout formLayout = new VerticalLayout();
         formLayout.addComponent(flightForm);
         formLayout.addComponent(buttonLayout);
-        formLayout.addComponent(flightMap);
+        // formLayout.addComponent(flightMap);
         formLayout.setSpacing(true);
         formLayout.setMargin(true);
         formPanel.setContent(formLayout);

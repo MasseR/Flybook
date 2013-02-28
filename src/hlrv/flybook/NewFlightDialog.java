@@ -22,7 +22,7 @@ public class NewFlightDialog extends Window implements Button.ClickListener {
 
         setModal(true);
 
-        flightForm = new FlightForm(ctx);
+        flightForm = new FlightForm();
 
         closeButton = new Button("Close");
         createButton = new Button("Create");

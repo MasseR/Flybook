@@ -1,7 +1,6 @@
 package hlrv.flybook;
 
 import java.sql.SQLException;
-import java.util.Collection;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
@@ -214,8 +213,8 @@ public class AirportSelector extends CustomComponent implements
                 String[] parts = value.split(",");
                 countryCombo.select(parts[2]);
                 cityCombo.select(parts[1]);
-                Collection<?> ids = nameCombo.getContainerPropertyIds();
-                boolean contains = nameCombo.containsId(parts[0]);
+                // Collection<?> ids = nameCombo.getContainerPropertyIds();
+                // boolean contains = nameCombo.containsId(parts[0]);
                 for (Object id : nameCombo.getItemIds()) {
                     Item item = nameCombo.getItem(id);
                     if (item.getItemProperty("name").getValue()

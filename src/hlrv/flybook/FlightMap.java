@@ -10,20 +10,15 @@ import java.sql.Statement;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.ExternalResource;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
 public class FlightMap extends CustomComponent implements Runnable,
         Property.ValueChangeListener {
 
-    private SessionContext ctx;
-
-    // private Item flightItem;
+    private int imageSize = 256;
 
     private Connection connection;
 
@@ -31,13 +26,12 @@ public class FlightMap extends CustomComponent implements Runnable,
 
     private ComboBox mapType;
 
-    public FlightMap(SessionContext ctx) throws Exception {
+    public FlightMap() throws Exception {
 
-        this.ctx = ctx;
+        SessionContext.getCurrent().getCurrentFlightEntry()
+                .addValueChangeListener(this);
 
-        ctx.getCurrentFlightEntry().addValueChangeListener(this);
-
-        connection = ctx.getDBConnection().reserve();
+        connection = SessionContext.getCurrent().getDBConnection().reserve();
         connection.setAutoCommit(true);
 
         /**
@@ -58,36 +52,42 @@ public class FlightMap extends CustomComponent implements Runnable,
          * Image panel
          */
         image = new Image();
+        image.setWidth(imageSize, Unit.PIXELS);
+        image.setHeight(imageSize, Unit.PIXELS);
         image.setAlternateText("No flight entries selected");
+
         // image.setImmediate(true);
         // image.setSizeUndefined();
 
-        /**
-         * Wrap image in Panel
-         */
-        Panel imagePanel = new Panel();
-        imagePanel.setContent(image);
-        imagePanel.setSizeFull();
+        // /**
+        // * Wrap image in Panel
+        // */
+        // Panel imagePanel = new Panel();
+        // imagePanel.setContent(image);
+        // imagePanel.setWidth(imageSize, Unit.PIXELS);
+        // imagePanel.setHeight(imageSize, Unit.PIXELS);
+        // imagePanel.setSizeFull();
 
-        VerticalLayout layout10 = new VerticalLayout();
-        layout10.addComponent(mapType);
-        layout10.setComponentAlignment(mapType, Alignment.TOP_RIGHT);
-        layout10.setSpacing(true);
-        layout10.setWidth("50px");
-        // layout10.setSizeFull();
+        // VerticalLayout layout10 = new VerticalLayout();
+        // layout10.addComponent(mapType);
+        // // layout10.setComponentAlignment(mapType, Alignment.TOP_RIGHT);
+        // // layout10.setSpacing(true);
+        // layout10.setWidth("50px");
+        // // layout10.setSizeFull();
 
-        HorizontalLayout layout0 = new HorizontalLayout();
-        layout0.addComponent(imagePanel);
-        layout0.addComponent(layout10);
+        VerticalLayout topLayout = new VerticalLayout();
+        // layout0.addComponent(imagePanel);
+        topLayout.addComponent(mapType);
+        topLayout.addComponent(image);
         // layout0.setExpandRatio(imagePanel, 1);
         // layout0.setExpandRatio(layout10, 0);
         // layout0.setComponentAlignment(imagePanel, Alignment.BOTTOM_LEFT);
         // layout0.setComponentAlignment(layout10, Alignment.BOTTOM_RIGHT);
-        layout0.setSpacing(true);
-        layout0.setMargin(true);
-        layout0.setSizeFull();
+        topLayout.setSpacing(true);
+        topLayout.setMargin(true);
+        topLayout.setSizeUndefined();
 
-        setCompositionRoot(layout0);
+        setCompositionRoot(topLayout);
     }
 
     // public void setFlightItem(Item item) {
@@ -101,7 +101,8 @@ public class FlightMap extends CustomComponent implements Runnable,
 
         ExternalResource res = null;
 
-        FlightItem flightItem = ctx.getCurrentFlightEntry().getValue();
+        FlightItem flightItem = SessionContext.getCurrent()
+                .getCurrentFlightEntry().getValue();
 
         if (flightItem != null) {
 
@@ -183,7 +184,8 @@ public class FlightMap extends CustomComponent implements Runnable,
 
         // sb.append("&size=640x640");
         // sb.append("&size=512x512");
-        sb.append("&size=256x256");
+        // sb.append("&size=256x256");
+        sb.append("&size=").append(imageSize).append("x").append(imageSize);
 
         // sb.append("&markers=color:green%7Clabel:D%7CHelsinki,Finland");
         // sb.append("&markers=color:blue%7Clabel:L%7CLondon,England");

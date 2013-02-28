@@ -2,9 +2,20 @@ package hlrv.flybook;
 
 import hlrv.flybook.db.DBConstants;
 
+import java.text.DateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
@@ -14,17 +25,18 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
-public class FlightForm extends CustomComponent {
-
-    private SessionContext context;
+public class FlightForm extends CustomComponent implements
+        Property.ValueChangeListener {
 
     private FieldGroup fieldGroup;
 
-    private TextField fieldId;
+    private TextField fieldId; // is this even needed ?
     private DateField fieldDate;
 
-    private TextField fieldPilotUsername;
     private TextField fieldPilotFullname;
+    private TextField fieldPilotUsername;
+
+    private TextField fieldAircraft;
 
     private AirportSelector departurePortSelector;
     private TextField fieldDeparturePort;
@@ -35,52 +47,39 @@ public class FlightForm extends CustomComponent {
     private TextField fieldLandingPort;
     private DateField fieldLandingTime;
 
+    private TextField fieldFlightTime;
+
+    private TextField fieldOnBlockTime;
+    private TextField fieldOffBlockTime;
+    private TextField fieldIFRTime;
+
+    private ComboBox comboFlightType;
+
     private TextArea fieldNotes;
 
-    public FlightForm(SessionContext context) {
-        super();
+    private FlightMap flightMap;
 
-        this.context = context;
+    public FlightForm() {
+        super();
 
         /**
          * Create id and date
          */
         fieldId = new TextField("Flight ID");
         fieldId.setColumns(5);
-        fieldId.setReadOnly(true);
 
         fieldDate = new DateField("Date Added");
         fieldDate.setResolution(Resolution.SECOND);
-        fieldDate.setReadOnly(true);
-
-        HorizontalLayout idAndDateLayout = new HorizontalLayout();
-        idAndDateLayout.setSpacing(true);
-        idAndDateLayout.addComponent(fieldId);
-        idAndDateLayout.addComponent(fieldDate);
-        idAndDateLayout.setSizeUndefined();
 
         /**
          * Create pilot name fields and add to panel
          */
+        fieldPilotFullname = new TextField("Pilot");
+        // fieldPilotFullname.setColumns(20);
         fieldPilotUsername = new TextField("Username");
         fieldPilotUsername.setColumns(10);
-        fieldPilotUsername.setReadOnly(true);
-        fieldPilotFullname = new TextField("Fullname");
-        fieldPilotFullname.setColumns(20);
-        fieldPilotFullname.setReadOnly(true);
 
-        Panel pilotPanel = new Panel("Pilot");
-        HorizontalLayout pilotLayout = new HorizontalLayout();
-        pilotLayout.addComponent(fieldPilotUsername);
-        pilotLayout.addComponent(fieldPilotFullname);
-        // pilotLayout.setSizeFull();
-        // pilotLayout.setExpandRatio(fieldPilotUsername, 1.0f);
-        // pilotLayout.setExpandRatio(fieldPilotFullname, 5.0f);
-        pilotLayout.setSpacing(true);
-        pilotLayout.setMargin(new MarginInfo(false, true, true, true));
-        pilotPanel.setContent(pilotLayout);
-
-        HorizontalLayout airportLayout = new HorizontalLayout();
+        fieldAircraft = new TextField("Aircraft");
 
         /**
          * Create departure panel
@@ -102,10 +101,13 @@ public class FlightForm extends CustomComponent {
         // layoutDeparturePort.setSpacing(true);
 
         fieldDepartureTime = new DateField("Time");
-        fieldDepartureTime.setResolution(Resolution.SECOND);
+        fieldDepartureTime.setResolution(Resolution.MINUTE);
+        fieldDepartureTime.addValueChangeListener(this);
+        fieldDepartureTime.setImmediate(true);
+
         // layoutDeparture.addComponent(layoutDeparturePort);
         layoutDeparture.addComponent(departurePortSelector);
-        layoutDeparture.addComponent(fieldDeparturePort);
+        // layoutDeparture.addComponent(fieldDeparturePort);
         layoutDeparture.addComponent(fieldDepartureTime);
         layoutDeparture.setSpacing(true);
         layoutDeparture.setMargin(new MarginInfo(false, true, true, true));
@@ -124,37 +126,140 @@ public class FlightForm extends CustomComponent {
         landingPortSelector.setSizeFull();
 
         fieldLandingTime = new DateField("Time");
-        fieldLandingTime.setResolution(Resolution.SECOND);
+        fieldLandingTime.setResolution(Resolution.MINUTE);
+        fieldLandingTime.addValueChangeListener(this);
+        fieldLandingTime.setImmediate(true);
+
         layoutLanding.addComponent(landingPortSelector);
-        layoutLanding.addComponent(fieldLandingPort);
+        // layoutLanding.addComponent(fieldLandingPort);
         layoutLanding.addComponent(fieldLandingTime);
         layoutLanding.setSpacing(true);
         layoutLanding.setMargin(new MarginInfo(false, true, true, true));
         landingPanel.setContent(layoutLanding);
 
-        airportLayout.addComponent(departurePanel);
-        airportLayout.addComponent(landingPanel);
+        fieldFlightTime = new TextField("Flight Time (HH:MM:SS)");
+        // fieldFlightTime.setResolution(Resolution.SECOND);
+        // /**
+        // * Need to have timezone +-0, because the date object used is a
+        // * difference of two dates.
+        // */
+        // fieldFlightTime.setTimeZone(TimeZone.getTimeZone("GMT+0"));
+        // fieldFlightTime.setDateFormat("HH:mm:ss");
+
+        fieldOnBlockTime = new TextField("On-Block Time");
+        fieldOffBlockTime = new TextField("Off-Block Time");
+        fieldIFRTime = new TextField("IFR Time");
+
+        IndexedContainer flightTypeContainer = new IndexedContainer();
+        flightTypeContainer.addItem("<TODO>");
+        flightTypeContainer.addItem("Domestic");
+        flightTypeContainer.addItem("Hobbyist");
+        flightTypeContainer.addItem("Transcontinental");
+        flightTypeContainer.addItem("Transregional");
+
+        comboFlightType = new ComboBox("Flight Type", flightTypeContainer);
+        comboFlightType.setNullSelectionAllowed(false);
+        comboFlightType.setInputPrompt("Select Flight Type");
+        comboFlightType.setImmediate(true);
 
         fieldNotes = new TextArea("Notes");
-        fieldNotes.setColumns(40);
+        // fieldNotes.setColumns(30);
+
+        try {
+            flightMap = new FlightMap();
+            // flightMap.setSizeFull();
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+
+        /**
+         * Layout created components.
+         */
+        HorizontalLayout idAndDateLayout = new HorizontalLayout();
+        idAndDateLayout.setSpacing(true);
+        idAndDateLayout.setSizeUndefined();
+        idAndDateLayout.addComponent(fieldPilotFullname);
+        idAndDateLayout.addComponent(fieldDate);
+        idAndDateLayout.addComponent(fieldId);
+
+        // Panel pilotPanel = new Panel("Pilot");
+        // HorizontalLayout pilotLayout = new HorizontalLayout();
+        // pilotLayout.addComponent(fieldPilotFullname);
+        // pilotLayout.addComponent(fieldPilotUsername);
+        // // pilotLayout.setSizeFull();
+        // // pilotLayout.setExpandRatio(fieldPilotUsername, 1.0f);
+        // // pilotLayout.setExpandRatio(fieldPilotFullname, 5.0f);
+        // pilotLayout.setSpacing(true);
+        // pilotLayout.setSizeUndefined();
+        // pilotLayout.setMargin(new MarginInfo(false, true, true, true));
+        // pilotPanel.setContent(pilotLayout);
+
+        HorizontalLayout typeAndAircraftLayout = new HorizontalLayout();
+        typeAndAircraftLayout.setSpacing(true);
+        typeAndAircraftLayout.setSizeUndefined();
+        typeAndAircraftLayout.addComponent(comboFlightType);
+        typeAndAircraftLayout.addComponent(fieldAircraft);
+
+        HorizontalLayout airportSelectorLayout = new HorizontalLayout();
+        airportSelectorLayout.setSpacing(true);
+        airportSelectorLayout.setSizeUndefined();
+        airportSelectorLayout.addComponent(departurePanel);
+        airportSelectorLayout.addComponent(landingPanel);
+
+        VerticalLayout airportLayout = new VerticalLayout();
+        airportLayout.setSpacing(true);
+        airportLayout.setSizeUndefined();
+        airportLayout.addComponent(airportSelectorLayout);
+        // airportLayout.addComponent(fieldFlightTime);
+
+        // HorizontalLayout blockTimeLayout = new HorizontalLayout();
+        // blockTimeLayout.setSpacing(true);
+        // blockTimeLayout.setSizeUndefined();
+        // blockTimeLayout.addComponent(fieldOnBlockTime);
+        // blockTimeLayout.addComponent(fieldOffBlockTime);
+
+        VerticalLayout bottomLeftLayout = new VerticalLayout();
+        bottomLeftLayout.setSpacing(true);
+        bottomLeftLayout.setSizeUndefined();
+        bottomLeftLayout.addComponent(fieldFlightTime);
+        bottomLeftLayout.addComponent(fieldOnBlockTime);
+        bottomLeftLayout.addComponent(fieldOffBlockTime);
+        bottomLeftLayout.addComponent(fieldIFRTime);
+        bottomLeftLayout.addComponent(fieldNotes);
+
+        HorizontalLayout bottomLayout = new HorizontalLayout();
+        bottomLayout.setSpacing(true);
+        bottomLayout.setSizeUndefined();
+        bottomLayout.addComponent(bottomLeftLayout);
+        bottomLayout.addComponent(flightMap);
+        bottomLayout.setComponentAlignment(flightMap, Alignment.TOP_LEFT);
 
         VerticalLayout topLayout = new VerticalLayout();
-        // layout0.setSpacing(true);
+        topLayout.setSpacing(true);
         topLayout.setMargin(true);
         topLayout.setSizeUndefined();
+        // topLayout.setSizeUndefined();
         topLayout.setWidth("100%");
         topLayout.addComponent(idAndDateLayout);
-        topLayout.addComponent(pilotPanel);
-        topLayout.addComponent(airportLayout);
-        // topLayout.addComponent(departurePanel);
-        // topLayout.addComponent(landingPanel);
-        topLayout.addComponent(fieldNotes);
+        topLayout.addComponent(typeAndAircraftLayout);
+        topLayout.addComponent(airportSelectorLayout);
+        // topLayout.addComponent(fieldFlightTime);
+        // topLayout.addComponent(blockTimeLayout);
+        // topLayout.addComponent(fieldIFRTime);
+        // topLayout.addComponent(comboFlightType);
+        topLayout.addComponent(bottomLayout);
+        // topLayout.addComponent(fieldNotes);
         // layout0.setExpandRatio(layout10, 0);
         // layout0.setExpandRatio(departurePanel, 0);
         // layout0.setExpandRatio(landingPanel, 0);
         // layout0.setExpandRatio(fieldNotes, 0);
 
+        /**
+         * Creates new FieldGroup and pre-binds.
+         */
         fieldGroup = createFieldGroup();
+
+        setReadOnlyComponents();
 
         setCompositionRoot(topLayout);
     }
@@ -172,13 +277,10 @@ public class FlightForm extends CustomComponent {
 
         if (fieldGroup.getItemDataSource() != null) {
             fieldGroup.setReadOnly(!editable);
-            departurePortSelector.setReadOnly(!editable);
+            // departurePortSelector.setReadOnly(!editable);
         }
 
-        fieldId.setReadOnly(true);
-        fieldDate.setReadOnly(true);
-        fieldPilotUsername.setReadOnly(true);
-        fieldPilotFullname.setReadOnly(true);
+        setReadOnlyComponents();
     }
 
     /**
@@ -194,14 +296,19 @@ public class FlightForm extends CustomComponent {
             fieldGroup = createFieldGroup();
         }
 
-        fieldId.setReadOnly(true);
-        fieldDate.setReadOnly(true);
-        fieldPilotUsername.setReadOnly(true);
-        fieldPilotFullname.setReadOnly(true);
+        /**
+         * Must reset read-only status, because fieldGroup removes them on call
+         * to setItemDataSource().
+         */
+        setReadOnlyComponents();
     }
 
     /**
      * Commits values to data source.
+     * 
+     * NOTE: This commits changes to datasource (container) only. If datasource
+     * is non-autocommit SQLContainer, one must call commit for the container as
+     * well so that changes are updated to the database.
      */
     public void commit() {
 
@@ -222,6 +329,14 @@ public class FlightForm extends CustomComponent {
         fieldGroup.discard();
     }
 
+    /**
+     * Creates field group.
+     * 
+     * Note: fields are not bound. Bindings are done automatically after first
+     * call to setItemDataSource().
+     * 
+     * @return FieldGroup
+     */
     private FieldGroup createFieldGroup() {
 
         FieldGroup fg = new FieldGroup();
@@ -240,9 +355,110 @@ public class FlightForm extends CustomComponent {
                 DBConstants.FLIGHTENTRIES_LANDING_AIRPORT_STRING);
         fg.bind(fieldLandingTime, DBConstants.FLIGHTENTRIES_LANDING_TIME);
 
+        // fg.bind(fieldFlightTime, DBConstants.FLIGHTENTRIES_FLIGHT_TIME);
+
+        fg.bind(fieldAircraft, DBConstants.FLIGHTENTRIES_AIRCRAFT);
+
+        fg.bind(fieldOnBlockTime, DBConstants.FLIGHTENTRIES_ONBLOCK_TIME);
+        fg.bind(fieldOffBlockTime, DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME);
+
+        fg.bind(fieldIFRTime, DBConstants.FLIGHTENTRIES_IFR_TIME);
+
         fg.bind(fieldNotes, DBConstants.FLIGHTENTRIES_NOTES);
 
         return fg;
     }
 
+    private void setReadOnlyComponents() {
+        fieldId.setReadOnly(true);
+        fieldDate.setReadOnly(true);
+        fieldPilotUsername.setReadOnly(true);
+        fieldPilotFullname.setReadOnly(true);
+        fieldFlightTime.setReadOnly(true);
+    }
+
+    @Override
+    public void valueChange(ValueChangeEvent event) {
+
+        if (event.getProperty() == fieldDepartureTime
+                || event.getProperty() == fieldLandingTime) {
+
+            Date departureDate = fieldDepartureTime.getValue();
+            Date landingDate = fieldLandingTime.getValue();
+
+            /**
+             * Ignore valuechange if either of dates has not been set.
+             */
+            if (departureDate == null || landingDate == null) {
+                return;
+            }
+
+            /**
+             * Check if current departure/landing times make sense. If not, then
+             * set the changed date equal to the other.
+             */
+            if (departureDate.after(landingDate)) {
+                if (event.getProperty() == fieldDepartureTime) {
+                    fieldDepartureTime.setValue(landingDate);
+                } else {
+                    fieldLandingTime.setValue(departureDate);
+                }
+
+                return;
+            }
+
+            /**
+             * Get flight time in milliseconds.
+             */
+            long time_ms = landingDate.getTime() - departureDate.getTime();
+
+            // if (time_ms >= 24 * 60 * 60 * 1000) {
+            // fieldFlightTime.setDateFormat("d 'days' HH:mm:ss");
+            // } else {
+            // fieldFlightTime.setDateFormat("HH:mm:ss");
+            // }
+
+            /**
+             * In following we need to have timezone +-0, because the date
+             * object used is a difference of two dates.
+             */
+            DateFormat formatter = DateFormat
+                    .getTimeInstance(DateFormat.MEDIUM);
+            formatter.setTimeZone(TimeZone.getTimeZone("GMT+0"));
+            String timeString = formatter.format(new Date(time_ms));
+
+            long days = time_ms / (24 * 60 * 60 * 1000);
+            if (days > 0) {
+                timeString = days + " days " + timeString;
+            }
+
+            // DateFormat.getTimeInstance(DateFormat.FULL);
+            // String timeString = formatter.format(new Date(time_ms));
+            // formatter = DateFormat.getTimeInstance(DateFormat.LONG);
+            // timeString = formatter.format(new Date(time_ms));
+
+            // formatter = DateFormat.getTimeInstance(DateFormat.SHORT);
+            // timeString = formatter.format(new Date(time_ms));
+
+            /**
+             * We want the flight time in form HH:MM:SS
+             */
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(time_ms);
+
+            String hours = cal.getDisplayName(Calendar.HOUR_OF_DAY,
+                    Calendar.LONG, Locale.getDefault());
+            String mins = cal.getDisplayName(Calendar.MINUTE, Calendar.LONG,
+                    Locale.getDefault());
+            String secs = "00";
+
+            // long time_s = time_ms / 1000L;
+            // long time_min = time_s / 60L;
+            // long time_h = time_min / 60L;
+
+            fieldFlightTime.setReadOnly(false);
+            fieldFlightTime.setValue(timeString);
+            fieldFlightTime.setReadOnly(true);
+        }
+    }
 }
