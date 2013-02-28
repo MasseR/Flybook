@@ -8,7 +8,6 @@ import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.VerticalSplitPanel;
 
 public class FlightDetailsPanel extends CustomComponent implements
         Property.ValueChangeListener, Button.ClickListener {
@@ -47,29 +46,30 @@ public class FlightDetailsPanel extends CustomComponent implements
         buttonLayout.setMargin(true);
 
         /**
+         * Flight map component, splitter bottom part
+         */
+        flightMap = new FlightMap(ctx);
+        flightMap.setSizeFull();
+
+        /**
          * Form fields panel, splitter top part
          */
         Panel formPanel = new Panel();
         VerticalLayout formLayout = new VerticalLayout();
         formLayout.addComponent(flightForm);
         formLayout.addComponent(buttonLayout);
+        formLayout.addComponent(flightMap);
         formLayout.setSpacing(true);
         formLayout.setMargin(true);
         formPanel.setContent(formLayout);
         formPanel.setSizeFull();
 
-        /**
-         * Flight map component, splitter bottom part
-         */
-        flightMap = new FlightMap(ctx);
-        flightMap.setSizeFull();
+        // VerticalSplitPanel verticalSplitPanel = new VerticalSplitPanel(
+        // formPanel, flightMap);
+        // verticalSplitPanel.setSplitPosition(50f);
+        // verticalSplitPanel.setSizeFull();
 
-        VerticalSplitPanel verticalSplitPanel = new VerticalSplitPanel(
-                formPanel, flightMap);
-        verticalSplitPanel.setSplitPosition(50f);
-        verticalSplitPanel.setSizeFull();
-
-        setCompositionRoot(verticalSplitPanel);
+        setCompositionRoot(formPanel);
     }
 
     // public String currentDateAsString() {

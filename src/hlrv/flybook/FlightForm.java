@@ -5,7 +5,6 @@ import hlrv.flybook.db.DBConstants;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
-import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
@@ -27,10 +26,12 @@ public class FlightForm extends CustomComponent {
     private TextField fieldPilotUsername;
     private TextField fieldPilotFullname;
 
+    private AirportSelector departurePortSelector;
     private TextField fieldDeparturePort;
     private DateField fieldDepartureTime;
-    private ComboBox comboDeparturePortCountries;
+    // private ComboBox comboDeparturePortCountries;
 
+    private AirportSelector landingPortSelector;
     private TextField fieldLandingPort;
     private DateField fieldLandingTime;
 
@@ -79,27 +80,32 @@ public class FlightForm extends CustomComponent {
         pilotLayout.setMargin(new MarginInfo(false, true, true, true));
         pilotPanel.setContent(pilotLayout);
 
+        HorizontalLayout airportLayout = new HorizontalLayout();
+
         /**
          * Create departure panel
          */
         Panel departurePanel = new Panel("Departure");
         VerticalLayout layoutDeparture = new VerticalLayout();
-        HorizontalLayout layoutDeparturePort = new HorizontalLayout();
+
         fieldDeparturePort = new TextField("Port");
         fieldDeparturePort.setColumns(30);
-        comboDeparturePortCountries = new ComboBox("Countries");
-        comboDeparturePortCountries.setNewItemsAllowed(false);
-        comboDeparturePortCountries.setContainerDataSource(context
-                .getAirportsContainer().getCountriesContainer());
-        comboDeparturePortCountries.setNullSelectionAllowed(false);
-        // comboDeparturePortCountries
-        // .setItemCaptionPropertyId(DBConstants.AIRPORTS_COUNTRY);
-        layoutDeparturePort.addComponent(fieldDeparturePort);
-        layoutDeparturePort.addComponent(comboDeparturePortCountries);
-        layoutDeparturePort.setSpacing(true);
+        departurePortSelector = new AirportSelector(fieldDeparturePort);
+        departurePortSelector.setSizeFull();
+
+        // HorizontalLayout layoutDeparturePort = new HorizontalLayout();
+
+        // fieldDeparturePort = new TextField("Port");
+        // fieldDeparturePort.setColumns(30);
+        // layoutDeparturePort.addComponent(fieldDeparturePort);
+        // layoutDeparturePort.addComponent(comboDeparturePortCountries);
+        // layoutDeparturePort.setSpacing(true);
+
         fieldDepartureTime = new DateField("Time");
         fieldDepartureTime.setResolution(Resolution.SECOND);
-        layoutDeparture.addComponent(layoutDeparturePort);
+        // layoutDeparture.addComponent(layoutDeparturePort);
+        layoutDeparture.addComponent(departurePortSelector);
+        layoutDeparture.addComponent(fieldDeparturePort);
         layoutDeparture.addComponent(fieldDepartureTime);
         layoutDeparture.setSpacing(true);
         layoutDeparture.setMargin(new MarginInfo(false, true, true, true));
@@ -110,15 +116,24 @@ public class FlightForm extends CustomComponent {
          */
         Panel landingPanel = new Panel("Landing");
         VerticalLayout layoutLanding = new VerticalLayout();
+
         fieldLandingPort = new TextField("Port");
         fieldLandingPort.setColumns(30);
+
+        landingPortSelector = new AirportSelector(fieldLandingPort);
+        landingPortSelector.setSizeFull();
+
         fieldLandingTime = new DateField("Time");
         fieldLandingTime.setResolution(Resolution.SECOND);
+        layoutLanding.addComponent(landingPortSelector);
         layoutLanding.addComponent(fieldLandingPort);
         layoutLanding.addComponent(fieldLandingTime);
         layoutLanding.setSpacing(true);
         layoutLanding.setMargin(new MarginInfo(false, true, true, true));
         landingPanel.setContent(layoutLanding);
+
+        airportLayout.addComponent(departurePanel);
+        airportLayout.addComponent(landingPanel);
 
         fieldNotes = new TextArea("Notes");
         fieldNotes.setColumns(40);
@@ -130,8 +145,9 @@ public class FlightForm extends CustomComponent {
         topLayout.setWidth("100%");
         topLayout.addComponent(idAndDateLayout);
         topLayout.addComponent(pilotPanel);
-        topLayout.addComponent(departurePanel);
-        topLayout.addComponent(landingPanel);
+        topLayout.addComponent(airportLayout);
+        // topLayout.addComponent(departurePanel);
+        // topLayout.addComponent(landingPanel);
         topLayout.addComponent(fieldNotes);
         // layout0.setExpandRatio(layout10, 0);
         // layout0.setExpandRatio(departurePanel, 0);
@@ -156,6 +172,7 @@ public class FlightForm extends CustomComponent {
 
         if (fieldGroup.getItemDataSource() != null) {
             fieldGroup.setReadOnly(!editable);
+            departurePortSelector.setReadOnly(!editable);
         }
 
         fieldId.setReadOnly(true);
