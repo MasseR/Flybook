@@ -3,6 +3,7 @@ package hlrv.flybook;
 import hlrv.flybook.auth.Auth;
 import hlrv.flybook.auth.User;
 import hlrv.flybook.conv.CustomConverterFactory;
+import hlrv.flybook.managers.UserManager;
 import hlrv.flybook.db.DBConnection;
 
 import java.util.Locale;
@@ -47,7 +48,7 @@ public class FlybookUI extends UI {
 
             FlybookUI.pool = new DBConnection();
 
-            this.authenticator = new Auth(FlybookUI.pool.getPool());
+            this.authenticator = new Auth(new UserManager(FlybookUI.pool.getPool()));
 
             this.context = new SessionContext(getSession(), FlybookUI.pool);
 
