@@ -1,8 +1,12 @@
 package hlrv.flybook;
 
+import hlrv.flybook.auth.Auth;
+import hlrv.flybook.auth.User;
+
+import java.sql.SQLException;
+
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -30,21 +34,22 @@ public class RegisterForm extends CustomComponent {
         public void buttonClick(ClickEvent event) {
 
             try {
-
-                fields.commit();
-                System.err.println(person.toString());
-            } catch (CommitException e) {
+                Auth auth = new Auth(null);
+                auth.register(item.getBean(), item.getBean().getPassword());
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
-
     }
 
     /*
      * Data of the editable user
      */
-    private final PersonPOJO person;
+    private final User user;
 
     /*
      * Layout for the form
@@ -54,7 +59,7 @@ public class RegisterForm extends CustomComponent {
     /*
      * BeanItem for item
      */
-    private final BeanItem<PersonPOJO> item;
+    private final BeanItem<User> item;
 
     /*
      * Fields for the form
@@ -74,9 +79,9 @@ public class RegisterForm extends CustomComponent {
         /*
          * Instantiate
          */
-        person = new PersonPOJO("", "", "", false);
+        user = new User("", "", "", "", false);
         layout = new VerticalLayout();
-        fields = new BeanFieldGroup<PersonPOJO>(PersonPOJO.class);
+        fields = new BeanFieldGroup<User>(User.class);
         save = new Button("Save");
 
         /*
@@ -89,12 +94,13 @@ public class RegisterForm extends CustomComponent {
         /*
          * Wrap person-pojo in BeanItem
          */
-        item = new BeanItem<PersonPOJO>(person);
+        item = new BeanItem<User>(user);
 
         /*
          * Set BeanItem as a data source
          */
         fields.setItemDataSource(item);
+        fields.setBuffered(false);
 
         for (Object propertyID : fields.getUnboundPropertyIds()) {
 
@@ -126,16 +132,5 @@ public class RegisterForm extends CustomComponent {
          * Remember to setCompositionRoot for CustomComponent
          */
         this.setCompositionRoot(layout);
-    }
-
-    /**
-     * Getter for registration details
-     * 
-     * @return
-     */
-    public PersonPOJO getRegistrationDetails() {
-
-        return person;
-
     }
 }
