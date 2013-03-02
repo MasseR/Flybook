@@ -2,7 +2,6 @@ package hlrv.flybook.containers;
 
 import hlrv.flybook.FlightItem;
 import hlrv.flybook.FlybookUI;
-import hlrv.flybook.SessionContext;
 import hlrv.flybook.auth.User;
 import hlrv.flybook.db.DBConnection;
 import hlrv.flybook.db.DBConstants;
@@ -21,7 +20,10 @@ import com.vaadin.ui.UI;
 
 public class FlightsContainer {
 
-    private SQLContainer container;
+    /**
+     * Primary container.
+     */
+    private SQLContainer flightsContainer;
 
     private Filter usernameFilter;
 
@@ -36,21 +38,21 @@ public class FlightsContainer {
 
         query.setDelegate(delegate);
 
-        container = new SQLContainer(query);
+        flightsContainer = new SQLContainer(query);
 
-        container.setAutoCommit(false);
+        flightsContainer.setAutoCommit(false);
 
         // container.setPageLength(5 * container.size());
     }
 
     public SQLContainer getContainer() {
-        return container;
+        return flightsContainer;
     }
 
     public void commit() {
 
         try {
-            container.commit();
+            flightsContainer.commit();
         } catch (SQLException e) {
             Notification.show("FlightsContainer Commit Error", e.toString(),
                     Notification.TYPE_ERROR_MESSAGE);
@@ -60,7 +62,7 @@ public class FlightsContainer {
     public void rollback() {
 
         try {
-            container.rollback();
+            flightsContainer.rollback();
         } catch (SQLException e) {
             Notification.show("FlightsContainer Rollback Error", e.toString(),
                     Notification.TYPE_ERROR_MESSAGE);
@@ -70,7 +72,7 @@ public class FlightsContainer {
     public void filterByUser(String username) {
 
         if (usernameFilter != null) {
-            container.removeContainerFilter(usernameFilter);
+            flightsContainer.removeContainerFilter(usernameFilter);
             usernameFilter = null;
         }
 
@@ -81,16 +83,26 @@ public class FlightsContainer {
              * with quotes)
              */
             usernameFilter = new Equal("FlightEntries.username", username);
-            container.addContainerFilter(usernameFilter);
+            flightsContainer.addContainerFilter(usernameFilter);
         }
     }
 
-    public FlightItem addEntry(SessionContext ctx) {
+    /**
+     * Creates a new row in container and initializes it with default values.
+     * 
+     * Note that new row is temporary only and commit() must be called in order
+     * to finalize addition. Temporary row addition can be cancelled by calling
+     * rollback() instead.
+     * 
+     * @return FlightItem
+     */
+    public FlightItem addEntry() {
 
-        Object obj = container.addItem(); // returns temporary row id
+        Object obj = flightsContainer.addItem(); // returns temporary row id
 
-        // getItem() by ignores filtered objects, so must use this one.
-        FlightItem flightItem = new FlightItem(container.getItemUnfiltered(obj));
+        // getItem() ignores filtered objects, so must use this one.
+        FlightItem flightItem = new FlightItem(
+                flightsContainer.getItemUnfiltered(obj));
 
         /**
          * Initialize item with some sane values.
@@ -100,18 +112,19 @@ public class FlightsContainer {
         Date curTime = new Date();
         Integer curTimeSecs = (int) (curTime.getTime() / 1000L);
 
-        flightItem.setFlightID(-1);
+        // flightItem.setFlightID(null);
 
+        // flightItem.setFlightID(-1);
         flightItem.setDate(curTimeSecs);
-        flightItem.setPilot(curUser.getUsername());
+        flightItem.setUsername(curUser.getUsername());
         flightItem.setPilotFullname(curUser.getFirstname() + " "
                 + curUser.getLastname());
 
-        flightItem.setDepartureAirport(1000);
+        flightItem.setDepartureAirport(null);
         flightItem.setDepartureAirportString("");
         flightItem.setDepartureTime(curTimeSecs);
 
-        flightItem.setLandingAirport(2000);
+        flightItem.setLandingAirport(null);
         flightItem.setLandingAirportString("");
         flightItem.setLandingTime(curTimeSecs);
 
@@ -129,11 +142,17 @@ public class FlightsContainer {
         return flightItem;
     }
 
-    public boolean removeEntry(FlightItem e) {
+    /**
+     * Removes item from container.
+     * 
+     * @param item
+     * @return true if entry successfully removed
+     */
+    public boolean removeEntry(FlightItem item) {
 
-        Object[] pkey = { new Integer(e.getFlightID()) };
+        Object[] pkey = { new Integer(item.getFlightID()) };
         RowId id = new RowId(pkey);
 
-        return container.removeItem(id);
+        return flightsContainer.removeItem(id);
     }
 }

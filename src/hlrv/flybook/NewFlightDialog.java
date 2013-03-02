@@ -8,21 +8,17 @@ import com.vaadin.ui.Window;
 
 public class NewFlightDialog extends Window implements Button.ClickListener {
 
-    private SessionContext ctx;
-
-    private FlightForm flightForm;
+    private FlightItemForm flightForm;
 
     private Button closeButton;
     private Button createButton;
 
-    public NewFlightDialog(SessionContext ctx) {
+    public NewFlightDialog() {
         super("New Flight");
-
-        this.ctx = ctx;
 
         setModal(true);
 
-        flightForm = new FlightForm();
+        flightForm = new FlightItemForm();
 
         closeButton = new Button("Close");
         createButton = new Button("Create");
@@ -44,7 +40,7 @@ public class NewFlightDialog extends Window implements Button.ClickListener {
 
     public void setDataSource(FlightItem flightItem) {
 
-        flightForm.setDataSource(flightItem);
+        flightForm.setItem(flightItem);
     }
 
     @Override
@@ -53,11 +49,11 @@ public class NewFlightDialog extends Window implements Button.ClickListener {
         if (event.getButton() == closeButton) {
 
             flightForm.reset();
-            ctx.getFlightsContainer().rollback();
+            SessionContext.getCurrent().getFlightsContainer().rollback();
         } else {
 
             flightForm.commit();
-            ctx.getFlightsContainer().commit();
+            SessionContext.getCurrent().getFlightsContainer().commit();
         }
 
         this.close();

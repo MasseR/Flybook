@@ -1,20 +1,19 @@
 package hlrv.flybook;
 
-import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
+import hlrv.flybook.auth.User;
+
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 public class FlightDetailsPanel extends CustomComponent implements
-        Property.ValueChangeListener, Button.ClickListener {
+        Button.ClickListener {
 
-    private SessionContext ctx;
-
-    private FlightForm flightForm;
+    private FlightItemForm flightForm;
 
     // private FlightMap flightMap;
 
@@ -24,11 +23,7 @@ public class FlightDetailsPanel extends CustomComponent implements
     // private DateFormat dateFormat = new
     // SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public FlightDetailsPanel(SessionContext ctx) throws Exception {
-
-        this.ctx = ctx;
-
-        ctx.getCurrentFlightEntry().addValueChangeListener(this);
+    public FlightDetailsPanel() throws Exception {
 
         applyButton = new Button("Apply");
         resetButton = new Button("Reset");
@@ -36,7 +31,7 @@ public class FlightDetailsPanel extends CustomComponent implements
         applyButton.addClickListener(this);
         resetButton.addClickListener(this);
 
-        flightForm = new FlightForm();
+        flightForm = new FlightItemForm();
         flightForm.setSizeFull();
 
         HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -76,26 +71,24 @@ public class FlightDetailsPanel extends CustomComponent implements
     // return dateFormat.format(new Date());
     // }
 
-    @Override
-    public void valueChange(ValueChangeEvent event) {
+    public void setItem(FlightItem item) {
 
-        FlightItem flightItem = ctx.getCurrentFlightEntry().getValue();
+        User currentUser = ((FlybookUI) UI.getCurrent()).getUser().getBean();
 
         /**
-         * Disable/enable some components based on whether or not current item
-         * was created by current user.
+         * Disable/enable some components based on whether or not current
+         * selection is modifiable by user.
          */
-        boolean itemCreatedByUser = ctx.isCurrentFlightEntryCreatedByUser();
-
-        applyButton.setEnabled(itemCreatedByUser);
-        resetButton.setEnabled(itemCreatedByUser);
+        boolean userCanModify = item.isModifiableByUser(currentUser);
+        applyButton.setEnabled(userCanModify);
+        resetButton.setEnabled(userCanModify);
 
         /**
          * Finally set data source for FlightForm so it binds fields to the
          * item.
          */
-        flightForm.setDataSource(flightItem);
-        flightForm.setEditable(itemCreatedByUser);
+        flightForm.setItem(item);
+        flightForm.setEditable(userCanModify);
     }
 
     @Override
@@ -107,14 +100,12 @@ public class FlightDetailsPanel extends CustomComponent implements
             /**
              * Must also commit to database (we have autocommit == false)
              */
-            ctx.getFlightsContainer().commit();
+            SessionContext.getCurrent().getFlightsContainer().commit();
 
         } else if (event.getButton() == resetButton) {
 
             flightForm.reset();
         }
-        // TODO Auto-generated method stub
-
     }
 
     // public void setItem(Item item) {

@@ -1,11 +1,12 @@
 package hlrv.flybook;
 
+import hlrv.flybook.auth.User;
 import hlrv.flybook.db.DBConstants;
 
 import com.vaadin.data.Item;
 
 /**
- * Wrapper class of Item for easier handling of flight Item set/get.
+ * Wrapper class of Item to handle flight item set/get.
  */
 public class FlightItem {
 
@@ -18,6 +19,10 @@ public class FlightItem {
 
     public Item getItem() {
         return item;
+    }
+
+    public boolean isNull() {
+        return item == null;
     }
 
     /**
@@ -33,7 +38,7 @@ public class FlightItem {
                 DBConstants.FLIGHTENTRIES_FLIGHT_ID).getValue();
     }
 
-    public String getPilot() {
+    public String getUsername() {
         return (String) item
                 .getItemProperty(DBConstants.FLIGHTENTRIES_USERNAME).getValue();
     }
@@ -126,11 +131,11 @@ public class FlightItem {
      * FlightEntries properties setters.
      */
 
-    public void setFlightID(int id) {
+    public void setFlightID(Integer id) {
         item.getItemProperty(DBConstants.FLIGHTENTRIES_FLIGHT_ID).setValue(id);
     }
 
-    public void setPilot(String username) {
+    public void setUsername(String username) {
         item.getItemProperty(DBConstants.FLIGHTENTRIES_USERNAME).setValue(
                 username);
     }
@@ -144,7 +149,7 @@ public class FlightItem {
                 aircraft);
     }
 
-    public void setDepartureAirport(int airport) {
+    public void setDepartureAirport(Integer airport) {
         item.getItemProperty(DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT)
                 .setValue(airport);
     }
@@ -154,7 +159,7 @@ public class FlightItem {
                 .setValue(time_s);
     }
 
-    public void setLandingAirport(int airport) {
+    public void setLandingAirport(Integer airport) {
         item.getItemProperty(DBConstants.FLIGHTENTRIES_LANDING_AIRPORT)
                 .setValue(airport);
     }
@@ -216,4 +221,29 @@ public class FlightItem {
                 .setValue(aircraft);
     }
 
+    /**
+     * Returns true if user can modify this item.
+     */
+    public boolean isModifiableByUser(User user) {
+
+        if (isNull()) {
+            return false;
+        }
+
+        /**
+         * Admin can modify anything.
+         */
+        if (user.isAdmin()) {
+            return true;
+        }
+
+        /**
+         * User can modify if username matches.
+         */
+        if (getUsername().equals(user.getUsername())) {
+            return true;
+        }
+
+        return false;
+    }
 }

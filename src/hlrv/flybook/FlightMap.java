@@ -1,52 +1,46 @@
 package hlrv.flybook;
 
-import hlrv.flybook.db.DBConstants;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.VerticalLayout;
 
-public class FlightMap extends CustomComponent implements Runnable,
+public class FlightMap extends CustomComponent implements
         Property.ValueChangeListener {
 
     private int imageSize = 256;
 
-    private Connection connection;
+    // private FlightItem flightItem;
 
     private Image image;
 
-    private ComboBox mapType;
+    private ComboBox comboType;
 
-    public FlightMap() throws Exception {
+    private AirportItem departurePort;
 
-        SessionContext.getCurrent().getCurrentFlightEntry()
-                .addValueChangeListener(this);
+    private AirportItem landingPort;
 
-        connection = SessionContext.getCurrent().getDBConnection().reserve();
-        connection.setAutoCommit(true);
+    /**
+     * Creates new FlightMap
+     * 
+     * @param itemProperty
+     * @throws Exception
+     */
+    public FlightMap() {
 
         /**
          * Combobox to select terrain type for image
          */
-        mapType = new ComboBox("Map type");
-        mapType.addItem("Terrain");
-        mapType.addItem("Satellite");
-        mapType.setNullSelectionAllowed(false);
-        mapType.setImmediate(true);
-
-        mapType.setValue("Terrain");
+        comboType = new ComboBox("Map type");
+        comboType.addItem("Terrain");
+        comboType.addItem("Satellite");
+        comboType.setNullSelectionAllowed(false);
+        comboType.setImmediate(true);
+        comboType.setValue("Terrain");
         // mapType.setTextInputAllowed(false);
-
-        mapType.addValueChangeListener(this);
+        comboType.addValueChangeListener(this);
 
         /**
          * Image panel
@@ -77,8 +71,8 @@ public class FlightMap extends CustomComponent implements Runnable,
 
         VerticalLayout topLayout = new VerticalLayout();
         // layout0.addComponent(imagePanel);
-        topLayout.addComponent(mapType);
         topLayout.addComponent(image);
+        topLayout.addComponent(comboType);
         // layout0.setExpandRatio(imagePanel, 1);
         // layout0.setExpandRatio(layout10, 0);
         // layout0.setComponentAlignment(imagePanel, Alignment.BOTTOM_LEFT);
@@ -90,87 +84,105 @@ public class FlightMap extends CustomComponent implements Runnable,
         setCompositionRoot(topLayout);
     }
 
-    // public void setFlightItem(Item item) {
+    public void setPorts(AirportItem departurePort, AirportItem landingPort) {
+
+        this.departurePort = departurePort;
+        this.landingPort = landingPort;
+
+        updateImageSource();
+    }
+
+    // public void setItem(FlightItem item) {
     //
-    // flightItem = item;
+    // this.flightItem = item;
+    //
+    // if (!flightItem.isNull()) {
+    // Property<Integer> prop = flightItem.getItem().getItemProperty(
+    // DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT);
+    // }
     //
     // updateImageSource();
     // }
 
     private void updateImageSource() {
 
-        ExternalResource res = null;
-
-        FlightItem flightItem = SessionContext.getCurrent()
-                .getCurrentFlightEntry().getValue();
-
-        if (flightItem != null) {
-
-            String[] ports = departureAndLandingPortStrings(flightItem);
+        if (departurePort.isNull() || landingPort.isNull()) {
+            image.setSource(null);
+        } else {
+            String[] ports = departureAndLandingPortStrings();
 
             System.out.println("Departure: " + ports[0] + ", Landing: "
                     + ports[1]);
 
-            res = new ExternalResource(createGoogleStaticMapApiURL(ports[0],
-                    ports[1]), "image/png");
+            ExternalResource res = new ExternalResource(
+                    createGoogleStaticMapApiURL(ports[0], ports[1]),
+                    "image/png");
+
+            image.setSource(res);
         }
-
-        // Image newImage = new Image(null, res);
-        // newImage.setAlternateText("No flight entries selected");
-        // newImage.setImmediate(true);
-        // replaceComponent(image, newImage);
-        // this.image = newImage;
-
-        image.markAsDirty();
-
-        image.setSource(res);
     }
 
-    private String[] departureAndLandingPortStrings(FlightItem flightItem) {
+    private String[] departureAndLandingPortStrings() {
 
         String[] ports = new String[2];
 
-        int departurePort = flightItem.getDepartureAirport();
-        int landingPort = flightItem.getLandingAirport();
+        // int departurePort = flightItem.getDepartureAirport();
+        // int landingPort = flightItem.getLandingAirport();
+        //
+        // AirportsContainer airportsContainer = SessionContext.getCurrent()
+        // .getAirportsContainer();
 
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT ");
-        sql.append(DBConstants.AIRPORTS_ID).append(", ");
-        sql.append(DBConstants.AIRPORTS_CITY).append(", ");
-        sql.append(DBConstants.AIRPORTS_COUNTRY).append(" ");
-        sql.append("FROM ").append(DBConstants.TABLE_AIRPORTS).append(" ");
-        sql.append("WHERE ");
-        sql.append(DBConstants.AIRPORTS_ID).append(" = ");
-        sql.append(departurePort).append(" OR ");
-        sql.append(DBConstants.AIRPORTS_ID).append(" = ");
-        sql.append(landingPort);
+        // AirportItem departureItem = airportsContainer.getItem(departurePort);
+        // AirportItem landingItem = airportsContainer.getItem(landingPort);
 
-        System.out.println(sql.toString());
+        // if (departureItem.isNull() || landingItem.isNull()) {
+        // ports[0] = ports[1] = "";
+        // }
 
-        try {
+        ports[0] = departurePort.getCity() + "," + departurePort.getCountry();
+        ports[1] = landingPort.getCity() + "," + landingPort.getCountry();
 
-            Statement stmt = connection.createStatement();
-
-            stmt.execute(sql.toString());
-
-            ResultSet results = stmt.getResultSet();
-
-            while (results.next()) {
-                int airportId = results.getInt(1);
-                if (airportId == departurePort) {
-                    ports[0] = results.getString(2) + ","
-                            + results.getString(3);
-                } else {
-                    ports[1] = results.getString(2) + ","
-                            + results.getString(3);
-                }
-            }
-
-            results.close(); // !!! release dblock !!!
-
-        } catch (SQLException e) {
-            System.err.println(e.toString());
-        }
+        // int departurePort = flightItem.getDepartureAirport();
+        // int landingPort = flightItem.getLandingAirport();
+        //
+        // StringBuilder sql = new StringBuilder();
+        // sql.append("SELECT ");
+        // sql.append(DBConstants.AIRPORTS_ID).append(", ");
+        // sql.append(DBConstants.AIRPORTS_CITY).append(", ");
+        // sql.append(DBConstants.AIRPORTS_COUNTRY).append(" ");
+        // sql.append("FROM ").append(DBConstants.TABLE_AIRPORTS).append(" ");
+        // sql.append("WHERE ");
+        // sql.append(DBConstants.AIRPORTS_ID).append(" = ");
+        // sql.append(departurePort).append(" OR ");
+        // sql.append(DBConstants.AIRPORTS_ID).append(" = ");
+        // sql.append(landingPort);
+        //
+        // System.out.println(sql.toString());
+        //
+        // try {
+        //
+        // Statement stmt = connection.createStatement();
+        //
+        // stmt.execute(sql.toString());
+        //
+        // ResultSet results = stmt.getResultSet();
+        //
+        // while (results.next()) {
+        // int airportId = results.getInt(1);
+        // if (airportId == departurePort) {
+        // ports[0] = results.getString(2) + ","
+        // + results.getString(3);
+        // } else {
+        // ports[1] = results.getString(2) + ","
+        // + results.getString(3);
+        // }
+        // }
+        //
+        // results.close(); // !!! release dblock !!!
+        //
+        // } catch (SQLException e) {
+        // System.err.println(e.toString());
+        // }
 
         return ports;
     }
@@ -208,23 +220,22 @@ public class FlightMap extends CustomComponent implements Runnable,
     }
 
     private String getMapType() {
-        String type = (String) mapType.getValue();
+        String type = (String) comboType.getValue();
         return type.toLowerCase();
     }
 
     @Override
-    public void valueChange(ValueChangeEvent event) {
+    public void valueChange(Property.ValueChangeEvent event) {
 
-        updateImageSource();
+        if (event.getProperty() == comboType) {
+            updateImageSource();
+        } else {
+
+            /**
+             * Departure/Landing port has changed.
+             */
+            updateImageSource();
+        }
     }
 
-    @Override
-    public void run() {
-
-        // Image won't update immediately if setSource(res) called from
-        // background thread
-        // Some discussion of the problem here:
-        // https://vaadin.com/forum/-/message_boards/view_message/231271
-
-    }
 }

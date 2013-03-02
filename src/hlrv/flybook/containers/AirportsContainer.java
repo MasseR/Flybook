@@ -1,19 +1,19 @@
 package hlrv.flybook.containers;
 
+import hlrv.flybook.AirportItem;
 import hlrv.flybook.db.DBConnection;
 import hlrv.flybook.db.DBConstants;
 
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.vaadin.data.Container;
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.filter.And;
 import com.vaadin.data.util.filter.Compare.Equal;
+import com.vaadin.data.util.sqlcontainer.RowId;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
@@ -21,56 +21,206 @@ import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
 import com.vaadin.ui.Notification;
 
+/**
+ * AirportsContainer wraps primary Airport SQLContainer and provides other
+ * helper methods to create containers generated from the primary container.
+ * 
+ * .classConstraint (getContainer() contains no filters or orderBys)
+ */
 public class AirportsContainer {
 
-    private SQLContainer allContainer;
+    /**
+     * Primary container.
+     */
+    private SQLContainer airportsContainer;
 
-    // private SQLContainer countriesContainer;
-
+    /**
+     * Container of country/flag columns.
+     */
     private IndexedContainer countriesContainer;
 
     /**
-     * Keep static list of all countries, assume this won't change.
+     * Keep cache of containers country -> city .
      */
-    private TreeSet<String> countries;
+    private ContainerCache<String, IndexedContainer> cachedCityContainers = new ContainerCache<String, IndexedContainer>(
+            50);
 
     /**
-     * Keep map of already fetched containers mapped to country.
+     * Keep cache of containers country-city -> name.
      */
-    private TreeMap<String, Container> mapCountryToCityContainer = new TreeMap<String, Container>();
-
-    // private HashSet<String> countries;
+    private ContainerCache<String, IndexedContainer> cachedNameContainers = new ContainerCache<String, IndexedContainer>(
+            100);
 
     public AirportsContainer(DBConnection dbconn) throws SQLException {
 
         JDBCConnectionPool pool = dbconn.getPool();
 
         TableQuery tq = new TableQuery("Airports", pool);
-        allContainer = new SQLContainer(tq);
-        allContainer.setAutoCommit(false);
+        tq.setVersionColumn(DBConstants.AIRPORTS_OPTLOCK);
+        airportsContainer = new SQLContainer(tq);
+        airportsContainer.setAutoCommit(false);
 
-        // FreeformQuery fq = new FreeformQuery(
-        // "SELECT country FROM Airports GROUP BY country", pool,
-        // DBConstants.AIRPORTS_COUNTRY);
-        // fq.setDelegate(new AirportCountriesFSDelegate());
-        // countriesContainer = new SQLContainer(fq);
-        // countriesContainer.setAutoCommit(false);
+        initCountriesContainer();
+    }
+
+    /**
+     * Returns SQLContainer that contains all Airport table columns.
+     * 
+     * @return
+     */
+    public SQLContainer getContainer() {
+        return airportsContainer;
+    }
+
+    /**
+     * Returns AirportItem corresponding to airport id.
+     * 
+     * @param id
+     * @return
+     */
+    public AirportItem getItem(Integer id) {
+
+        Item item = null;
+        if (id != null) {
+            airportsContainer.addContainerFilter(new Equal("id", id));
+            item = airportsContainer.getItem(airportsContainer.firstItemId());
+            airportsContainer.removeAllContainerFilters();
+        }
+        return new AirportItem(item);
+    }
+
+    /**
+     * Returns AirportItem corresponding to ICAO code.
+     * 
+     * @param id
+     * @return
+     */
+    public AirportItem getItemFromCode(String code) {
+
+        Item item = null;
+
+        if (code != null) {
+            airportsContainer.addContainerFilter(new Equal("code", code));
+            Object id = airportsContainer.firstItemId();
+            item = airportsContainer.getItem(id);
+            airportsContainer.removeAllContainerFilters();
+        }
+
+        return new AirportItem(item);
+    }
+
+    /**
+     * Returns AirportItem corresponding to location.
+     * 
+     * @param id
+     * @return
+     */
+    public AirportItem getItem(String country, String city, String name) {
+
+        Item item = null;
+
+        if (country != null && city != null && name != null) {
+            airportsContainer.addContainerFilter(new And(new And(new Equal(
+                    "country", country), new Equal("city", city)), new Equal(
+                    "name", name)));
+            Object id = airportsContainer.firstItemId();
+            item = airportsContainer.getItem(id);
+            airportsContainer.removeAllContainerFilters();
+        }
+
+        return new AirportItem(item);
+    }
+
+    /**
+     * Creates a new row in container and initializes it with default values.
+     * 
+     * Note that new row is temporary only and commit() must be called in order
+     * to finalize addition. Temporary row addition can be cancelled by calling
+     * rollback() instead.
+     * 
+     * @return AirportItem
+     */
+    public AirportItem addEntry() {
+
+        Object obj = airportsContainer.addItem(); // returns temporary row id
+
+        // getItem() ignores filtered objects, so must use this one.
+        AirportItem item = new AirportItem(
+                airportsContainer.getItemUnfiltered(obj));
+
+        item.setICAOCode("????");
+        item.setName("");
+        item.setCity("");
+        item.setCountry("");
+        item.setLocation("0:0");
+
+        return item;
+    }
+
+    /**
+     * Removes item from container.
+     * 
+     * @param item
+     * @return true if entry successfully removed
+     */
+    public boolean removeEntry(AirportItem item) {
+
+        RowId id = createRowId(item.getID());
+        return airportsContainer.removeItem(id);
+    }
+
+    /**
+     * Returns rowid corresponding to airport id.
+     * 
+     * @param id
+     * @return
+     */
+    public RowId createRowId(int id) {
+
+        Object[] pkey = { new Integer(id) };
+        return new RowId(pkey);
+    }
+
+    public void commit() {
+
+        try {
+            airportsContainer.commit();
+        } catch (SQLException e) {
+            Notification.show("AirportsContainer Commit Error", e.toString(),
+                    Notification.TYPE_ERROR_MESSAGE);
+        }
+    }
+
+    public void rollback() {
+
+        try {
+            airportsContainer.rollback();
+        } catch (SQLException e) {
+            Notification.show("AirportsContainer Rollback Error", e.toString(),
+                    Notification.TYPE_ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Returns Container of all countries and corresponding Flag Resource.
+     */
+    public IndexedContainer createCountriesContainer() {
 
         // Ordered set
-        countries = new TreeSet<String>();
+        TreeSet<String> countries = new TreeSet<String>();
 
-        Object id = allContainer.firstItemId();
+        Object id = airportsContainer.firstItemId();
         while (id != null) {
-            Item item = allContainer.getItem(id);
+            Item item = airportsContainer.getItem(id);
             String country = (String) item.getItemProperty(
                     DBConstants.AIRPORTS_COUNTRY).getValue();
 
             countries.add(country);
 
-            id = allContainer.nextItemId(id);
+            id = airportsContainer.nextItemId(id);
         }
 
-        countriesContainer = new IndexedContainer();
+        IndexedContainer countriesContainer = new IndexedContainer();
         countriesContainer.addContainerProperty("country", String.class, null);
         countriesContainer.addContainerProperty("icon", Resource.class, null);
 
@@ -84,116 +234,143 @@ public class AirportsContainer {
                             + country.replaceAll(" ", "_") + ".png"));
 
         }
-    }
 
-    public Container getContainer() {
-        return allContainer;
-    }
-
-    /**
-     * Fetch precreated Container of all countries and corresponding Flag
-     * Resource.
-     */
-    public Container getCountriesContainer() {
         return countriesContainer;
     }
 
     /**
-     * Returns Container of unique cities for country.
+     * Returns precreated Container of all ICAO codes.
      */
-    public Container getCitiesOfCountryContainer(String country) {
+    public IndexedContainer createICAOCodesContainer() {
 
-        if (mapCountryToCityContainer.containsKey(country)) {
-            return mapCountryToCityContainer.get(country);
+        /**
+         * Collect icao codes in ordered set.
+         */
+        TreeSet<String> codes = new TreeSet<String>();
+
+        Object id = airportsContainer.firstItemId();
+        while (id != null) {
+            Item item = airportsContainer.getItem(id);
+            String code = (String) item.getItemProperty(
+                    DBConstants.AIRPORTS_CODE).getValue();
+            codes.add(code);
+            id = airportsContainer.nextItemId(id);
         }
 
         /**
-         * Fetch all cities from db and insert to ordered set.
+         * Create new memory based IndexedContainer and add Items.
          */
-        TreeSet<String> cities = fetchPropertySet(
-                new Equal("country", country), DBConstants.AIRPORTS_CITY);
+        IndexedContainer icaoCodesContainer = new IndexedContainer();
+        icaoCodesContainer.addContainerProperty("code", String.class, null);
 
-        /**
-         * Create container from city set.
-         */
+        Iterator<String> it = codes.iterator();
+        while (it.hasNext()) {
+            String code = it.next();
+            Item item = icaoCodesContainer.addItem(code);
+            item.getItemProperty("code").setValue(code);
+        }
+
+        return icaoCodesContainer;
+    }
+
+    /**
+     * Returns Container of unique cities for country. If country is null,
+     * returned container is empty.
+     */
+    public IndexedContainer createCitiesContainer(String country) {
+
         IndexedContainer cityContainer = new IndexedContainer();
         cityContainer.addContainerProperty("city", String.class, null);
 
-        Iterator<String> it = cities.iterator();
-        while (it.hasNext()) {
-            String city = it.next();
-            Item item = cityContainer.addItem(city);
-            item.getItemProperty("city").setValue(city);
-        }
+        if (country != null) {
+            //
+            // if (cachedCityContainers.containsKey(country)) {
+            // return cachedCityContainers.get(country);
+            // }
 
-        mapCountryToCityContainer.put(country, cityContainer);
+            /**
+             * Fetch all cities from db and insert to ordered set.
+             */
+            TreeSet<String> cities = fetchPropertySet(new Equal("country",
+                    country), DBConstants.AIRPORTS_CITY);
+
+            /**
+             * Create container from city set.
+             */
+
+            Iterator<String> it = cities.iterator();
+            while (it.hasNext()) {
+                String city = it.next();
+                Item item = cityContainer.addItem(city);
+                item.getItemProperty("city").setValue(city);
+            }
+
+            // cachedCityContainers.put(country, cityContainer);
+        }
 
         return cityContainer;
     }
 
     /**
-     * Returns Container of unique cities for country.
+     * Returns Container of name for country and city pair. If country or city
+     * is null, returned container is empty.
      */
-    public Container getAirportNamesContainer(String country, String city) {
+    public IndexedContainer createAirportNamesContainer(String country,
+            String city) {
 
-        /**
-         * Fetch all airport names and insert to ordered set.
-         */
-        TreeSet<String> airports = fetchPropertySet(new And(new Equal(
-                "country", country), new Equal("city", city)),
-                DBConstants.AIRPORTS_NAME);
-
-        /**
-         * Create container from nameset.
-         */
         IndexedContainer container = new IndexedContainer();
         container.addContainerProperty("name", String.class, null);
 
-        Iterator<String> it = airports.iterator();
-        while (it.hasNext()) {
-            String name = it.next();
-            Item item = container.addItem(city);
-            item.getItemProperty("name").setValue(name);
+        if (country != null && city != null) {
+
+            // String key = country + "-" + city;
+            //
+            // /**
+            // * Check cache first.
+            // */
+            // if (cachedNameContainers.containsKey(key)) {
+            // return cachedNameContainers.get(key);
+            // }
+
+            /**
+             * Fetch all airport names and insert to ordered set.
+             */
+            TreeSet<String> airports = fetchPropertySet(new And(new Equal(
+                    "country", country), new Equal("city", city)),
+                    DBConstants.AIRPORTS_NAME);
+
+            Iterator<String> it = airports.iterator();
+            while (it.hasNext()) {
+                String name = it.next();
+                Item item = container.addItem(name);
+                item.getItemProperty("name").setValue(name);
+            }
+
+            // cachedNameContainers.put(key, container);
         }
 
         return container;
     }
 
-    public void commit() {
+    private void initCountriesContainer() {
 
-        try {
-            allContainer.commit();
-        } catch (SQLException e) {
-            Notification.show("AirportsContainer Commit Error", e.toString(),
-                    Notification.TYPE_ERROR_MESSAGE);
-        }
-    }
-
-    public void rollback() {
-
-        try {
-            allContainer.rollback();
-        } catch (SQLException e) {
-            Notification.show("AirportsContainer Rollback Error", e.toString(),
-                    Notification.TYPE_ERROR_MESSAGE);
-        }
     }
 
     private TreeSet<String> fetchPropertySet(Filter filter, String properyId) {
 
         TreeSet<String> set = new TreeSet<String>();
 
-        allContainer.addContainerFilter(filter);
+        airportsContainer.addContainerFilter(filter);
 
-        Object id = allContainer.firstItemId();
+        Object id = airportsContainer.firstItemId();
         while (id != null) {
-            Item item = allContainer.getItem(id);
+            Item item = airportsContainer.getItem(id);
             String value = (String) item.getItemProperty(properyId).getValue();
             set.add(value);
-            id = allContainer.nextItemId(id);
+            id = airportsContainer.nextItemId(id);
         }
 
-        allContainer.removeAllContainerFilters();
+        airportsContainer.removeAllContainerFilters();
 
         return set;
     }

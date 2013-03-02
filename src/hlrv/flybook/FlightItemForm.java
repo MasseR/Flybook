@@ -1,5 +1,6 @@
 package hlrv.flybook;
 
+import hlrv.flybook.containers.AirportsContainer;
 import hlrv.flybook.db.DBConstants;
 
 import java.text.DateFormat;
@@ -9,7 +10,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.vaadin.data.Property;
-import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.shared.ui.MarginInfo;
@@ -18,6 +18,7 @@ import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.DateField;
+import com.vaadin.ui.Field;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
@@ -25,7 +26,7 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
-public class FlightForm extends CustomComponent implements
+public class FlightItemForm extends CustomComponent implements
         Property.ValueChangeListener {
 
     private FieldGroup fieldGroup;
@@ -38,13 +39,13 @@ public class FlightForm extends CustomComponent implements
 
     private TextField fieldAircraft;
 
-    private AirportSelector departurePortSelector;
-    private TextField fieldDeparturePort;
+    private AirportField fieldDepartureAirport;
+    // private TextField fieldDeparturePort;
     private DateField fieldDepartureTime;
     // private ComboBox comboDeparturePortCountries;
 
-    private AirportSelector landingPortSelector;
-    private TextField fieldLandingPort;
+    private AirportField fieldLandingAirport;
+    // private TextField fieldLandingPort;
     private DateField fieldLandingTime;
 
     private TextField fieldFlightTime;
@@ -59,7 +60,7 @@ public class FlightForm extends CustomComponent implements
 
     private FlightMap flightMap;
 
-    public FlightForm() {
+    public FlightItemForm() {
         super();
 
         /**
@@ -87,10 +88,11 @@ public class FlightForm extends CustomComponent implements
         Panel departurePanel = new Panel("Departure");
         VerticalLayout layoutDeparture = new VerticalLayout();
 
-        fieldDeparturePort = new TextField("Port");
-        fieldDeparturePort.setColumns(30);
-        departurePortSelector = new AirportSelector(fieldDeparturePort);
-        departurePortSelector.setSizeFull();
+        // fieldDeparturePort = new TextField("Port");
+        // fieldDeparturePort.setColumns(30);
+        fieldDepartureAirport = new AirportField();
+        fieldDepartureAirport.addValueChangeListener(this);
+        fieldDepartureAirport.setSizeFull();
 
         // HorizontalLayout layoutDeparturePort = new HorizontalLayout();
 
@@ -106,7 +108,7 @@ public class FlightForm extends CustomComponent implements
         fieldDepartureTime.setImmediate(true);
 
         // layoutDeparture.addComponent(layoutDeparturePort);
-        layoutDeparture.addComponent(departurePortSelector);
+        layoutDeparture.addComponent(fieldDepartureAirport);
         // layoutDeparture.addComponent(fieldDeparturePort);
         layoutDeparture.addComponent(fieldDepartureTime);
         layoutDeparture.setSpacing(true);
@@ -119,18 +121,19 @@ public class FlightForm extends CustomComponent implements
         Panel landingPanel = new Panel("Landing");
         VerticalLayout layoutLanding = new VerticalLayout();
 
-        fieldLandingPort = new TextField("Port");
-        fieldLandingPort.setColumns(30);
+        // fieldLandingPort = new TextField("Port");
+        // fieldLandingPort.setColumns(30);
 
-        landingPortSelector = new AirportSelector(fieldLandingPort);
-        landingPortSelector.setSizeFull();
+        fieldLandingAirport = new AirportField();
+        fieldLandingAirport.addValueChangeListener(this);
+        fieldLandingAirport.setSizeFull();
 
         fieldLandingTime = new DateField("Time");
         fieldLandingTime.setResolution(Resolution.MINUTE);
         fieldLandingTime.addValueChangeListener(this);
         fieldLandingTime.setImmediate(true);
 
-        layoutLanding.addComponent(landingPortSelector);
+        layoutLanding.addComponent(fieldLandingAirport);
         // layoutLanding.addComponent(fieldLandingPort);
         layoutLanding.addComponent(fieldLandingTime);
         layoutLanding.setSpacing(true);
@@ -150,14 +153,9 @@ public class FlightForm extends CustomComponent implements
         fieldOffBlockTime = new TextField("Off-Block Time");
         fieldIFRTime = new TextField("IFR Time");
 
-        IndexedContainer flightTypeContainer = new IndexedContainer();
-        flightTypeContainer.addItem("<TODO>");
-        flightTypeContainer.addItem("Domestic");
-        flightTypeContainer.addItem("Hobbyist");
-        flightTypeContainer.addItem("Transcontinental");
-        flightTypeContainer.addItem("Transregional");
-
-        comboFlightType = new ComboBox("Flight Type", flightTypeContainer);
+        comboFlightType = new ComboBox("Flight Type",
+                createFlightTypeContainer("caption"));
+        comboFlightType.setItemCaptionPropertyId("caption");
         comboFlightType.setNullSelectionAllowed(false);
         comboFlightType.setInputPrompt("Select Flight Type");
         comboFlightType.setImmediate(true);
@@ -165,12 +163,7 @@ public class FlightForm extends CustomComponent implements
         fieldNotes = new TextArea("Notes");
         // fieldNotes.setColumns(30);
 
-        try {
-            flightMap = new FlightMap();
-            // flightMap.setSizeFull();
-        } catch (Exception e) {
-            System.err.println(e.toString());
-        }
+        flightMap = new FlightMap();
 
         /**
          * Layout created components.
@@ -264,6 +257,28 @@ public class FlightForm extends CustomComponent implements
         setCompositionRoot(topLayout);
     }
 
+    private IndexedContainer createFlightTypeContainer(String caption) {
+
+        IndexedContainer flightTypeContainer = new IndexedContainer();
+        flightTypeContainer.addContainerProperty(caption, String.class, null);
+
+        flightTypeContainer.addItem(new Integer(FlightType.DOMESTIC.ordinal()))
+                .getItemProperty(caption).setValue("Domestic");
+
+        flightTypeContainer.addItem(new Integer(FlightType.HOBBY.ordinal()))
+                .getItemProperty(caption).setValue("Hobby");
+
+        flightTypeContainer
+                .addItem(new Integer(FlightType.TRANSREGIONAL.ordinal()))
+                .getItemProperty(caption).setValue("Transregional");
+
+        flightTypeContainer
+                .addItem(new Integer(FlightType.TRANSCONTINENTAL.ordinal()))
+                .getItemProperty(caption).setValue("Transcontinental");
+
+        return flightTypeContainer;
+    }
+
     public boolean isEditable() {
         return !fieldGroup.isReadOnly();
     }
@@ -284,16 +299,32 @@ public class FlightForm extends CustomComponent implements
     }
 
     /**
-     * Sets field data source.
+     * Sets item to edit.
      * 
-     * @param flightItem
+     * @param item
      */
-    public void setDataSource(FlightItem flightItem) {
+    public void setItem(FlightItem item) {
 
-        if (flightItem != null) {
-            fieldGroup.setItemDataSource(flightItem.getItem());
+        if (item.isNull()) {
+            for (Field<?> f : fieldGroup.getFields()) {
+                fieldGroup.unbind(f);
+            }
+            fieldGroup.setItemDataSource(null);
         } else {
-            fieldGroup = createFieldGroup();
+
+            /**
+             * If id is null, we are using this form to create new entry, which
+             * doesn't need to have field visible or value changed.
+             */
+            if (item.getFlightID() == null) {
+                fieldId.setVisible(false);
+            } else {
+                fieldId.setReadOnly(false);
+                fieldId.setValue(item.getFlightID().toString());
+                fieldId.setVisible(true);
+            }
+
+            fieldGroup.setItemDataSource(item.getItem());
         }
 
         /**
@@ -341,23 +372,24 @@ public class FlightForm extends CustomComponent implements
 
         FieldGroup fg = new FieldGroup();
 
-        fg.bind(fieldId, DBConstants.FLIGHTENTRIES_FLIGHT_ID);
+        // fg.bind(fieldId, DBConstants.FLIGHTENTRIES_FLIGHT_ID);
+
         fg.bind(fieldDate, DBConstants.FLIGHTENTRIES_DATE);
 
         fg.bind(fieldPilotUsername, DBConstants.FLIGHTENTRIES_USERNAME);
         fg.bind(fieldPilotFullname, DBConstants.FLIGHTENTRIES_PILOT_FULLNAME);
 
-        fg.bind(fieldDeparturePort,
-                DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT_STRING);
+        fg.bind(comboFlightType, DBConstants.FLIGHTENTRIES_FLIGHT_TYPE);
+        fg.bind(fieldAircraft, DBConstants.FLIGHTENTRIES_AIRCRAFT);
+
+        fg.bind(fieldDepartureAirport,
+                DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT);
         fg.bind(fieldDepartureTime, DBConstants.FLIGHTENTRIES_DEPARTURE_TIME);
 
-        fg.bind(fieldLandingPort,
-                DBConstants.FLIGHTENTRIES_LANDING_AIRPORT_STRING);
+        fg.bind(fieldLandingAirport, DBConstants.FLIGHTENTRIES_LANDING_AIRPORT);
         fg.bind(fieldLandingTime, DBConstants.FLIGHTENTRIES_LANDING_TIME);
 
         // fg.bind(fieldFlightTime, DBConstants.FLIGHTENTRIES_FLIGHT_TIME);
-
-        fg.bind(fieldAircraft, DBConstants.FLIGHTENTRIES_AIRCRAFT);
 
         fg.bind(fieldOnBlockTime, DBConstants.FLIGHTENTRIES_ONBLOCK_TIME);
         fg.bind(fieldOffBlockTime, DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME);
@@ -370,6 +402,7 @@ public class FlightForm extends CustomComponent implements
     }
 
     private void setReadOnlyComponents() {
+
         fieldId.setReadOnly(true);
         fieldDate.setReadOnly(true);
         fieldPilotUsername.setReadOnly(true);
@@ -378,7 +411,7 @@ public class FlightForm extends CustomComponent implements
     }
 
     @Override
-    public void valueChange(ValueChangeEvent event) {
+    public void valueChange(Property.ValueChangeEvent event) {
 
         if (event.getProperty() == fieldDepartureTime
                 || event.getProperty() == fieldLandingTime) {
@@ -459,6 +492,18 @@ public class FlightForm extends CustomComponent implements
             fieldFlightTime.setReadOnly(false);
             fieldFlightTime.setValue(timeString);
             fieldFlightTime.setReadOnly(true);
+        } else if (event.getProperty() == fieldDepartureAirport
+                || event.getProperty() == fieldLandingAirport) {
+
+            Integer departurePort = fieldDepartureAirport.getValue();
+            Integer landingPort = fieldLandingAirport.getValue();
+
+            AirportsContainer container = SessionContext.getCurrent()
+                    .getAirportsContainer();
+
+            flightMap.setPorts(container.getItem(departurePort),
+                    container.getItem(landingPort));
+
         }
     }
 }

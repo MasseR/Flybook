@@ -6,10 +6,7 @@ import hlrv.flybook.db.DBConnection;
 
 import java.sql.SQLException;
 
-import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.server.VaadinSession;
-import com.vaadin.ui.UI;
 
 public class SessionContext {
 
@@ -18,12 +15,12 @@ public class SessionContext {
      */
     private DBConnection dbconn;
 
-
-    /**
-     * Current selected FlightItem in table, can be changed so wrap in property
-     * others can listen for changes.
-     */
-    private ObjectProperty<FlightItem> currentFlightEntry;
+    // /**
+    // * Current selected FlightItem in table, can be changed so wrap in
+    // property
+    // * others can listen for changes.
+    // */
+    // private ObjectProperty<FlightItem> currentFlightEntry;
 
     /**
      * SQLContainer wrapper for FlightEntries.
@@ -40,8 +37,8 @@ public class SessionContext {
 
         dbconn = connection;
 
-        currentFlightEntry = new ObjectProperty<FlightItem>(null,
-                FlightItem.class, false);
+        // currentFlightEntry = new ObjectProperty<FlightItem>(null,
+        // FlightItem.class, false);
 
         try {
 
@@ -57,9 +54,9 @@ public class SessionContext {
         session.setAttribute("context", this);
     }
 
-    public ObjectProperty<FlightItem> getCurrentFlightEntry() {
-        return currentFlightEntry;
-    }
+    // public ObjectProperty<FlightItem> getCurrentFlightEntry() {
+    // return currentFlightEntry;
+    // }
 
     public DBConnection getDBConnection() {
         return dbconn;
@@ -79,16 +76,17 @@ public class SessionContext {
                 "context");
     }
 
-    /**
-     * Helper method that returns true if current selected flight entry has been
-     * created/owned by current user.
-     */
-    public boolean isCurrentFlightEntryCreatedByUser() {
-        if (currentFlightEntry.getValue() == null) {
-            return false;
-        }
-
-        return currentFlightEntry.getValue().getPilot()
-                .equals(((FlybookUI) UI.getCurrent()).getUser().getBean().getUsername());
-    }
+    // /**
+    // * Helper method that returns true if current selected flight entry has
+    // been
+    // * created/owned by current user.
+    // */
+    // public boolean isCurrentFlightEntryCreatedByUser() {
+    // if (currentFlightEntry.getValue() == null) {
+    // return false;
+    // }
+    //
+    // return currentFlightEntry.getValue().getPilot()
+    // .equals(((FlybookUI) UI.getCurrent()).getUser().getBean().getUsername());
+    // }
 }

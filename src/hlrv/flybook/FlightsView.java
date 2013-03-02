@@ -1,7 +1,9 @@
 package hlrv.flybook;
 
+import hlrv.flybook.auth.User;
 import hlrv.flybook.containers.FlightsContainer;
 
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.Button;
@@ -10,29 +12,28 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.HorizontalSplitPanel;
 import com.vaadin.ui.Panel;
+import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-public class FlightsTab extends AbstractMainViewTab implements
+public class FlightsView extends AbstractMainViewTab implements
         Property.ValueChangeListener, Button.ClickListener {
 
-    private SessionContext ctx;
-
-    private FlightsTable flightsTable;
+    // private FlightsTable flightsTable;
 
     private FlightDetailsPanel flightDetails;
 
     private ComboBox pilotCombo;
+
+    private Table table;
 
     private Button newButton;
     private Button deleteButton;
 
     private NewFlightDialog newFlightDialog = null;
 
-    public FlightsTab(SessionContext ctx) throws Exception {
+    public FlightsView() throws Exception {
         super();
-
-        this.ctx = ctx;
 
         /**
          * We will have two main sub components: table and details panel.
@@ -41,17 +42,31 @@ public class FlightsTab extends AbstractMainViewTab implements
         /**
          * Create table and wrap in panel.
          */
-        Panel flightsPanel = new Panel();
-        flightsTable = new FlightsTable(ctx);
-        flightsTable.setWidth("");
-        flightsTable.setHeight("100%");
+
+        table = new Table();
+        table.setSelectable(true);
+        table.setImmediate(true);
+        table.setNullSelectionAllowed(false);
+        table.setColumnCollapsingAllowed(true);
+        table.setWidth("");
+        table.setHeight("100%");
+        table.setSizeFull();
+
+        table.addValueChangeListener(this);
+        // table.addItemSetChangeListener(this);
+
+        FlightsContainer container = SessionContext.getCurrent()
+                .getFlightsContainer();
+        table.setContainerDataSource(container.getContainer());
+
+        Panel flightsPanel = new Panel(table);
         flightsPanel.setSizeFull();
-        flightsPanel.setContent(flightsTable);
 
         /**
          * Create components above table.
          */
-        String username = ((FlybookUI) UI.getCurrent()).getUser().getBean().getUsername();
+        String username = ((FlybookUI) UI.getCurrent()).getUser().getBean()
+                .getUsername();
         pilotCombo = new ComboBox("Pilot");
         pilotCombo.setNullSelectionAllowed(false);
         pilotCombo.addValueChangeListener(this);
@@ -105,7 +120,7 @@ public class FlightsTab extends AbstractMainViewTab implements
         /**
          * Details panel on splitter right side.
          */
-        flightDetails = new FlightDetailsPanel(ctx);
+        flightDetails = new FlightDetailsPanel();
         flightDetails.setSizeFull();
 
         HorizontalSplitPanel horizontalSplitPanel = new HorizontalSplitPanel(
@@ -113,16 +128,18 @@ public class FlightsTab extends AbstractMainViewTab implements
         horizontalSplitPanel.setSplitPosition(50f);
 
         setContent(horizontalSplitPanel);
-
-        /**
-         * We will listen for current flight entry changes.
-         */
-        ctx.getCurrentFlightEntry().addValueChangeListener(this);
     }
 
     @Override
     public void tabSelected() {
 
+    }
+
+    private FlightItem getSelectedItem() {
+
+        Object rowid = table.getValue();
+        Item currentItem = table.getItem(rowid);
+        return new FlightItem(currentItem);
     }
 
     @Override
@@ -132,21 +149,35 @@ public class FlightsTab extends AbstractMainViewTab implements
 
             String value = (String) event.getProperty().getValue();
 
-            if (value.equals(((FlybookUI) UI.getCurrent()).getUser().getBean().getUsername())) {
-                ctx.getFlightsContainer().filterByUser(value);
+            if (value.equals(((FlybookUI) UI.getCurrent()).getUser().getBean()
+                    .getUsername())) {
+                SessionContext.getCurrent().getFlightsContainer()
+                        .filterByUser(value);
                 // flightsTable.filterByUser(value);
             } else if (value.equals("All")) {
                 // flightsTable.filterByUser(null);
-                ctx.getFlightsContainer().filterByUser(null);
+                SessionContext.getCurrent().getFlightsContainer()
+                        .filterByUser(null);
             }
 
             System.out.println("Pilot: " + event.getProperty().getValue());
 
-        } else if (event.getProperty() == ctx.getCurrentFlightEntry()) {
+        } else if (event.getProperty() == table) {
 
-            boolean enableDeletion = ctx.isCurrentFlightEntryCreatedByUser();
+            FlightItem item = getSelectedItem();
+
+            /**
+             * Disable/enable some components based on whether or not current
+             * selection is modifiable by user.
+             */
+            User currentUser = ((FlybookUI) UI.getCurrent()).getUser()
+                    .getBean();
+            // boolean enableDeletion = currentUser.isAdmin();
+            boolean enableDeletion = item.isModifiableByUser(currentUser);
 
             deleteButton.setEnabled(enableDeletion);
+
+            flightDetails.setItem(item);
         }
     }
 
@@ -156,15 +187,16 @@ public class FlightsTab extends AbstractMainViewTab implements
         if (event.getButton() == newButton) {
 
             if (newFlightDialog == null) {
-                newFlightDialog = new NewFlightDialog(ctx);
+                newFlightDialog = new NewFlightDialog();
             }
 
             /**
              * Create temporary row in container and wrap the Item in
              * FlightEntry with some default values.
              */
-            FlightsContainer container = ctx.getFlightsContainer();
-            FlightItem flightItem = container.addEntry(ctx);
+            FlightsContainer container = SessionContext.getCurrent()
+                    .getFlightsContainer();
+            FlightItem flightItem = container.addEntry();
 
             /**
              * Set the entry as datasource for dialog.
@@ -179,13 +211,16 @@ public class FlightsTab extends AbstractMainViewTab implements
 
         } else if (event.getButton() == deleteButton) {
 
-            FlightsContainer container = ctx.getFlightsContainer();
-            FlightItem flightItem = ctx.getCurrentFlightEntry().getValue();
-            if (flightItem != null) {
-                if (container.removeEntry(flightItem)) {
+            FlightItem item = getSelectedItem();
+            if (!item.isNull()) {
+                FlightsContainer container = SessionContext.getCurrent()
+                        .getFlightsContainer();
+
+                if (container.removeEntry(item)) {
                     container.commit();
                 }
             }
         }
     }
+
 }
