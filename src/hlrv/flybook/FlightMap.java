@@ -10,7 +10,8 @@ import com.vaadin.ui.VerticalLayout;
 public class FlightMap extends CustomComponent implements
         Property.ValueChangeListener {
 
-    private int imageSize = 256;
+    private int imageWidth = 250;
+    private int imageHeight = 150;
 
     // private FlightItem flightItem;
 
@@ -46,8 +47,8 @@ public class FlightMap extends CustomComponent implements
          * Image panel
          */
         image = new Image();
-        image.setWidth(imageSize, Unit.PIXELS);
-        image.setHeight(imageSize, Unit.PIXELS);
+        image.setWidth(imageWidth, Unit.PIXELS);
+        image.setHeight(imageHeight, Unit.PIXELS);
         image.setAlternateText("No flight entries selected");
 
         // image.setImmediate(true);
@@ -78,7 +79,7 @@ public class FlightMap extends CustomComponent implements
         // layout0.setComponentAlignment(imagePanel, Alignment.BOTTOM_LEFT);
         // layout0.setComponentAlignment(layout10, Alignment.BOTTOM_RIGHT);
         topLayout.setSpacing(true);
-        topLayout.setMargin(true);
+        // topLayout.setMargin(true);
         topLayout.setSizeUndefined();
 
         setCompositionRoot(topLayout);
@@ -197,7 +198,7 @@ public class FlightMap extends CustomComponent implements
         // sb.append("&size=640x640");
         // sb.append("&size=512x512");
         // sb.append("&size=256x256");
-        sb.append("&size=").append(imageSize).append("x").append(imageSize);
+        sb.append("&size=").append(imageWidth).append("x").append(imageHeight);
 
         // sb.append("&markers=color:green%7Clabel:D%7CHelsinki,Finland");
         // sb.append("&markers=color:blue%7Clabel:L%7CLondon,England");

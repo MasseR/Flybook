@@ -5,6 +5,17 @@ import java.util.TreeMap;
 
 import com.vaadin.data.Container;
 
+/**
+ * Class that could be used to cache Containers.
+ * 
+ * NOTE: This is presently not used in code! It seems to be unstable practice to
+ * share containers with different components as container data sources.
+ * 
+ * @param <K>
+ *            Keytype
+ * @param <C>
+ *            ContainerType
+ */
 public class ContainerCache<K, C extends Container> {
 
     private TreeMap<K, C> cache = new TreeMap<K, C>();

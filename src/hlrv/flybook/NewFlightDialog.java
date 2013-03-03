@@ -1,8 +1,11 @@
 package hlrv.flybook;
 
+import java.sql.SQLException;
+
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
@@ -50,12 +53,21 @@ public class NewFlightDialog extends Window implements Button.ClickListener {
 
             flightForm.reset();
             SessionContext.getCurrent().getFlightsContainer().rollback();
+            this.close();
         } else {
 
-            flightForm.commit();
-            SessionContext.getCurrent().getFlightsContainer().commit();
+            /**
+             * Commit form values so they get set to FlightItem properties.
+             */
+            if (flightForm.commit()) {
+                try {
+                    SessionContext.getCurrent().getFlightsContainer().commit();
+                    this.close();
+                } catch (SQLException e) {
+                    Notification.show("Commit Failed", e.toString(),
+                            Notification.TYPE_ERROR_MESSAGE);
+                }
+            }
         }
-
-        this.close();
     }
 }

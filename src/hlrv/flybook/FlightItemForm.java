@@ -12,9 +12,9 @@ import java.util.TimeZone;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.data.validator.NullValidator;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
-import com.vaadin.ui.Alignment;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.DateField;
@@ -91,6 +91,9 @@ public class FlightItemForm extends CustomComponent implements
         // fieldDeparturePort = new TextField("Port");
         // fieldDeparturePort.setColumns(30);
         fieldDepartureAirport = new AirportField();
+        fieldDepartureAirport.setValidationVisible(true);
+        fieldDepartureAirport.addValidator(new NullValidator(
+                "Departure Airport must be selected", false));
         fieldDepartureAirport.addValueChangeListener(this);
         fieldDepartureAirport.setSizeFull();
 
@@ -125,6 +128,9 @@ public class FlightItemForm extends CustomComponent implements
         // fieldLandingPort.setColumns(30);
 
         fieldLandingAirport = new AirportField();
+        fieldLandingAirport.setValidationVisible(true);
+        fieldLandingAirport.addValidator(new NullValidator(
+                "Landing Airport must be selected", false));
         fieldLandingAirport.addValueChangeListener(this);
         fieldLandingAirport.setSizeFull();
 
@@ -214,25 +220,31 @@ public class FlightItemForm extends CustomComponent implements
         VerticalLayout bottomLeftLayout = new VerticalLayout();
         bottomLeftLayout.setSpacing(true);
         bottomLeftLayout.setSizeUndefined();
-        bottomLeftLayout.addComponent(fieldFlightTime);
+
         bottomLeftLayout.addComponent(fieldOnBlockTime);
         bottomLeftLayout.addComponent(fieldOffBlockTime);
         bottomLeftLayout.addComponent(fieldIFRTime);
         bottomLeftLayout.addComponent(fieldNotes);
 
+        VerticalLayout bottomRightLayout = new VerticalLayout();
+        bottomRightLayout.setSpacing(true);
+        bottomRightLayout.setSizeUndefined();
+        bottomRightLayout.addComponent(fieldFlightTime);
+        bottomRightLayout.addComponent(flightMap);
+
         HorizontalLayout bottomLayout = new HorizontalLayout();
         bottomLayout.setSpacing(true);
         bottomLayout.setSizeUndefined();
         bottomLayout.addComponent(bottomLeftLayout);
-        bottomLayout.addComponent(flightMap);
-        bottomLayout.setComponentAlignment(flightMap, Alignment.TOP_LEFT);
+        bottomLayout.addComponent(bottomRightLayout);
+        // bottomLayout.setComponentAlignment(flightMap, Alignment.TOP_LEFT);
 
         VerticalLayout topLayout = new VerticalLayout();
         topLayout.setSpacing(true);
         topLayout.setMargin(true);
         topLayout.setSizeUndefined();
         // topLayout.setSizeUndefined();
-        topLayout.setWidth("100%");
+        // topLayout.setWidth("100%");
         topLayout.addComponent(idAndDateLayout);
         topLayout.addComponent(typeAndAircraftLayout);
         topLayout.addComponent(airportSelectorLayout);
@@ -292,7 +304,6 @@ public class FlightItemForm extends CustomComponent implements
 
         if (fieldGroup.getItemDataSource() != null) {
             fieldGroup.setReadOnly(!editable);
-            // departurePortSelector.setReadOnly(!editable);
         }
 
         setReadOnlyComponents();
@@ -324,6 +335,17 @@ public class FlightItemForm extends CustomComponent implements
                 fieldId.setVisible(true);
             }
 
+            /**
+             * We set time fields to null to make sure valueChange() works right
+             * when fieldGroup sets values from source and change events fire
+             * again.
+             */
+            fieldDepartureTime.setReadOnly(false);
+            fieldDepartureTime.setValue(null);
+
+            fieldLandingTime.setReadOnly(false);
+            fieldLandingTime.setValue(null);
+
             fieldGroup.setItemDataSource(item.getItem());
         }
 
@@ -337,20 +359,22 @@ public class FlightItemForm extends CustomComponent implements
     /**
      * Commits values to data source.
      * 
-     * NOTE: This commits changes to datasource (container) only. If datasource
-     * is non-autocommit SQLContainer, one must call commit for the container as
-     * well so that changes are updated to the database.
+     * NOTE: This commits changes to datasource (FlightItem) only. Because Item
+     * belongs to non-autocommit SQLContainer, one must call commit for the
+     * container as well so that changes are updated to the database.
      */
-    public void commit() {
+    public boolean commit() {
 
         try {
 
             fieldGroup.commit();
-        } catch (FieldGroup.CommitException e) {
 
-            Notification.show("Commit Error", e.toString(),
-                    Notification.TYPE_WARNING_MESSAGE);
+            return true;
+        } catch (FieldGroup.CommitException e) {
+            Notification.show("Commit Warning", e.toString(),
+                    Notification.TYPE_HUMANIZED_MESSAGE);
         }
+        return false;
     }
 
     /**

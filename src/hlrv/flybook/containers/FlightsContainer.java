@@ -49,14 +49,9 @@ public class FlightsContainer {
         return flightsContainer;
     }
 
-    public void commit() {
+    public void commit() throws SQLException {
 
-        try {
-            flightsContainer.commit();
-        } catch (SQLException e) {
-            Notification.show("FlightsContainer Commit Error", e.toString(),
-                    Notification.TYPE_ERROR_MESSAGE);
-        }
+        flightsContainer.commit();
     }
 
     public void rollback() {
@@ -100,7 +95,9 @@ public class FlightsContainer {
 
         Object obj = flightsContainer.addItem(); // returns temporary row id
 
-        // getItem() ignores filtered objects, so must use this one.
+        /**
+         * getItem() ignores filtered objects, so must use this one.
+         */
         FlightItem flightItem = new FlightItem(
                 flightsContainer.getItemUnfiltered(obj));
 
@@ -112,14 +109,19 @@ public class FlightsContainer {
         Date curTime = new Date();
         Integer curTimeSecs = (int) (curTime.getTime() / 1000L);
 
+        /**
+         * FlightID is special case, it should probably be null, so that when
+         * commit is called, database can initialize id with unique value.
+         */
         // flightItem.setFlightID(null);
 
-        // flightItem.setFlightID(-1);
         flightItem.setDate(curTimeSecs);
         flightItem.setUsername(curUser.getUsername());
         flightItem.setPilotFullname(curUser.getFirstname() + " "
                 + curUser.getLastname());
 
+        // TODO: Could be neat if new item was initialized to users current
+        // physical location...
         flightItem.setDepartureAirport(null);
         flightItem.setDepartureAirportString("");
         flightItem.setDepartureTime(curTimeSecs);
@@ -128,6 +130,7 @@ public class FlightsContainer {
         flightItem.setLandingAirportString("");
         flightItem.setLandingTime(curTimeSecs);
 
+        // TODO: This is temporary value
         flightItem.setAircraft("REG123");
 
         flightItem.setOnBlockTime(0);

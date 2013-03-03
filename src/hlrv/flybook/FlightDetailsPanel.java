@@ -2,28 +2,27 @@ package hlrv.flybook;
 
 import hlrv.flybook.auth.User;
 
+import java.sql.SQLException;
+
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.Reindeer;
 
-public class FlightDetailsPanel extends CustomComponent implements
-        Button.ClickListener {
+public class FlightDetailsPanel extends Panel implements Button.ClickListener {
 
     private FlightItemForm flightForm;
-
-    // private FlightMap flightMap;
 
     private Button applyButton;
     private Button resetButton;
 
-    // private DateFormat dateFormat = new
-    // SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     public FlightDetailsPanel() throws Exception {
+
+        addStyleName(Reindeer.PANEL_LIGHT);
 
         applyButton = new Button("Apply");
         resetButton = new Button("Reset");
@@ -32,44 +31,46 @@ public class FlightDetailsPanel extends CustomComponent implements
         resetButton.addClickListener(this);
 
         flightForm = new FlightItemForm();
-        flightForm.setSizeFull();
+        // flightForm.setWidth("100%");
+        // flightForm.setHeight(SIZE_UNDEFINED, Unit.PERCENTAGE);
+        flightForm.setSizeUndefined();
 
         HorizontalLayout buttonLayout = new HorizontalLayout();
         buttonLayout.addComponent(applyButton);
         buttonLayout.addComponent(resetButton);
         buttonLayout.setSpacing(true);
         buttonLayout.setMargin(true);
+        // buttonLayout.setWidth("100%");
+        // buttonLayout.setHeight(SIZE_UNDEFINED, Unit.PERCENTAGE);
+        buttonLayout.setSizeUndefined();
 
         // /**
-        // * Flight map component, splitter bottom part
+        // * Form fields panel, splitter top part
         // */
-        // flightMap = new FlightMap(ctx);
-        // flightMap.setSizeFull();
-
-        /**
-         * Form fields panel, splitter top part
-         */
-        Panel formPanel = new Panel();
+        // Panel formPanel = new Panel();
         VerticalLayout formLayout = new VerticalLayout();
+        // VerticalLayout formLayout = this;
         formLayout.addComponent(flightForm);
         formLayout.addComponent(buttonLayout);
         // formLayout.addComponent(flightMap);
         formLayout.setSpacing(true);
-        formLayout.setMargin(true);
-        formPanel.setContent(formLayout);
-        formPanel.setSizeFull();
+        // formLayout.setMargin(true);
+        formLayout.setWidth("100%");
+        formLayout.setHeight(SIZE_UNDEFINED, Unit.PERCENTAGE);
+        // formLayout.setSizeUndefined();
+
+        // formPanel.setContent(formLayout);
+        // formPanel.setSizeUndefined();
 
         // VerticalSplitPanel verticalSplitPanel = new VerticalSplitPanel(
         // formPanel, flightMap);
         // verticalSplitPanel.setSplitPosition(50f);
         // verticalSplitPanel.setSizeFull();
 
-        setCompositionRoot(formPanel);
-    }
+        // setCompositionRoot(formLayout);
 
-    // public String currentDateAsString() {
-    // return dateFormat.format(new Date());
-    // }
+        setContent(formLayout);
+    }
 
     public void setItem(FlightItem item) {
 
@@ -84,8 +85,8 @@ public class FlightDetailsPanel extends CustomComponent implements
         resetButton.setEnabled(userCanModify);
 
         /**
-         * Finally set data source for FlightForm so it binds fields to the
-         * item.
+         * Finally set data source for FlightForm so it can bind fields. Also we
+         * set the form editable if user can modify it.
          */
         flightForm.setItem(item);
         flightForm.setEditable(userCanModify);
@@ -95,21 +96,24 @@ public class FlightDetailsPanel extends CustomComponent implements
     public void buttonClick(ClickEvent event) {
         if (event.getButton() == applyButton) {
 
-            flightForm.commit();
-
             /**
-             * Must also commit to database (we have autocommit == false)
+             * Commit form values so they get set to FlightItem properties.
              */
-            SessionContext.getCurrent().getFlightsContainer().commit();
+            if (flightForm.commit()) {
+                try {
+                    SessionContext.getCurrent().getFlightsContainer().commit();
+                } catch (SQLException e) {
+                    Notification.show("Commit Failed", e.toString(),
+                            Notification.TYPE_ERROR_MESSAGE);
+
+                    SessionContext.getCurrent().getFlightsContainer()
+                            .rollback();
+                }
+            }
 
         } else if (event.getButton() == resetButton) {
 
             flightForm.reset();
         }
     }
-
-    // public void setItem(Item item) {
-    //
-    // mapView.setFlightItem(item);
-    // }
 }

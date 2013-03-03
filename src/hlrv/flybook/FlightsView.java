@@ -3,6 +3,8 @@ package hlrv.flybook;
 import hlrv.flybook.auth.User;
 import hlrv.flybook.containers.FlightsContainer;
 
+import java.sql.SQLException;
+
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -10,8 +12,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Panel;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
@@ -48,9 +49,10 @@ public class FlightsView extends AbstractMainViewTab implements
         table.setImmediate(true);
         table.setNullSelectionAllowed(false);
         table.setColumnCollapsingAllowed(true);
-        table.setWidth("");
-        table.setHeight("100%");
+        // table.setWidth("");
+        // table.setHeight("100%");
         table.setSizeFull();
+        // table.setSizeUndefined();
 
         table.addValueChangeListener(this);
         // table.addItemSetChangeListener(this);
@@ -59,8 +61,8 @@ public class FlightsView extends AbstractMainViewTab implements
                 .getFlightsContainer();
         table.setContainerDataSource(container.getContainer());
 
-        Panel flightsPanel = new Panel(table);
-        flightsPanel.setSizeFull();
+        // Panel flightsPanel = new Panel(table);
+        // flightsPanel.setSizeFull();
 
         /**
          * Create components above table.
@@ -86,48 +88,60 @@ public class FlightsView extends AbstractMainViewTab implements
         deleteButton.addClickListener(this);
 
         /**
+         * Details panel on splitter right side.
+         */
+        flightDetails = new FlightDetailsPanel();
+        flightDetails.setWidth(SIZE_UNDEFINED, Unit.PERCENTAGE);
+        flightDetails.setHeight("100%");
+        // flightDetails.setSizeFull();
+
+        /**
          * Layout for components above table.
          */
         HorizontalLayout tableControlsLayout = new HorizontalLayout();
-        tableControlsLayout.addComponent(pilotCombo);
         tableControlsLayout.setSpacing(true);
         // tableControlsLayout.setMargin(true);
-        // tableControlsLayout.setMargin(true);
+        tableControlsLayout.setSizeUndefined();
+        tableControlsLayout.addComponent(pilotCombo);
 
         /**
          * Layout for buttons below table.
          */
         HorizontalLayout bottomButtonLayout = new HorizontalLayout();
-        bottomButtonLayout.addComponent(newButton);
-        bottomButtonLayout.addComponent(deleteButton);
         bottomButtonLayout.setSpacing(true);
         bottomButtonLayout.setMargin(true);
+        bottomButtonLayout.setSizeUndefined();
+        bottomButtonLayout.addComponent(newButton);
+        bottomButtonLayout.addComponent(deleteButton);
 
         /**
          * Vertical layout on splitter left side.
          */
-        VerticalLayout topLayout = new VerticalLayout();
-        topLayout.addComponent(tableControlsLayout);
-        topLayout.addComponent(flightsPanel);
-        topLayout.addComponent(bottomButtonLayout);
-        topLayout.setExpandRatio(tableControlsLayout, 0.0f);
-        topLayout.setExpandRatio(flightsPanel, 1.0f);
-        topLayout.setExpandRatio(bottomButtonLayout, 0.0f);
-        topLayout.setSpacing(true);
-        topLayout.setMargin(true);
-        topLayout.setSizeFull();
+        VerticalLayout leftLayout = new VerticalLayout();
+        leftLayout.addComponent(tableControlsLayout);
+        leftLayout.addComponent(table);
+        leftLayout.addComponent(bottomButtonLayout);
+        leftLayout.setExpandRatio(tableControlsLayout, 0.0f);
+        leftLayout.setExpandRatio(table, 1.0f);
+        leftLayout.setExpandRatio(bottomButtonLayout, 0.0f);
+        leftLayout.setSpacing(true);
+        // topLayout.setMargin(true);
+        leftLayout.setSizeFull();
 
-        /**
-         * Details panel on splitter right side.
-         */
-        flightDetails = new FlightDetailsPanel();
-        flightDetails.setSizeFull();
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.setSizeFull();
+        horizontalLayout.setSpacing(true);
 
-        HorizontalSplitPanel horizontalSplitPanel = new HorizontalSplitPanel(
-                topLayout, flightDetails);
-        horizontalSplitPanel.setSplitPosition(50f);
+        horizontalLayout.addComponent(leftLayout);
+        horizontalLayout.addComponent(flightDetails);
+        horizontalLayout.setExpandRatio(leftLayout, 1.0f);
+        // horizontalLayout.setExpandRatio(flightDetails, 0.1f);
 
-        setContent(horizontalSplitPanel);
+        // HorizontalSplitPanel horizontalSplitPanel = new HorizontalSplitPanel(
+        // topLayout, flightDetails);
+        // horizontalSplitPanel.setSplitPosition(50f);
+
+        setContent(horizontalLayout);
     }
 
     @Override
@@ -213,11 +227,20 @@ public class FlightsView extends AbstractMainViewTab implements
 
             FlightItem item = getSelectedItem();
             if (!item.isNull()) {
+
                 FlightsContainer container = SessionContext.getCurrent()
                         .getFlightsContainer();
 
                 if (container.removeEntry(item)) {
-                    container.commit();
+                    try {
+                        container.commit();
+                    } catch (SQLException e) {
+
+                        Notification.show("Commit Error", e.toString(),
+                                Notification.TYPE_ERROR_MESSAGE);
+
+                        container.rollback();
+                    }
                 }
             }
         }
