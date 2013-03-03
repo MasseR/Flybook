@@ -64,7 +64,7 @@ public class AirportItem {
         if (isNull()) {
             return null;
         } else {
-            return (String) item.getItemProperty(DBConstants.AIRPORTS_CODE)
+            return (String) item.getItemProperty(DBConstants.AIRPORTS_ICAO)
                     .getValue();
         }
     }
@@ -95,7 +95,7 @@ public class AirportItem {
     }
 
     public void setICAOCode(String code) {
-        item.getItemProperty(DBConstants.AIRPORTS_CODE).setValue(code);
+        item.getItemProperty(DBConstants.AIRPORTS_ICAO).setValue(code);
     }
 
     public void setLocation(String location) {

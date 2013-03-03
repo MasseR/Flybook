@@ -95,12 +95,13 @@ public class AirportsContainer {
      * @param id
      * @return
      */
-    public AirportItem getItemFromCode(String code) {
+    public AirportItem getItemFromCode(String icaoCode) {
 
         Item item = null;
 
-        if (code != null) {
-            airportsContainer.addContainerFilter(new Equal("code", code));
+        if (icaoCode != null) {
+            airportsContainer.addContainerFilter(new Equal(
+                    DBConstants.AIRPORTS_ICAO, icaoCode));
             Object id = airportsContainer.firstItemId();
             item = airportsContainer.getItem(id);
             airportsContainer.removeAllContainerFilters();
@@ -121,8 +122,9 @@ public class AirportsContainer {
 
         if (country != null && city != null && name != null) {
             airportsContainer.addContainerFilter(new And(new And(new Equal(
-                    "country", country), new Equal("city", city)), new Equal(
-                    "name", name)));
+                    DBConstants.AIRPORTS_COUNTRY, country), new Equal(
+                    DBConstants.AIRPORTS_CITY, city)), new Equal(
+                    DBConstants.AIRPORTS_NAME, name)));
             Object id = airportsContainer.firstItemId();
             item = airportsContainer.getItem(id);
             airportsContainer.removeAllContainerFilters();
@@ -203,6 +205,8 @@ public class AirportsContainer {
 
     /**
      * Returns Container of all countries and corresponding Flag Resource.
+     * 
+     * Columns: country (String), icon (Resource)
      */
     public IndexedContainer createCountriesContainer() {
 
@@ -221,14 +225,16 @@ public class AirportsContainer {
         }
 
         IndexedContainer countriesContainer = new IndexedContainer();
-        countriesContainer.addContainerProperty("country", String.class, null);
+        countriesContainer.addContainerProperty(DBConstants.AIRPORTS_COUNTRY,
+                String.class, null);
         countriesContainer.addContainerProperty("icon", Resource.class, null);
 
         Iterator<String> it = countries.iterator();
         while (it.hasNext()) {
             String country = it.next();
             Item item = countriesContainer.addItem(country);
-            item.getItemProperty("country").setValue(country);
+            item.getItemProperty(DBConstants.AIRPORTS_COUNTRY)
+                    .setValue(country);
             item.getItemProperty("icon").setValue(
                     new ThemeResource("../icons/countries/"
                             + country.replaceAll(" ", "_") + ".png"));
@@ -252,7 +258,7 @@ public class AirportsContainer {
         while (id != null) {
             Item item = airportsContainer.getItem(id);
             String code = (String) item.getItemProperty(
-                    DBConstants.AIRPORTS_CODE).getValue();
+                    DBConstants.AIRPORTS_ICAO).getValue();
             codes.add(code);
             id = airportsContainer.nextItemId(id);
         }
@@ -261,13 +267,14 @@ public class AirportsContainer {
          * Create new memory based IndexedContainer and add Items.
          */
         IndexedContainer icaoCodesContainer = new IndexedContainer();
-        icaoCodesContainer.addContainerProperty("code", String.class, null);
+        icaoCodesContainer.addContainerProperty(DBConstants.AIRPORTS_ICAO,
+                String.class, null);
 
         Iterator<String> it = codes.iterator();
         while (it.hasNext()) {
             String code = it.next();
             Item item = icaoCodesContainer.addItem(code);
-            item.getItemProperty("code").setValue(code);
+            item.getItemProperty(DBConstants.AIRPORTS_ICAO).setValue(code);
         }
 
         return icaoCodesContainer;
@@ -280,7 +287,8 @@ public class AirportsContainer {
     public IndexedContainer createCitiesContainer(String country) {
 
         IndexedContainer cityContainer = new IndexedContainer();
-        cityContainer.addContainerProperty("city", String.class, null);
+        cityContainer.addContainerProperty(DBConstants.AIRPORTS_CITY,
+                String.class, null);
 
         if (country != null) {
             //
@@ -291,8 +299,9 @@ public class AirportsContainer {
             /**
              * Fetch all cities from db and insert to ordered set.
              */
-            TreeSet<String> cities = fetchPropertySet(new Equal("country",
-                    country), DBConstants.AIRPORTS_CITY);
+            TreeSet<String> cities = fetchPropertySet(new Equal(
+                    DBConstants.AIRPORTS_COUNTRY, country),
+                    DBConstants.AIRPORTS_CITY);
 
             /**
              * Create container from city set.
@@ -302,7 +311,7 @@ public class AirportsContainer {
             while (it.hasNext()) {
                 String city = it.next();
                 Item item = cityContainer.addItem(city);
-                item.getItemProperty("city").setValue(city);
+                item.getItemProperty(DBConstants.AIRPORTS_CITY).setValue(city);
             }
 
             // cachedCityContainers.put(country, cityContainer);
@@ -319,7 +328,8 @@ public class AirportsContainer {
             String city) {
 
         IndexedContainer container = new IndexedContainer();
-        container.addContainerProperty("name", String.class, null);
+        container.addContainerProperty(DBConstants.AIRPORTS_NAME, String.class,
+                null);
 
         if (country != null && city != null) {
 
@@ -336,14 +346,15 @@ public class AirportsContainer {
              * Fetch all airport names and insert to ordered set.
              */
             TreeSet<String> airports = fetchPropertySet(new And(new Equal(
-                    "country", country), new Equal("city", city)),
+                    DBConstants.AIRPORTS_COUNTRY, country), new Equal(
+                    DBConstants.AIRPORTS_CITY, city)),
                     DBConstants.AIRPORTS_NAME);
 
             Iterator<String> it = airports.iterator();
             while (it.hasNext()) {
                 String name = it.next();
                 Item item = container.addItem(name);
-                item.getItemProperty("name").setValue(name);
+                item.getItemProperty(DBConstants.AIRPORTS_NAME).setValue(name);
             }
 
             // cachedNameContainers.put(key, container);
