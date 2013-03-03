@@ -2,6 +2,7 @@ package hlrv.flybook;
 
 import hlrv.flybook.auth.User;
 import hlrv.flybook.containers.FlightsContainer;
+import hlrv.flybook.db.DBConstants;
 
 import java.sql.SQLException;
 
@@ -20,63 +21,109 @@ import com.vaadin.ui.VerticalLayout;
 public class FlightsView extends AbstractMainViewTab implements
         Property.ValueChangeListener, Button.ClickListener {
 
-    // private FlightsTable flightsTable;
+    /**
+     * Reference to fligths SQLContainer wrapper object.
+     * 
+     * NOTE: At the moment this is created in SessionContext and we fetch it in
+     * out constructor. This may require rethinking, because containers seem to
+     * not like being shared. Sharing can introduce subtle bugs, as was the case
+     * in AirportsContainer...
+     */
+    private FlightsContainer fligthsContainer;
 
+    /**
+     * Panel that can be used to view selected flight details and edit data.
+     */
     private FlightDetailsPanel flightDetails;
 
-    private ComboBox pilotCombo;
+    /**
+     * Combobox to filter by pilot username.
+     */
+    private ComboBox comboPilotFilter;
 
+    /**
+     * Table to show some read-only (for now?) columns of filtered flights.
+     */
     private Table table;
 
+    /**
+     * Controls to manage selected table entry.
+     */
     private Button newButton;
     private Button deleteButton;
 
+    /**
+     * Lazy dialog to create new entry.
+     */
     private NewFlightDialog newFlightDialog = null;
+
+    /**
+     * Which columns are shown in table?
+     */
+    private String[] tableVisibleColumns = {
+            DBConstants.FLIGHTENTRIES_FLIGHT_ID,
+            DBConstants.FLIGHTENTRIES_USERNAME, DBConstants.FLIGHTENTRIES_DATE,
+            DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT,
+            DBConstants.FLIGHTENTRIES_DEPARTURE_TIME,
+            DBConstants.FLIGHTENTRIES_LANDING_AIRPORT,
+            DBConstants.FLIGHTENTRIES_LANDING_TIME,
+            DBConstants.FLIGHTENTRIES_FLIGHT_TIME,
+            DBConstants.FLIGHTENTRIES_AIRCRAFT,
+            DBConstants.FLIGHTENTRIES_FLIGHT_TYPE,
+            DBConstants.FLIGHTENTRIES_ONBLOCK_TIME,
+            DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME };
+
+    /**
+     * Columns headers matching to visible columns.
+     */
+    private String[] tableHeaders = { "Id", "Pilot", "Date",
+            "Departure Airport", "Departure Time", "Landing Airport",
+            "Landing Time", "Flight Time", "Aircraft", "Type", "On-Block Time",
+            "Off-Block Time" };
+
+    /**
+     * Table columns that are initially collapsed.
+     */
+    private String[] initiallyCollapsedColumns = {
+            DBConstants.FLIGHTENTRIES_FLIGHT_ID,
+            DBConstants.FLIGHTENTRIES_ONBLOCK_TIME,
+            DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME };
 
     public FlightsView() throws Exception {
         super();
+
+        fligthsContainer = SessionContext.getCurrent().getFlightsContainer();
 
         /**
          * We will have two main sub components: table and details panel.
          */
 
         /**
-         * Create table and wrap in panel.
+         * Create and initialize table.
          */
-
-        table = new Table();
-        table.setSelectable(true);
-        table.setImmediate(true);
-        table.setNullSelectionAllowed(false);
-        table.setColumnCollapsingAllowed(true);
-        // table.setWidth("");
-        // table.setHeight("100%");
-        table.setSizeFull();
-        // table.setSizeUndefined();
-
-        table.addValueChangeListener(this);
-        // table.addItemSetChangeListener(this);
-
-        FlightsContainer container = SessionContext.getCurrent()
-                .getFlightsContainer();
-        table.setContainerDataSource(container.getContainer());
-
-        // Panel flightsPanel = new Panel(table);
-        // flightsPanel.setSizeFull();
+        initTable();
 
         /**
          * Create components above table.
          */
+
+        /**
+         * Create filters.
+         */
+
+        /**
+         * Filter by pilot username.
+         */
         String username = ((FlybookUI) UI.getCurrent()).getUser().getBean()
                 .getUsername();
-        pilotCombo = new ComboBox("Pilot");
-        pilotCombo.setNullSelectionAllowed(false);
-        pilotCombo.addValueChangeListener(this);
-        pilotCombo.setImmediate(true);
-        pilotCombo.addItem("All");
-        pilotCombo.addItem(username);
+        comboPilotFilter = new ComboBox("Pilot");
+        comboPilotFilter.setNullSelectionAllowed(false);
+        comboPilotFilter.addValueChangeListener(this);
+        comboPilotFilter.setImmediate(true);
+        comboPilotFilter.addItem("All");
+        comboPilotFilter.addItem(username);
 
-        pilotCombo.setValue(username);
+        comboPilotFilter.setValue(username);
 
         /**
          * Create components below table.
@@ -88,7 +135,7 @@ public class FlightsView extends AbstractMainViewTab implements
         deleteButton.addClickListener(this);
 
         /**
-         * Details panel on splitter right side.
+         * Details panel on view right side.
          */
         flightDetails = new FlightDetailsPanel();
         flightDetails.setWidth(SIZE_UNDEFINED, Unit.PERCENTAGE);
@@ -102,7 +149,7 @@ public class FlightsView extends AbstractMainViewTab implements
         tableControlsLayout.setSpacing(true);
         // tableControlsLayout.setMargin(true);
         tableControlsLayout.setSizeUndefined();
-        tableControlsLayout.addComponent(pilotCombo);
+        tableControlsLayout.addComponent(comboPilotFilter);
 
         /**
          * Layout for buttons below table.
@@ -115,7 +162,7 @@ public class FlightsView extends AbstractMainViewTab implements
         bottomButtonLayout.addComponent(deleteButton);
 
         /**
-         * Vertical layout on splitter left side.
+         * Vertical layout on left side.
          */
         VerticalLayout leftLayout = new VerticalLayout();
         leftLayout.addComponent(tableControlsLayout);
@@ -144,11 +191,42 @@ public class FlightsView extends AbstractMainViewTab implements
         setContent(horizontalLayout);
     }
 
+    private void initTable() {
+        table = new Table();
+
+        // Remember to set data source before setVisibleColumns() etc.
+        table.setContainerDataSource(fligthsContainer.getContainer());
+        table.setVisibleColumns(tableVisibleColumns);
+        table.setColumnHeaders(tableHeaders);
+
+        table.setColumnCollapsingAllowed(true);
+        for (String col : initiallyCollapsedColumns) {
+            table.setColumnCollapsed(col, true);
+        }
+
+        table.setSelectable(true);
+        table.setImmediate(true);
+        table.setNullSelectionAllowed(false);
+
+        table.addValueChangeListener(this);
+        // table.addItemSetChangeListener(this);
+
+        // table.setWidth("");
+        // table.setHeight("100%");
+        table.setSizeFull();
+        // table.setSizeUndefined();
+
+        //
+    }
+
     @Override
     public void tabSelected() {
 
     }
 
+    /**
+     * Returns selected FlightItem in table.
+     */
     private FlightItem getSelectedItem() {
 
         Object rowid = table.getValue();
@@ -159,40 +237,59 @@ public class FlightsView extends AbstractMainViewTab implements
     @Override
     public void valueChange(ValueChangeEvent event) {
 
-        if (event.getProperty() == pilotCombo) {
+        if (event.getProperty() == comboPilotFilter) {
 
-            String value = (String) event.getProperty().getValue();
-
-            if (value.equals(((FlybookUI) UI.getCurrent()).getUser().getBean()
-                    .getUsername())) {
-                SessionContext.getCurrent().getFlightsContainer()
-                        .filterByUser(value);
-                // flightsTable.filterByUser(value);
-            } else if (value.equals("All")) {
-                // flightsTable.filterByUser(null);
-                SessionContext.getCurrent().getFlightsContainer()
-                        .filterByUser(null);
-            }
-
-            System.out.println("Pilot: " + event.getProperty().getValue());
+            valueChangePilotFilter(event);
 
         } else if (event.getProperty() == table) {
 
-            FlightItem item = getSelectedItem();
-
-            /**
-             * Disable/enable some components based on whether or not current
-             * selection is modifiable by user.
-             */
-            User currentUser = ((FlybookUI) UI.getCurrent()).getUser()
-                    .getBean();
-            // boolean enableDeletion = currentUser.isAdmin();
-            boolean enableDeletion = item.isModifiableByUser(currentUser);
-
-            deleteButton.setEnabled(enableDeletion);
-
-            flightDetails.setItem(item);
+            valueChangeTableSelection(event);
         }
+    }
+
+    /**
+     * Called when pilot filter selection changes.
+     */
+    private void valueChangePilotFilter(ValueChangeEvent event) {
+
+        String pilot = (String) event.getProperty().getValue();
+
+        /**
+         * Check the special cases first (ALL for now), and set filters
+         * accordingly. Otherwise assume the value is the username and set the
+         * container filters to that.
+         */
+
+        if (pilot.toUpperCase().equals("ALL")) {
+
+            fligthsContainer.filterByUser(null);
+
+        } else {
+
+            fligthsContainer.filterByUser(pilot);
+        }
+    }
+
+    /**
+     * Called when selection in table changes.
+     * 
+     * Selected item can be null!
+     */
+    private void valueChangeTableSelection(ValueChangeEvent event) {
+
+        FlightItem item = getSelectedItem();
+
+        /**
+         * Disable/enable some components based on whether or not current
+         * selection is modifiable by user.
+         */
+        User currentUser = ((FlybookUI) UI.getCurrent()).getUser().getBean();
+        // boolean enableDeletion = currentUser.isAdmin();
+        boolean enableDeletion = item.isModifiableByUser(currentUser);
+
+        deleteButton.setEnabled(enableDeletion);
+
+        flightDetails.setItem(item);
     }
 
     @Override
@@ -200,48 +297,59 @@ public class FlightsView extends AbstractMainViewTab implements
 
         if (event.getButton() == newButton) {
 
-            if (newFlightDialog == null) {
-                newFlightDialog = new NewFlightDialog();
-            }
-
-            /**
-             * Create temporary row in container and wrap the Item in
-             * FlightEntry with some default values.
-             */
-            FlightsContainer container = SessionContext.getCurrent()
-                    .getFlightsContainer();
-            FlightItem flightItem = container.addEntry();
-
-            /**
-             * Set the entry as datasource for dialog.
-             */
-            newFlightDialog.setDataSource(flightItem);
-
-            /**
-             * Show modal dialog. Dialog will commit or rollback based on user
-             * action.
-             */
-            UI.getCurrent().addWindow(newFlightDialog);
+            buttonClickNew(event);
 
         } else if (event.getButton() == deleteButton) {
 
-            FlightItem item = getSelectedItem();
-            if (!item.isNull()) {
+            buttonClickDelete(event);
 
-                FlightsContainer container = SessionContext.getCurrent()
-                        .getFlightsContainer();
+        }
+    }
 
-                if (container.removeEntry(item)) {
-                    try {
-                        container.commit();
-                    } catch (SQLException e) {
+    private void buttonClickNew(ClickEvent event) {
 
-                        Notification.show("Commit Error", e.toString(),
-                                Notification.TYPE_ERROR_MESSAGE);
+        if (newFlightDialog == null) {
+            newFlightDialog = new NewFlightDialog();
+        }
 
-                        container.rollback();
-                    }
-                }
+        /**
+         * Create temporary new item in container.
+         * 
+         * NewFlightDialog will handle commit/rollback.
+         */
+        FlightItem flightItem = fligthsContainer.addEntry();
+
+        /**
+         * Set the item as datasource for dialog.
+         */
+        newFlightDialog.setDataSource(flightItem);
+
+        /**
+         * Show modal dialog. Dialog will commit or rollback based on user
+         * action.
+         */
+        UI.getCurrent().addWindow(newFlightDialog);
+    }
+
+    private void buttonClickDelete(ClickEvent event) {
+
+        FlightItem item = getSelectedItem();
+
+        if (item.isNull()) {
+            return;
+        }
+
+        // TODO: Assert following logic...
+        if (fligthsContainer.removeEntry(item)) {
+
+            try {
+                fligthsContainer.commit();
+            } catch (SQLException e) {
+
+                Notification.show("Commit Error", e.toString(),
+                        Notification.TYPE_ERROR_MESSAGE);
+
+                fligthsContainer.rollback();
             }
         }
     }
