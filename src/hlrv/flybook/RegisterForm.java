@@ -2,6 +2,7 @@ package hlrv.flybook;
 
 import hlrv.flybook.auth.Auth;
 import hlrv.flybook.auth.User;
+import hlrv.flybook.managers.UserManager;
 
 import java.sql.SQLException;
 
@@ -34,10 +35,11 @@ public class RegisterForm extends CustomComponent {
         public void buttonClick(ClickEvent event) {
 
             try {
-                Auth auth = new Auth(null);
+                Auth auth = new Auth(new UserManager(FlybookUI.getPool()));
                 if (register == true) {
 
-                    auth.register(item.getBean(), item.getBean().getPassword());
+                    auth.register(((BeanItem<User>) fields.getItemDataSource())
+                            .getBean());
                 } else {
 
                     // modify user. how is it done? UserManager?
@@ -83,16 +85,16 @@ public class RegisterForm extends CustomComponent {
     /*
      * The constructor
      */
-    public RegisterForm() {
+    public RegisterForm(boolean register) {
 
         /*
          * Instantiate
          */
-        user = new User("", "", "", "", false);
-        layout = new VerticalLayout();
-        fields = new BeanFieldGroup<User>(User.class);
-        save = new Button("Save");
-        register = false;
+        this.user = new User("", "", "", "", false);
+        this.layout = new VerticalLayout();
+        this.fields = new BeanFieldGroup<User>(User.class);
+        this.save = new Button("Save");
+        this.register = register;
 
         /*
          * Layout settings

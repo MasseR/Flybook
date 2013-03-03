@@ -147,7 +147,7 @@ public class LoginForm extends CustomComponent {
                 /*
                  * !!! THIS IS A HACK! DO THIS PROPERLY!
                  */
-                FlybookUI.getCurrent().addWindow(new RegisterView());
+                FlybookUI.getCurrent().addWindow(new RegisterView(true));
             }
 
         });
