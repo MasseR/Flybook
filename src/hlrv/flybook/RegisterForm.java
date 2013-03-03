@@ -35,7 +35,14 @@ public class RegisterForm extends CustomComponent {
 
             try {
                 Auth auth = new Auth(null);
-                auth.register(item.getBean(), item.getBean().getPassword());
+                if (register == true) {
+
+                    auth.register(item.getBean(), item.getBean().getPassword());
+                } else {
+
+                    // modify user. how is it done? UserManager?
+
+                }
             } catch (SQLException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -71,6 +78,8 @@ public class RegisterForm extends CustomComponent {
      */
     private final Button save;
 
+    private boolean register;
+
     /*
      * The constructor
      */
@@ -83,6 +92,7 @@ public class RegisterForm extends CustomComponent {
         layout = new VerticalLayout();
         fields = new BeanFieldGroup<User>(User.class);
         save = new Button("Save");
+        register = false;
 
         /*
          * Layout settings
@@ -132,5 +142,13 @@ public class RegisterForm extends CustomComponent {
          * Remember to setCompositionRoot for CustomComponent
          */
         this.setCompositionRoot(layout);
+    }
+
+    /**
+     * Setting this field true makes the class a registration form. Setting it
+     * false makes the class modify user form
+     */
+    public void setRegister(boolean register) {
+        this.register = register;
     }
 }
