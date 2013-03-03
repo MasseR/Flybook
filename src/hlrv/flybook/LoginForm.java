@@ -115,12 +115,12 @@ public class LoginForm extends CustomComponent {
                 /*
                  * Authenticate the user
                  */
-                String userName = item.getItemProperty("login").toString();
-                String password = item.getItemProperty("password").toString();
-
                 try {
 
-                    auth.login(userName, password);
+                    auth.login((String) item.getItemProperty("login")
+                            .getValue(),
+                            (String) item.getItemProperty("password")
+                                    .getValue());
 
                 } catch (Exception e) {
 

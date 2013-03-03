@@ -27,7 +27,9 @@ public class Auth {
      */
     public User login(String username, String password) throws Exception {
         User user = this.manager.getFromUsername(username);
-        Hash hash = new Hash(this.manager.getHashCode(username));
+        // TODO:remove this before going live
+        System.err.println(user.toString());
+        Hash hash = new Hash(this.manager.getHashCode(password));
         if (hash.check(password)) {
             this.user = user;
             return user;

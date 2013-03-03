@@ -27,6 +27,9 @@ public class UserManager {
         if (id == null) {
             throw new Exception("User not found");
         }
+        // TODO:
+        System.err.println(this.container.getItem(id).getItemPropertyIds()
+                .toString());
         return this.container.getItem(id);
     }
 
@@ -47,7 +50,6 @@ public class UserManager {
     public void createUser(User user, Hash password) {
 
         Object itemId = this.container.addItem();
-
         Item newUser = this.container.getItem(itemId);
         newUser.getItemProperty("username").setValue(user.getUsername());
         newUser.getItemProperty("firstname").setValue(user.getFirstname());
