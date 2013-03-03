@@ -1,6 +1,7 @@
 package hlrv.flybook;
 
 import hlrv.flybook.containers.AirportsContainer;
+import hlrv.flybook.db.DBConstants;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
@@ -37,7 +38,7 @@ public class AirportField extends CustomField<Integer> implements
         icaoCombo.setNullSelectionAllowed(false);
         icaoCombo.setContainerDataSource(airportsContainer
                 .createICAOCodesContainer());
-        icaoCombo.setItemCaptionPropertyId("code");
+        icaoCombo.setItemCaptionPropertyId(DBConstants.AIRPORTS_ICAO);
         icaoCombo.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
         icaoCombo.setImmediate(true);
         icaoCombo.setFilteringMode(FilteringMode.STARTSWITH);
@@ -49,7 +50,7 @@ public class AirportField extends CustomField<Integer> implements
         countryCombo.setNullSelectionAllowed(false);
         countryCombo.setContainerDataSource(airportsContainer
                 .createCountriesContainer());
-        countryCombo.setItemCaptionPropertyId("country");
+        countryCombo.setItemCaptionPropertyId(DBConstants.AIRPORTS_COUNTRY);
         countryCombo.setItemIconPropertyId("icon");
         countryCombo
                 .setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
@@ -165,7 +166,7 @@ public class AirportField extends CustomField<Integer> implements
 
         if (event.getProperty() == icaoCombo) {
 
-            String icao = getSelectedValue(icaoCombo, "code");
+            String icao = getSelectedValue(icaoCombo, DBConstants.AIRPORTS_ICAO);
 
             if (!internalValueBeingSet) {
                 AirportItem item = airportsContainer.getItemFromCode(icao);
@@ -241,7 +242,6 @@ public class AirportField extends CustomField<Integer> implements
 
                 internalValueBeingSet = false;
             }
-            // setInternalValue(apId);
         }
     }
 

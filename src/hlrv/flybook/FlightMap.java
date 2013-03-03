@@ -13,14 +13,20 @@ public class FlightMap extends CustomComponent implements
     private int imageWidth = 250;
     private int imageHeight = 150;
 
-    // private FlightItem flightItem;
-
+    /**
+     * Component containing the image.
+     */
     private Image image;
 
+    /**
+     * Combobox used to change map terrain type.
+     */
     private ComboBox comboType;
 
+    /**
+     * We need departure and landing items.
+     */
     private AirportItem departurePort;
-
     private AirportItem landingPort;
 
     /**
@@ -30,6 +36,8 @@ public class FlightMap extends CustomComponent implements
      * @throws Exception
      */
     public FlightMap() {
+
+        departurePort = landingPort = new AirportItem(null);
 
         /**
          * Combobox to select terrain type for image
