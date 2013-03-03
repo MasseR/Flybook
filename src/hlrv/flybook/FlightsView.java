@@ -2,10 +2,11 @@ package hlrv.flybook;
 
 import hlrv.flybook.auth.User;
 import hlrv.flybook.containers.FlightsContainer;
-import hlrv.flybook.db.DBConstants;
 
 import java.sql.SQLException;
 
+import com.vaadin.data.Container;
+import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -14,12 +15,17 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.Table;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.Window;
 
+/**
+ * FlightsView is a root component of main view. It contains read-only flight
+ * entry table and details panel.
+ */
 public class FlightsView extends AbstractMainViewTab implements
-        Property.ValueChangeListener, Button.ClickListener {
+        Window.CloseListener, Property.ValueChangeListener,
+        Button.ClickListener, Container.ItemSetChangeListener {
 
     /**
      * Reference to fligths SQLContainer wrapper object.
@@ -29,7 +35,7 @@ public class FlightsView extends AbstractMainViewTab implements
      * not like being shared. Sharing can introduce subtle bugs, as was the case
      * in AirportsContainer...
      */
-    private FlightsContainer fligthsContainer;
+    private FlightsContainer flightsContainer;
 
     /**
      * Panel that can be used to view selected flight details and edit data.
@@ -44,7 +50,7 @@ public class FlightsView extends AbstractMainViewTab implements
     /**
      * Table to show some read-only (for now?) columns of filtered flights.
      */
-    private Table table;
+    private FlightsTable table;
 
     /**
      * Controls to manage selected table entry.
@@ -57,42 +63,10 @@ public class FlightsView extends AbstractMainViewTab implements
      */
     private NewFlightDialog newFlightDialog = null;
 
-    /**
-     * Which columns are shown in table?
-     */
-    private String[] tableVisibleColumns = {
-            DBConstants.FLIGHTENTRIES_FLIGHT_ID,
-            DBConstants.FLIGHTENTRIES_USERNAME, DBConstants.FLIGHTENTRIES_DATE,
-            DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT,
-            DBConstants.FLIGHTENTRIES_DEPARTURE_TIME,
-            DBConstants.FLIGHTENTRIES_LANDING_AIRPORT,
-            DBConstants.FLIGHTENTRIES_LANDING_TIME,
-            DBConstants.FLIGHTENTRIES_FLIGHT_TIME,
-            DBConstants.FLIGHTENTRIES_AIRCRAFT,
-            DBConstants.FLIGHTENTRIES_FLIGHT_TYPE,
-            DBConstants.FLIGHTENTRIES_ONBLOCK_TIME,
-            DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME };
-
-    /**
-     * Columns headers matching to visible columns.
-     */
-    private String[] tableHeaders = { "Id", "Pilot", "Date",
-            "Departure Airport", "Departure Time", "Landing Airport",
-            "Landing Time", "Flight Time", "Aircraft", "Type", "On-Block Time",
-            "Off-Block Time" };
-
-    /**
-     * Table columns that are initially collapsed.
-     */
-    private String[] initiallyCollapsedColumns = {
-            DBConstants.FLIGHTENTRIES_FLIGHT_ID,
-            DBConstants.FLIGHTENTRIES_ONBLOCK_TIME,
-            DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME };
-
     public FlightsView() throws Exception {
         super();
 
-        fligthsContainer = SessionContext.getCurrent().getFlightsContainer();
+        flightsContainer = SessionContext.getCurrent().getFlightsContainer();
 
         /**
          * We will have two main sub components: table and details panel.
@@ -101,7 +75,17 @@ public class FlightsView extends AbstractMainViewTab implements
         /**
          * Create and initialize table.
          */
-        initTable();
+        table = new FlightsTable();
+
+        table.addValueChangeListener(this);
+        table.addItemSetChangeListener(this);
+        // table.addItemSetChangeListener(this);
+        // table.setWidth("");
+        // table.setHeight("100%");
+        table.setSizeFull();
+        // table.setSizeUndefined();
+
+        //
 
         /**
          * Create components above table.
@@ -191,34 +175,6 @@ public class FlightsView extends AbstractMainViewTab implements
         setContent(horizontalLayout);
     }
 
-    private void initTable() {
-        table = new Table();
-
-        // Remember to set data source before setVisibleColumns() etc.
-        table.setContainerDataSource(fligthsContainer.getContainer());
-        table.setVisibleColumns(tableVisibleColumns);
-        table.setColumnHeaders(tableHeaders);
-
-        table.setColumnCollapsingAllowed(true);
-        for (String col : initiallyCollapsedColumns) {
-            table.setColumnCollapsed(col, true);
-        }
-
-        table.setSelectable(true);
-        table.setImmediate(true);
-        table.setNullSelectionAllowed(false);
-
-        table.addValueChangeListener(this);
-        // table.addItemSetChangeListener(this);
-
-        // table.setWidth("");
-        // table.setHeight("100%");
-        table.setSizeFull();
-        // table.setSizeUndefined();
-
-        //
-    }
-
     @Override
     public void tabSelected() {
 
@@ -262,11 +218,11 @@ public class FlightsView extends AbstractMainViewTab implements
 
         if (pilot.toUpperCase().equals("ALL")) {
 
-            fligthsContainer.filterByUser(null);
+            flightsContainer.filterByUser(null);
 
         } else {
 
-            fligthsContainer.filterByUser(pilot);
+            flightsContainer.filterByUser(pilot);
         }
     }
 
@@ -310,6 +266,7 @@ public class FlightsView extends AbstractMainViewTab implements
 
         if (newFlightDialog == null) {
             newFlightDialog = new NewFlightDialog();
+            newFlightDialog.addCloseListener(this);
         }
 
         /**
@@ -317,7 +274,7 @@ public class FlightsView extends AbstractMainViewTab implements
          * 
          * NewFlightDialog will handle commit/rollback.
          */
-        FlightItem flightItem = fligthsContainer.addEntry();
+        FlightItem flightItem = flightsContainer.addEntry();
 
         /**
          * Set the item as datasource for dialog.
@@ -331,7 +288,55 @@ public class FlightsView extends AbstractMainViewTab implements
         UI.getCurrent().addWindow(newFlightDialog);
     }
 
+    @Override
+    public void windowClose(Window.CloseEvent event) {
+
+        /**
+         * We get this event on NewFlightDialog close.
+         */
+
+        if (newFlightDialog.isCommitted()) {
+
+            /**
+             * User accepted new item.
+             */
+            try {
+
+                flightsContainer.commit();
+            } catch (SQLException e) {
+                Notification.show("Commit Failed", e.toString(),
+                        Notification.TYPE_ERROR_MESSAGE);
+            }
+
+        } else {
+
+            /**
+             * User cancelled.
+             */
+            flightsContainer.rollback();
+        }
+
+    }
+
     private void buttonClickDelete(ClickEvent event) {
+
+        // Item item = table.getItem(table.getValue());
+        // if (item == null) {
+        // System.err.println("Null selected flight item being deleted");
+        // }
+        //
+        // if (table.removeItem(item)) {
+        //
+        // try {
+        // flightsContainer.commit();
+        // } catch (SQLException e) {
+        //
+        // Notification.show("Commit Error", e.toString(),
+        // Notification.TYPE_ERROR_MESSAGE);
+        //
+        // flightsContainer.rollback();
+        // }
+        // }
 
         FlightItem item = getSelectedItem();
 
@@ -340,18 +345,26 @@ public class FlightsView extends AbstractMainViewTab implements
         }
 
         // TODO: Assert following logic...
-        if (fligthsContainer.removeEntry(item)) {
+        if (flightsContainer.removeEntry(item)) {
 
             try {
-                fligthsContainer.commit();
+                flightsContainer.commit();
+                table.sanitizeSelection();
             } catch (SQLException e) {
 
                 Notification.show("Commit Error", e.toString(),
                         Notification.TYPE_ERROR_MESSAGE);
 
-                fligthsContainer.rollback();
+                flightsContainer.rollback();
             }
         }
     }
 
+    @Override
+    public void containerItemSetChange(ItemSetChangeEvent event) {
+
+        table.sanitizeSelection();
+
+        Object selectedId = table.getValue();
+    }
 }

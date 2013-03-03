@@ -26,7 +26,7 @@ public class AirportField extends CustomField<Integer> implements
 
     private ComboBox nameCombo;
 
-    private boolean internalValueBeingSet;
+    private boolean valueBeingSet;
 
     public AirportField() {
 
@@ -134,12 +134,28 @@ public class AirportField extends CustomField<Integer> implements
     }
 
     @Override
+    public void setReadOnly(boolean readOnly) {
+        super.setReadOnly(readOnly);
+
+        setInternalReadOnly(readOnly);
+
+    }
+
+    protected void setInternalReadOnly(boolean readOnly) {
+
+        icaoCombo.setReadOnly(readOnly);
+        countryCombo.setReadOnly(readOnly);
+        cityCombo.setReadOnly(readOnly);
+        nameCombo.setReadOnly(readOnly);
+    }
+
+    @Override
     protected void setInternalValue(Integer newValue) {
         super.setInternalValue(newValue);
 
-        if (!internalValueBeingSet) {
+        if (!valueBeingSet) {
 
-            internalValueBeingSet = true;
+            valueBeingSet = true;
 
             /**
              * Get AirportItem matching id.
@@ -150,15 +166,19 @@ public class AirportField extends CustomField<Integer> implements
              * Select matching country,city,name values to corresponding combo
              * boxes.
              */
+            if (isReadOnly()) {
+                setInternalReadOnly(false);
+            }
             icaoCombo.select(apItem.getICAOCode());
             countryCombo.select(apItem.getCountry());
             cityCombo.select(apItem.getCity());
             nameCombo.select(apItem.getName());
+            if (isReadOnly()) {
+                setInternalReadOnly(true);
+            }
 
-            internalValueBeingSet = false;
-
+            valueBeingSet = false;
         }
-
     }
 
     @Override
@@ -168,7 +188,7 @@ public class AirportField extends CustomField<Integer> implements
 
             String icao = getSelectedValue(icaoCombo, DBConstants.AIRPORTS_ICAO);
 
-            if (!internalValueBeingSet) {
+            if (!valueBeingSet) {
                 AirportItem item = airportsContainer.getItemFromCode(icao);
 
                 Integer apId = item.getID();
@@ -190,7 +210,7 @@ public class AirportField extends CustomField<Integer> implements
             cityCombo.setContainerDataSource(container);
             cityCombo.setEnabled(container.size() > 0);
 
-            if (!internalValueBeingSet) {
+            if (!valueBeingSet) {
 
                 icaoCombo.select(null);
 
@@ -212,7 +232,7 @@ public class AirportField extends CustomField<Integer> implements
             nameCombo.setContainerDataSource(container);
             nameCombo.setEnabled(container.size() > 0);
 
-            if (!internalValueBeingSet) {
+            if (!valueBeingSet) {
 
                 icaoCombo.select(null);
 
@@ -229,9 +249,9 @@ public class AirportField extends CustomField<Integer> implements
             String city = getSelectedValue(cityCombo, "city");
             String name = getSelectedValue(nameCombo, "name");
 
-            if (!internalValueBeingSet) {
+            if (!valueBeingSet) {
 
-                internalValueBeingSet = true;
+                valueBeingSet = true;
 
                 AirportItem item = airportsContainer.getItem(country, city,
                         name);
@@ -240,7 +260,7 @@ public class AirportField extends CustomField<Integer> implements
 
                 icaoCombo.select(item.getICAOCode());
 
-                internalValueBeingSet = false;
+                valueBeingSet = false;
             }
         }
     }

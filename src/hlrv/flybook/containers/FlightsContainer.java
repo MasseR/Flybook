@@ -14,7 +14,7 @@ import com.vaadin.data.util.filter.Compare.Equal;
 import com.vaadin.data.util.sqlcontainer.RowId;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
-import com.vaadin.data.util.sqlcontainer.query.FreeformQuery;
+import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 
@@ -31,15 +31,18 @@ public class FlightsContainer {
 
         JDBCConnectionPool pool = dbconn.getPool();
 
-        FreeformQuery query = new FreeformQuery("SELECT * FROM FlightEntries",
-                pool, DBConstants.FLIGHTENTRIES_FLIGHT_ID);
+        TableQuery query = new TableQuery(DBConstants.TABLE_FLIGHTENTRIES, pool);
+        query.setVersionColumn(DBConstants.FLIGHTENTRIES_OPTLOCK);
 
-        FlightEntriesFSDeletegate delegate = new FlightEntriesFSDeletegate();
+        // FreeformQuery query = new
+        // FreeformQuery("SELECT * FROM FlightEntries",
+        // pool, DBConstants.FLIGHTENTRIES_FLIGHT_ID);
 
-        query.setDelegate(delegate);
+        // FlightEntriesFSDeletegate delegate = new FlightEntriesFSDeletegate();
+
+        // query.setDelegate(delegate);
 
         flightsContainer = new SQLContainer(query);
-
         flightsContainer.setAutoCommit(false);
 
         // container.setPageLength(5 * container.size());
@@ -77,7 +80,9 @@ public class FlightsContainer {
              * trickery in FlightEntriesFSDelegate constructor (something to do
              * with quotes)
              */
-            usernameFilter = new Equal("FlightEntries.username", username);
+            // usernameFilter = new Equal("FlightEntries.username", username);
+            usernameFilter = new Equal(DBConstants.FLIGHTENTRIES_USERNAME,
+                    username);
             flightsContainer.addContainerFilter(usernameFilter);
         }
     }
@@ -117,17 +122,17 @@ public class FlightsContainer {
 
         flightItem.setDate(curTimeSecs);
         flightItem.setUsername(curUser.getUsername());
-        flightItem.setPilotFullname(curUser.getFirstname() + " "
-                + curUser.getLastname());
+        // flightItem.setPilotFullname(curUser.getFirstname() + " "
+        // + curUser.getLastname());
 
         // TODO: Could be neat if new item was initialized to users current
         // physical location...
         flightItem.setDepartureAirport(null);
-        flightItem.setDepartureAirportString("");
+        // flightItem.setDepartureAirportString("");
         flightItem.setDepartureTime(curTimeSecs);
 
         flightItem.setLandingAirport(null);
-        flightItem.setLandingAirportString("");
+        // flightItem.setLandingAirportString("");
         flightItem.setLandingTime(curTimeSecs);
 
         // TODO: This is temporary value

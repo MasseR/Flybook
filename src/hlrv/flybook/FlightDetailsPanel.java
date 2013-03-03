@@ -88,6 +88,7 @@ public class FlightDetailsPanel extends Panel implements Button.ClickListener {
          * Finally set data source for FlightForm so it can bind fields. Also we
          * set the form editable if user can modify it.
          */
+        flightForm.setEditable(true); // This fixes things...
         flightForm.setItem(item);
         flightForm.setEditable(userCanModify);
     }

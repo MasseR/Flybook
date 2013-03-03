@@ -18,7 +18,6 @@ import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.DateField;
-import com.vaadin.ui.Field;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.Panel;
@@ -34,7 +33,7 @@ public class FlightItemForm extends CustomComponent implements
     private TextField fieldId; // is this even needed ?
     private DateField fieldDate;
 
-    private TextField fieldPilotFullname;
+    // private TextField fieldPilotFullname;
     private TextField fieldPilotUsername;
 
     private TextField fieldAircraft;
@@ -75,7 +74,7 @@ public class FlightItemForm extends CustomComponent implements
         /**
          * Create pilot name fields and add to panel
          */
-        fieldPilotFullname = new TextField("Pilot");
+        // fieldPilotFullname = new TextField("Pilot");
         // fieldPilotFullname.setColumns(20);
         fieldPilotUsername = new TextField("Username");
         fieldPilotUsername.setColumns(10);
@@ -177,7 +176,8 @@ public class FlightItemForm extends CustomComponent implements
         HorizontalLayout idAndDateLayout = new HorizontalLayout();
         idAndDateLayout.setSpacing(true);
         idAndDateLayout.setSizeUndefined();
-        idAndDateLayout.addComponent(fieldPilotFullname);
+        idAndDateLayout.addComponent(fieldPilotUsername);
+        // idAndDateLayout.addComponent(fieldPilotFullname);
         idAndDateLayout.addComponent(fieldDate);
         idAndDateLayout.addComponent(fieldId);
 
@@ -263,7 +263,7 @@ public class FlightItemForm extends CustomComponent implements
          * Creates new FieldGroup and pre-binds.
          */
         fieldGroup = createFieldGroup();
-
+        fieldGroup.setItemDataSource(FlightItem.createNullItem().getItem());
         setReadOnlyComponents();
 
         setCompositionRoot(topLayout);
@@ -273,6 +273,9 @@ public class FlightItemForm extends CustomComponent implements
 
         IndexedContainer flightTypeContainer = new IndexedContainer();
         flightTypeContainer.addContainerProperty(caption, String.class, null);
+
+        flightTypeContainer.addItem(new Integer(FlightType.UNKNOWN.ordinal()))
+                .getItemProperty(caption).setValue("Unknown");
 
         flightTypeContainer.addItem(new Integer(FlightType.DOMESTIC.ordinal()))
                 .getItemProperty(caption).setValue("Domestic");
@@ -302,9 +305,11 @@ public class FlightItemForm extends CustomComponent implements
      */
     public void setEditable(boolean editable) {
 
-        if (fieldGroup.getItemDataSource() != null) {
-            fieldGroup.setReadOnly(!editable);
-        }
+        // if (fieldGroup.getItemDataSource() != null) {
+        fieldGroup.setReadOnly(!editable);
+        // } else {
+        // setReadOnly(!editable);
+        // }
 
         setReadOnlyComponents();
     }
@@ -312,42 +317,61 @@ public class FlightItemForm extends CustomComponent implements
     /**
      * Sets item to edit.
      * 
-     * @param item
+     * @param flightItem
      */
-    public void setItem(FlightItem item) {
+    public void setItem(FlightItem flightItem) {
 
-        if (item.isNull()) {
-            for (Field<?> f : fieldGroup.getFields()) {
-                fieldGroup.unbind(f);
-            }
-            fieldGroup.setItemDataSource(null);
-        } else {
-
-            /**
-             * If id is null, we are using this form to create new entry, which
-             * doesn't need to have field visible or value changed.
-             */
-            if (item.getFlightID() == null) {
-                fieldId.setVisible(false);
-            } else {
-                fieldId.setReadOnly(false);
-                fieldId.setValue(item.getFlightID().toString());
-                fieldId.setVisible(true);
-            }
-
-            /**
-             * We set time fields to null to make sure valueChange() works right
-             * when fieldGroup sets values from source and change events fire
-             * again.
-             */
-            fieldDepartureTime.setReadOnly(false);
-            fieldDepartureTime.setValue(null);
-
-            fieldLandingTime.setReadOnly(false);
-            fieldLandingTime.setValue(null);
-
-            fieldGroup.setItemDataSource(item.getItem());
+        if (flightItem.isNull()) {
+            flightItem = FlightItem.createNullItem();
         }
+
+        /**
+         * If id is null, there is no why id field should be visible at all.
+         */
+        if (flightItem.getFlightID() == null) {
+            fieldId.setVisible(false);
+        } else {
+            fieldId.setReadOnly(false);
+            fieldId.setValue(flightItem.getFlightID().toString());
+            fieldId.setVisible(true);
+        }
+
+        /**
+         * We set time fields to null to make sure valueChange() works right
+         * when fieldGroup sets values from source and change events fire again.
+         */
+        fieldDepartureTime.setReadOnly(false);
+        fieldDepartureTime.setValue(null);
+
+        fieldLandingTime.setReadOnly(false);
+        fieldLandingTime.setValue(null);
+
+        fieldGroup.setItemDataSource(flightItem.getItem());
+
+        // if (flightItem.isNull()) {
+        //
+        // // for (Field<?> f : fieldGroup.getFields()) {
+        // // fieldGroup.unbind(f);
+        // // }
+        // fieldGroup.setReadOnly(true);
+        // fieldGroup.discard();
+        // fieldGroup.setItemDataSource(null);
+        //
+        // } else {
+        //
+        // /**
+        // * We set time fields to null to make sure valueChange() works right
+        // * when fieldGroup sets values from source and change events fire
+        // * again.
+        // */
+        // fieldDepartureTime.setReadOnly(false);
+        // fieldDepartureTime.setValue(null);
+        //
+        // fieldLandingTime.setReadOnly(false);
+        // fieldLandingTime.setValue(null);
+        //
+        // fieldGroup.setItemDataSource(flightItem.getItem());
+        // }
 
         /**
          * Must reset read-only status, because fieldGroup removes them on call
@@ -401,7 +425,8 @@ public class FlightItemForm extends CustomComponent implements
         fg.bind(fieldDate, DBConstants.FLIGHTENTRIES_DATE);
 
         fg.bind(fieldPilotUsername, DBConstants.FLIGHTENTRIES_USERNAME);
-        fg.bind(fieldPilotFullname, DBConstants.FLIGHTENTRIES_PILOT_FULLNAME);
+        // fg.bind(fieldPilotFullname,
+        // DBConstants.FLIGHTENTRIES_PILOT_FULLNAME);
 
         fg.bind(comboFlightType, DBConstants.FLIGHTENTRIES_FLIGHT_TYPE);
         fg.bind(fieldAircraft, DBConstants.FLIGHTENTRIES_AIRCRAFT);
@@ -430,7 +455,7 @@ public class FlightItemForm extends CustomComponent implements
         fieldId.setReadOnly(true);
         fieldDate.setReadOnly(true);
         fieldPilotUsername.setReadOnly(true);
-        fieldPilotFullname.setReadOnly(true);
+        // fieldPilotFullname.setReadOnly(true);
         fieldFlightTime.setReadOnly(true);
     }
 
@@ -530,4 +555,5 @@ public class FlightItemForm extends CustomComponent implements
 
         }
     }
+
 }

@@ -1,90 +1,91 @@
-//package hlrv.flybook;
-//
-//import hlrv.flybook.containers.FlightsContainer;
-//
-//import com.vaadin.data.Container;
-//import com.vaadin.data.Container.ItemSetChangeEvent;
-//import com.vaadin.data.Item;
-//import com.vaadin.data.Property;
-//import com.vaadin.data.util.sqlcontainer.query.QueryDelegate;
-//import com.vaadin.ui.CustomComponent;
-//import com.vaadin.ui.Table;
-//
-//public class FlightsTable extends CustomComponent implements
-//        Property<FlightItemProperty>, Property.ValueChangeListener,
-//        Container.ItemSetChangeListener, QueryDelegate.RowIdChangeListener {
-//
-//    // private SessionContext ctx;
-//
-//    private Table table;
-//
-//    private FlightItemProperty selectedItem;
-//
-//    public FlightsTable() {
-//
-//        this.selectedItem = new FlightItemProperty();
-//
-//        table = new Table();
-//        table.setSelectable(true);
-//        table.setImmediate(true);
-//        table.setNullSelectionAllowed(false);
-//        table.setColumnCollapsingAllowed(true);
-//        table.addValueChangeListener(this);
-//        table.addItemSetChangeListener(this);
-//        table.setSizeFull();
-//        // setSizeUndefined();
-//
-//        FlightsContainer container = SessionContext.getCurrent()
-//                .getFlightsContainer();
-//
-//        table.setContainerDataSource(container.getContainer());
-//
-//        container.getContainer().addRowIdChangeListener(this);
-//
-//        setCompositionRoot(table);
-//    }
-//
-//    public void addValueChangeListener(Property.ValueChangeListener listener) {
-//        selectedItem.addValueChangeListener(listener);
-//    }
-//
-//    @Override
-//    public void valueChange(ValueChangeEvent event) {
-//
-//        /**
-//         * Reset FlightItem property
-//         */
-//        Object rowid = event.getProperty().getValue();
-//
-//        Item currentItem = table.getItem(rowid);
-//
-//        FlightItem flightItem = currentItem != null ? new FlightItem(
-//                currentItem) : null;
-//
-//        selectedItem.setValue(flightItem);
-//    }
-//
-//    @Override
-//    public void containerItemSetChange(ItemSetChangeEvent event) {
-//
-//        // Item selectedItem = table.getItem(table.getValue());
-//        // if (selectedItem == null) {
-//        // ctx.getCurrentFlightEntry().setValue(null);
-//        // } else {
-//        // FlightItem fe = ctx.getCurrentFlightEntry().getValue();
-//        // if (fe == null || fe.getItem() != selectedItem) {
-//        // ctx.getCurrentFlightEntry().setValue(
-//        // new FlightItem(selectedItem));
-//        // }
-//        // }
-//    }
-//
-//    @Override
-//    public void rowIdChange(QueryDelegate.RowIdChangeEvent event) {
-//
-//        System.err.println("Old ID: " + event.getOldRowId());
-//        System.err.println("New ID: " + event.getNewRowId());
-//
-//        table.setValue(event.getNewRowId());
-//    }
-// }
+package hlrv.flybook;
+
+import hlrv.flybook.containers.FlightsContainer;
+import hlrv.flybook.db.DBConstants;
+
+import com.vaadin.ui.Table;
+
+public class FlightsTable extends Table {
+
+    /**
+     * Which columns are shown in table?
+     */
+    private String[] visibleColumns = {
+            DBConstants.FLIGHTENTRIES_FLIGHT_ID,
+            DBConstants.FLIGHTENTRIES_USERNAME,
+            DBConstants.FLIGHTENTRIES_DATE,
+            DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT,
+            DBConstants.FLIGHTENTRIES_DEPARTURE_TIME,
+            DBConstants.FLIGHTENTRIES_LANDING_AIRPORT,
+            DBConstants.FLIGHTENTRIES_LANDING_TIME,
+            // DBConstants.FLIGHTENTRIES_FLIGHT_TIME,
+            DBConstants.FLIGHTENTRIES_AIRCRAFT,
+            DBConstants.FLIGHTENTRIES_FLIGHT_TYPE,
+            DBConstants.FLIGHTENTRIES_ONBLOCK_TIME,
+            DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME };
+
+    /**
+     * Columns headers matching to visible columns.
+     */
+    private String[] headers = { "Id", "Pilot", "Date", "Departure Airport",
+            "Departure Time", "Landing Airport", "Landing Time", /*
+                                                                  * "Flight Time",
+                                                                  */
+            "Aircraft", "Type", "On-Block Time", "Off-Block Time" };
+
+    /**
+     * Table columns that are initially collapsed.
+     */
+    private String[] initialCollapsedColumns = {
+            DBConstants.FLIGHTENTRIES_FLIGHT_ID,
+            DBConstants.FLIGHTENTRIES_ONBLOCK_TIME,
+            DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME };
+
+    public FlightsTable() {
+
+        FlightsContainer flightsContainer = SessionContext.getCurrent()
+                .getFlightsContainer();
+
+        // Remember to set data source before setVisibleColumns() etc.
+        setContainerDataSource(flightsContainer.getContainer());
+        setVisibleColumns(visibleColumns);
+        setColumnHeaders(headers);
+
+        setColumnCollapsingAllowed(true);
+        for (String col : initialCollapsedColumns) {
+            setColumnCollapsed(col, true);
+        }
+
+        setSelectable(true);
+        setImmediate(true);
+        setNullSelectionAllowed(false);
+    }
+
+    // @Override
+    // public void valueChange(ValueChangeEvent event) {
+    // }
+
+    // @Override
+    // public void containerItemSetChange(ItemSetChangeEvent event) {
+    //
+    // // Item selectedItem = table.getItem(table.getValue());
+    // // if (selectedItem == null) {
+    // // ctx.getCurrentFlightEntry().setValue(null);
+    // // } else {
+    // // FlightItem fe = ctx.getCurrentFlightEntry().getValue();
+    // // if (fe == null || fe.getItem() != selectedItem) {
+    // // ctx.getCurrentFlightEntry().setValue(
+    // // new FlightItem(selectedItem));
+    // // }
+    // // }
+    // }
+
+    // @Override
+    // public void rowIdChange(QueryDelegate.RowIdChangeEvent event) {
+    //
+    // System.err.println("Old ID: " + event.getOldRowId());
+    // System.err.println("New ID: " + event.getNewRowId());
+    //
+    // // table.setValue(event.getNewRowId());
+    // }
+}
