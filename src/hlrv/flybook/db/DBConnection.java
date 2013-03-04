@@ -2,22 +2,36 @@ package hlrv.flybook.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.connection.SimpleJDBCConnectionPool;
 import com.vaadin.server.VaadinService;
 
 /**
- * Wrapper class of JDBCConnectionPool.
+ * DBConnection wraps JDBCConnectionPool that manages connections to Flybook
+ * database.
  */
 public class DBConnection {
 
+    /**
+     * Use single pool object.
+     */
     private final SimpleJDBCConnectionPool pool;
 
+    /**
+     * Creates new DBConnection instance.
+     * 
+     * @throws SQLException
+     */
     public DBConnection() throws SQLException {
 
         String filePath = getDatabaseFilePath();
-        System.out.println("Database: " + filePath);
+
+        Logger logger = Logger.getLogger("DBConnection");
+        logger.log(new LogRecord(Level.INFO, "Database: " + filePath));
 
         pool = new SimpleJDBCConnectionPool("org.sqlite.JDBC", "jdbc:sqlite:"
                 + filePath, "anon", "", 2, 5);

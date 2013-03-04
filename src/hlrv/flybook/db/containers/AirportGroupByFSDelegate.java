@@ -1,4 +1,4 @@
-package hlrv.flybook.containers;
+package hlrv.flybook.db.containers;
 
 import java.sql.Connection;
 import java.sql.SQLException;

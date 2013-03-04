@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+import com.vaadin.annotations.Theme;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.server.VaadinRequest;
@@ -21,7 +22,9 @@ import com.vaadin.ui.UI;
 /**
  * Main UI class
  */
+
 @SuppressWarnings("serial")
+@Theme("flybook")
 public class FlybookUI extends UI {
 
     private Auth authenticator = null;
