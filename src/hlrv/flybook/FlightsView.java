@@ -64,7 +64,7 @@ public class FlightsView extends AbstractMainViewTab implements
      */
     private NewFlightDialog newFlightDialog = null;
 
-    public FlightsView() throws Exception {
+    public FlightsView() {
         super();
 
         flightsContainer = SessionContext.getCurrent().getFlightsContainer();

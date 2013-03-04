@@ -10,10 +10,10 @@ import com.vaadin.ui.Window;
 
 public class NewFlightDialog extends Window implements Button.ClickListener {
 
-    private FlightItemForm flightForm;
+    private final FlightItemForm flightForm;
 
-    private Button closeButton;
-    private Button createButton;
+    private final Button closeButton;
+    private final Button createButton;
 
     private boolean isCommitted;
 

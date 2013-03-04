@@ -18,10 +18,10 @@ public class FlightDetailsPanel extends Panel implements Button.ClickListener {
 
     private FlightItemForm flightForm;
 
-    private Button applyButton;
-    private Button resetButton;
+    private final Button applyButton;
+    private final Button resetButton;
 
-    public FlightDetailsPanel() throws Exception {
+    public FlightDetailsPanel() {
 
         addStyleName(Reindeer.PANEL_LIGHT);
 

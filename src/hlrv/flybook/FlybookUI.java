@@ -13,9 +13,8 @@ import java.util.logging.Logger;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 
 /**
@@ -27,7 +26,7 @@ import com.vaadin.ui.UI;
 public class FlybookUI extends UI {
 
     private Auth authenticator = null;
-    private BeanItem<User> user = null;
+    private final BeanItem<User> user = null;
     private SessionContext context = null;
     private static DBConnection pool = null;
 
@@ -45,10 +44,15 @@ public class FlybookUI extends UI {
         return user;
     }
 
+    public static JDBCConnectionPool getPool() {
+
+        return FlybookUI.pool.getPool();
+
+    }
+
     @Override
     protected void init(VaadinRequest request) {
         try {
-
             FlybookUI.pool = new DBConnection();
 
             this.authenticator = new Auth(new UserManager(
@@ -59,21 +63,7 @@ public class FlybookUI extends UI {
             getSession().setConverterFactory(new CustomConverterFactory());
             getSession().setLocale(Locale.getDefault());
 
-            TabSheet tabs = new TabSheet();
-
-            tabs.setSizeFull();
-
-            FlightsView flightsTab = new FlightsView();
-
-            tabs.addTab(flightsTab, "Flights");
-
-            tabs.addTab(new Panel(), "Airports");
-
-            tabs.addTab(new Panel(), "Aircrafts");
-
-            tabs.addTab(new Panel(), "Account");
-
-            setContent(tabs);
+            setContent(new LoginView());
 
         } catch (Exception e) {
             System.err.println(e.toString());

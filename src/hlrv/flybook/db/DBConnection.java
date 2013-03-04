@@ -19,7 +19,7 @@ public class DBConnection {
     /**
      * Use single pool object.
      */
-    private SimpleJDBCConnectionPool pool;
+    private final SimpleJDBCConnectionPool pool;
 
     /**
      * Creates new DBConnection instance.

@@ -2,8 +2,6 @@ package hlrv.flybook.auth;
 
 import hlrv.flybook.managers.UserManager;
 
-import java.sql.SQLException;
-
 import com.vaadin.data.util.BeanItem;
 
 // Some design notes. I'm taking a simpler approach even though I increase
@@ -12,7 +10,7 @@ import com.vaadin.data.util.BeanItem;
 // method so I'm hardcoding the behaviour here.
 
 public class Auth {
-    private UserManager manager;
+    private final UserManager manager;
     private User user;
 
     public Auth(UserManager manager) {
@@ -29,7 +27,7 @@ public class Auth {
      */
     public User login(String username, String password) throws Exception {
         User user = this.manager.getFromUsername(username);
-        Hash hash = new Hash(this.manager.getHashCode(username));
+        Hash hash = new Hash(this.manager.getHashCode(password));
         if (hash.check(password)) {
             this.user = user;
             return user;
@@ -52,12 +50,8 @@ public class Auth {
         this.user = null;
     }
 
-    public void register(User user, String password) throws SQLException {
-        Hash hash = Hash.hash(password);
-        try {
-            this.manager.createUser(user, hash);
-        } catch (Exception e) {
-
-        }
+    public void register(User user) throws Exception {
+        Hash hash = Hash.hash(user.getPassword());
+        this.manager.createUser(user, hash);
     }
 }

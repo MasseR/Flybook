@@ -14,12 +14,12 @@ public class SessionContext {
     /**
      * Database connections manager.
      */
-    private DBConnection dbconn;
+    private final DBConnection dbconn;
 
     /**
      * Container for Users table.
      */
-    private UsersContainer usersContainer;
+    private final UsersContainer usersContainer;
 
     /**
      * SQLContainer wrapper for FlightEntries.
