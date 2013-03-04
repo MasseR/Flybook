@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.vaadin.data.Property;
-import com.vaadin.server.Resource;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 
@@ -179,15 +178,26 @@ public class FlightsTable extends Table {
                     label.setValue(name);
                     label.setDescription(sb.toString());
 
-                    Resource res = (Resource) airportsContainer
-                            .getCountriesContainer()
-                            .getItem(country)
-                            .getItemProperty(
-                                    AirportsContainer.PID_COUNTRIES_ICON)
-                            .getValue();
+                    // Resource res = (Resource) airportsContainer
+                    // .getCountriesContainer()
+                    // .getItem(country)
+                    // .getItemProperty(
+                    // AirportsContainer.PID_COUNTRIES_ICON)
+                    // .getValue();
+                    // label.setIcon(res);
+                    // label.setImmediate(true);
 
-                    label.setIcon(res);
-                    label.setImmediate(true);
+                    // Image img = new Image("", res);
+                    //
+                    // HorizontalLayout layout = new HorizontalLayout();
+                    // layout.setSizeUndefined();
+                    // layout.setSpacing(true);
+                    // layout.addComponent(label);
+                    // layout.addComponent(img);
+                    // layout.setComponentAlignment(img,
+                    // Alignment.MIDDLE_CENTER);
+
+                    return label;
                 }
 
                 return label;
