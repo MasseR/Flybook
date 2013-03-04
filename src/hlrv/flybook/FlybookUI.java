@@ -3,13 +3,8 @@ package hlrv.flybook;
 import hlrv.flybook.auth.Auth;
 import hlrv.flybook.auth.User;
 import hlrv.flybook.conv.CustomConverterFactory;
-<<<<<<< HEAD
-import hlrv.flybook.managers.UserManager;
-import hlrv.flybook.db.DBConnection;
-=======
 import hlrv.flybook.db.DBConnection;
 import hlrv.flybook.managers.UserManager;
->>>>>>> esahal/master
 
 import java.util.Locale;
 import java.util.logging.Level;
@@ -17,10 +12,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import com.vaadin.data.util.BeanItem;
-<<<<<<< HEAD
-=======
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
->>>>>>> esahal/master
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
