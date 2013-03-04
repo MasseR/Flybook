@@ -1,4 +1,4 @@
-package hlrv.flybook.containers;
+package hlrv.flybook.db.containers;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -10,11 +10,19 @@ import com.vaadin.data.util.sqlcontainer.SQLUtil;
 import com.vaadin.data.util.sqlcontainer.query.FreeformStatementDelegate;
 import com.vaadin.data.util.sqlcontainer.query.OrderBy;
 import com.vaadin.data.util.sqlcontainer.query.generator.StatementHelper;
+import com.vaadin.data.util.sqlcontainer.query.generator.filter.QueryBuilder;
 
-public class AirportCountriesFSDelegate implements FreeformStatementDelegate {
+public class AirportGroupByFSDelegate implements FreeformStatementDelegate {
+
+    private String groupBy;
+
     private List<Filter> filters;
 
     private List<OrderBy> orderBys;
+
+    public AirportGroupByFSDelegate(String groupBy) {
+        this.groupBy = groupBy;
+    }
 
     @Override
     @Deprecated
@@ -44,7 +52,15 @@ public class AirportCountriesFSDelegate implements FreeformStatementDelegate {
         StatementHelper sh = new StatementHelper();
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT COUNT(DISTINCT country) FROM Airports");
+
+        sql.append("SELECT COUNT(DISTINCT ").append(groupBy)
+                .append(") FROM Airports");
+
+        if (filters != null) {
+            sql.append(QueryBuilder.getWhereStringForFilters(filters, sh));
+        }
+
+        // sql.append(" GROUP BY ").append(groupBy);
 
         sh.setQueryString(sql.toString());
         return sh;
@@ -57,21 +73,23 @@ public class AirportCountriesFSDelegate implements FreeformStatementDelegate {
         StatementHelper sh = new StatementHelper();
 
         StringBuilder sql = new StringBuilder("");
-        sql.append("SELECT country from Airports GROUP BY country");
+        sql.append("SELECT id, country, ").append(groupBy)
+                .append(" FROM Airports");
 
-        // if (filters != null) {
-        // // Returned string is empty or first char is space
-        // sql.append(QueryBuilder.getWhereStringForFilters(filters, sh));
-        // }
-        //
-        // sql.append(getOrderByString());
+        if (filters != null) {
+            sql.append(QueryBuilder.getWhereStringForFilters(filters, sh));
+        }
+
+        sql.append(" GROUP BY ").append(groupBy);
+
+        sql.append(getOrderByString());
 
         if (offset != 0 || limit != 0) {
             sql.append(" LIMIT ").append(limit);
             sql.append(" OFFSET ").append(offset);
         }
 
-        // System.out.println("queryStatement: " + sql.toString());
+        System.out.println("queryStatement: " + sql.toString());
 
         sh.setQueryString(sql.toString());
         return sh;
@@ -107,8 +125,14 @@ public class AirportCountriesFSDelegate implements FreeformStatementDelegate {
         StatementHelper sh = new StatementHelper();
 
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT id FROM Airports");
+        sql.append("SELECT id, ").append(groupBy).append(" FROM Airports");
         sql.append("WHERE id = ?");
+
+        if (filters != null) {
+            sql.append(QueryBuilder.getWhereStringForFilters(filters, sh));
+        }
+
+        sql.append(" GROUP BY ").append(groupBy);
 
         sh.addParameterValue(keys[0]);
         sh.setQueryString(sql.toString());

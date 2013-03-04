@@ -1,33 +1,54 @@
 package hlrv.flybook;
 
-import hlrv.flybook.containers.AirportsContainer;
 import hlrv.flybook.db.DBConstants;
+import hlrv.flybook.db.containers.AirportsContainer;
+import hlrv.flybook.db.items.AirportItem;
 
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.shared.ui.combobox.FilteringMode;
-import com.vaadin.ui.AbstractSelect;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.VerticalLayout;
 
+/**
+ * AirportField is a Field that contains Airport ID as its value.
+ * 
+ * Field contains some controls to select the airport via comboxes. Depending on
+ * combobox states, ID value may be null (airport id is undefined, combo states
+ * can't be mapped to ID).
+ */
 public class AirportField extends CustomField<Integer> implements
         Property.ValueChangeListener {
 
+    /**
+     * We need to get access to Airport Table.
+     */
     private AirportsContainer airportsContainer;
 
+    /**
+     * This selects ID quicly.
+     */
     private ComboBox icaoCombo;
 
+    /**
+     * Following combos are used for more intuitive ID selection, but it is more
+     * cumbersome method.
+     */
     private ComboBox countryCombo;
-
     private ComboBox cityCombo;
-
     private ComboBox nameCombo;
 
+    /**
+     * Some flag taht makes the construct work... for now.
+     */
     private boolean valueBeingSet;
 
+    /**
+     * Creates new AirportField.
+     */
     public AirportField() {
 
         airportsContainer = SessionContext.getCurrent().getAirportsContainer();
@@ -37,9 +58,14 @@ public class AirportField extends CustomField<Integer> implements
         icaoCombo.setNewItemsAllowed(false);
         icaoCombo.setNullSelectionAllowed(false);
         icaoCombo.setContainerDataSource(airportsContainer
-                .createICAOCodesContainer());
-        icaoCombo.setItemCaptionPropertyId(DBConstants.AIRPORTS_ICAO);
-        icaoCombo.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                .getICAOCodesContainer());
+        /**
+         * IMPORTANT: There seems to be bug if container is shared beween two
+         * different comoboboxes AND setItemCaptionMode(..) is set to PROPERTY.
+         * Program crashes if filtering method is touched.
+         */
+        // icaoCombo.setItemCaptionPropertyId(DBConstants.AIRPORTS_ICAO);
+        // icaoCombo.setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
         icaoCombo.setImmediate(true);
         icaoCombo.setFilteringMode(FilteringMode.STARTSWITH);
         icaoCombo.addValueChangeListener(this);
@@ -49,11 +75,12 @@ public class AirportField extends CustomField<Integer> implements
         countryCombo.setNewItemsAllowed(false);
         countryCombo.setNullSelectionAllowed(false);
         countryCombo.setContainerDataSource(airportsContainer
-                .createCountriesContainer());
-        countryCombo.setItemCaptionPropertyId(DBConstants.AIRPORTS_COUNTRY);
-        countryCombo.setItemIconPropertyId("icon");
+                .getCountriesContainer());
+        // countryCombo.setItemCaptionPropertyId(DBConstants.AIRPORTS_COUNTRY);
         countryCombo
-                .setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
+                .setItemIconPropertyId(AirportsContainer.PID_COUNTRIES_ICON);
+        // countryCombo
+        // .setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
         countryCombo.setImmediate(true);
 
         countryCombo.addValueChangeListener(this);
@@ -89,56 +116,20 @@ public class AirportField extends CustomField<Integer> implements
         return layout;
     }
 
-    // private void initComboContainers() {
-    //
-    // JDBCConnectionPool pool = SessionContext.getCurrent().getDBConnection()
-    // .getPool();
-    //
-    // try {
-    // /**
-    // * SQLContainer contains the filters/orderbys and apparently passes
-    // * them to the query when necessary, so we can assume query can be
-    // * shared between different containers. Not sure though...
-    // */
-    // TableQuery tq = new TableQuery(DBConstants.TABLE_AIRPORTS, pool);
-    // tq.setVersionColumn(DBConstants.AIRPORTS_OPTLOCK);
-    //
-    // SQLContainer cityContainer = new SQLContainer(tq);
-    // cityContainer.addOrderBy(new OrderBy(DBConstants.AIRPORTS_CITY,
-    // true));
-    //
-    // SQLContainer nameContainer = new SQLContainer(tq);
-    // nameContainer.addOrderBy(new OrderBy(DBConstants.AIRPORTS_NAME,
-    // true));
-    //
-    // cityCombo.setContainerDataSource(cityContainer);
-    // cityCombo.setItemCaptionPropertyId(DBConstants.AIRPORTS_CITY);
-    // cityCombo
-    // .setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
-    //
-    // nameCombo.setContainerDataSource(nameContainer);
-    // nameCombo.setItemCaptionPropertyId(DBConstants.AIRPORTS_NAME);
-    // nameCombo
-    // .setItemCaptionMode(AbstractSelect.ItemCaptionMode.PROPERTY);
-    //
-    // } catch (SQLException e) {
-    // Notification.show("Error", e.toString(),
-    // Notification.TYPE_ERROR_MESSAGE);
-    // }
-    //
-    // }
-
     @Override
+    // CustomField requires
     public Class<? extends Integer> getType() {
         return Integer.class;
     }
 
+    /**
+     * This sets Field and it's internal combos readOnly state.
+     */
     @Override
     public void setReadOnly(boolean readOnly) {
         super.setReadOnly(readOnly);
 
         setInternalReadOnly(readOnly);
-
     }
 
     protected void setInternalReadOnly(boolean readOnly) {
@@ -149,6 +140,10 @@ public class AirportField extends CustomField<Integer> implements
         nameCombo.setReadOnly(readOnly);
     }
 
+    /**
+     * This gets called as field property values are are being set. We must set
+     * comboboxes to corresponding states.
+     */
     @Override
     protected void setInternalValue(Integer newValue) {
         super.setInternalValue(newValue);
@@ -181,6 +176,19 @@ public class AirportField extends CustomField<Integer> implements
         }
     }
 
+    /**
+     * We must respond to Combobox state changes. Logic in simple form is:
+     * 
+     * On ICAOCombo state changes -> Set ID.
+     * 
+     * On CountryCombo state change -> Init CityCombo content. If CityCombo has
+     * only one item, select it.
+     * 
+     * On CityCombo state change -> Init NameCombo content. If NameCombo has
+     * only one item, select it.
+     * 
+     * On NameCombo state change -> Set ID.
+     */
     @Override
     public void valueChange(Property.ValueChangeEvent event) {
 

@@ -1,5 +1,7 @@
 package hlrv.flybook;
 
+import hlrv.flybook.db.items.AirportItem;
+
 import com.vaadin.data.Property;
 import com.vaadin.server.ExternalResource;
 import com.vaadin.ui.ComboBox;

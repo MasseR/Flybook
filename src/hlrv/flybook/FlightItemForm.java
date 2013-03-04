@@ -1,12 +1,11 @@
 package hlrv.flybook;
 
-import hlrv.flybook.containers.AirportsContainer;
 import hlrv.flybook.db.DBConstants;
+import hlrv.flybook.db.containers.AirportsContainer;
+import hlrv.flybook.db.items.FlightItem;
 
 import java.text.DateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 
 import com.vaadin.data.Property;
@@ -525,14 +524,14 @@ public class FlightItemForm extends CustomComponent implements
             /**
              * We want the flight time in form HH:MM:SS
              */
-            Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(time_ms);
-
-            String hours = cal.getDisplayName(Calendar.HOUR_OF_DAY,
-                    Calendar.LONG, Locale.getDefault());
-            String mins = cal.getDisplayName(Calendar.MINUTE, Calendar.LONG,
-                    Locale.getDefault());
-            String secs = "00";
+            // Calendar cal = Calendar.getInstance();
+            // cal.setTimeInMillis(time_ms);
+            //
+            // String hours = cal.getDisplayName(Calendar.HOUR_OF_DAY,
+            // Calendar.LONG, Locale.getDefault());
+            // String mins = cal.getDisplayName(Calendar.MINUTE, Calendar.LONG,
+            // Locale.getDefault());
+            // String secs = "00";
 
             // long time_s = time_ms / 1000L;
             // long time_min = time_s / 60L;

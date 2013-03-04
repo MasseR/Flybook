@@ -1,6 +1,7 @@
 package hlrv.flybook;
 
 import hlrv.flybook.auth.User;
+import hlrv.flybook.db.items.FlightItem;
 
 import java.sql.SQLException;
 

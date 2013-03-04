@@ -1,5 +1,7 @@
 package hlrv.flybook;
 
+import hlrv.flybook.db.items.FlightItem;
+
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;

@@ -1,8 +1,8 @@
-package hlrv.flybook.containers;
+package hlrv.flybook.db.containers;
 
-import hlrv.flybook.AirportItem;
 import hlrv.flybook.db.DBConnection;
 import hlrv.flybook.db.DBConstants;
+import hlrv.flybook.db.items.AirportItem;
 
 import java.sql.SQLException;
 import java.util.Iterator;
@@ -39,6 +39,13 @@ public class AirportsContainer {
      */
     private IndexedContainer countriesContainer;
 
+    public static final String PID_COUNTRIES_ICON = "icon";
+
+    /**
+     * Container of ICAO codes.
+     */
+    private IndexedContainer icaoCodesContainer;
+
     /**
      * Keep cache of containers country -> city .
      */
@@ -55,12 +62,13 @@ public class AirportsContainer {
 
         JDBCConnectionPool pool = dbconn.getPool();
 
-        TableQuery tq = new TableQuery("Airports", pool);
+        TableQuery tq = new TableQuery(DBConstants.TABLE_AIRPORTS, pool);
         tq.setVersionColumn(DBConstants.AIRPORTS_OPTLOCK);
         airportsContainer = new SQLContainer(tq);
         airportsContainer.setAutoCommit(false);
 
-        initCountriesContainer();
+        countriesContainer = createCountriesContainer();
+        icaoCodesContainer = createICAOCodesContainer();
     }
 
     /**
@@ -204,80 +212,21 @@ public class AirportsContainer {
     }
 
     /**
-     * Returns Container of all countries and corresponding Flag Resource.
-     * 
-     * Columns: country (String), icon (Resource)
+     * Returns Container of all ICAO codes.
      */
-    public IndexedContainer createCountriesContainer() {
+    public IndexedContainer getICAOCodesContainer() {
 
-        // Ordered set
-        TreeSet<String> countries = new TreeSet<String>();
-
-        Object id = airportsContainer.firstItemId();
-        while (id != null) {
-            Item item = airportsContainer.getItem(id);
-            String country = (String) item.getItemProperty(
-                    DBConstants.AIRPORTS_COUNTRY).getValue();
-
-            countries.add(country);
-
-            id = airportsContainer.nextItemId(id);
-        }
-
-        IndexedContainer countriesContainer = new IndexedContainer();
-        countriesContainer.addContainerProperty(DBConstants.AIRPORTS_COUNTRY,
-                String.class, null);
-        countriesContainer.addContainerProperty("icon", Resource.class, null);
-
-        Iterator<String> it = countries.iterator();
-        while (it.hasNext()) {
-            String country = it.next();
-            Item item = countriesContainer.addItem(country);
-            item.getItemProperty(DBConstants.AIRPORTS_COUNTRY)
-                    .setValue(country);
-            item.getItemProperty("icon").setValue(
-                    new ThemeResource("../icons/countries/"
-                            + country.replaceAll(" ", "_") + ".png"));
-
-        }
-
-        return countriesContainer;
+        return icaoCodesContainer;
     }
 
     /**
-     * Returns precreated Container of all ICAO codes.
+     * Returns Container of all countries and corresponding Flag Resource.
+     * 
+     * Columns: 'country' (String), 'icon' (Resource)
      */
-    public IndexedContainer createICAOCodesContainer() {
+    public IndexedContainer getCountriesContainer() {
 
-        /**
-         * Collect icao codes in ordered set.
-         */
-        TreeSet<String> codes = new TreeSet<String>();
-
-        Object id = airportsContainer.firstItemId();
-        while (id != null) {
-            Item item = airportsContainer.getItem(id);
-            String code = (String) item.getItemProperty(
-                    DBConstants.AIRPORTS_ICAO).getValue();
-            codes.add(code);
-            id = airportsContainer.nextItemId(id);
-        }
-
-        /**
-         * Create new memory based IndexedContainer and add Items.
-         */
-        IndexedContainer icaoCodesContainer = new IndexedContainer();
-        icaoCodesContainer.addContainerProperty(DBConstants.AIRPORTS_ICAO,
-                String.class, null);
-
-        Iterator<String> it = codes.iterator();
-        while (it.hasNext()) {
-            String code = it.next();
-            Item item = icaoCodesContainer.addItem(code);
-            item.getItemProperty(DBConstants.AIRPORTS_ICAO).setValue(code);
-        }
-
-        return icaoCodesContainer;
+        return countriesContainer;
     }
 
     /**
@@ -363,20 +312,77 @@ public class AirportsContainer {
         return container;
     }
 
-    private void initCountriesContainer() {
+    private IndexedContainer createICAOCodesContainer() {
 
+        /**
+         * Collect icao codes in ordered set.
+         */
+        TreeSet<String> codes = fetchPropertySet(null,
+                DBConstants.AIRPORTS_ICAO);
+
+        /**
+         * Create new memory based IndexedContainer and add Items.
+         */
+        IndexedContainer icaoCodesContainer = new IndexedContainer();
+        icaoCodesContainer.addContainerProperty(DBConstants.AIRPORTS_ICAO,
+                String.class, null);
+
+        Iterator<String> it = codes.iterator();
+        while (it.hasNext()) {
+            String code = it.next();
+            Item item = icaoCodesContainer.addItem(code);
+            item.getItemProperty(DBConstants.AIRPORTS_ICAO).setValue(code);
+        }
+
+        return icaoCodesContainer;
     }
 
-    private TreeSet<String> fetchPropertySet(Filter filter, String properyId) {
+    private IndexedContainer createCountriesContainer() {
+
+        // Ordered set
+        TreeSet<String> countries = fetchPropertySet(null,
+                DBConstants.AIRPORTS_COUNTRY);
+
+        IndexedContainer countriesContainer = new IndexedContainer();
+        countriesContainer.addContainerProperty(DBConstants.AIRPORTS_COUNTRY,
+                String.class, null);
+        countriesContainer.addContainerProperty(PID_COUNTRIES_ICON,
+                Resource.class, null);
+
+        Iterator<String> it = countries.iterator();
+        while (it.hasNext()) {
+            String country = it.next();
+            Item item = countriesContainer.addItem(country);
+            item.getItemProperty(DBConstants.AIRPORTS_COUNTRY)
+                    .setValue(country);
+            item.getItemProperty(PID_COUNTRIES_ICON).setValue(
+                    new ThemeResource("../icons/countries/"
+                            + country.replaceAll(" ", "_") + ".png"));
+        }
+
+        return countriesContainer;
+    }
+
+    /**
+     * Iterates through filtered primary container rows and adds each row value
+     * indicated by pid to TreeSet object.
+     * 
+     * @param filter
+     * @param pid
+     * @return
+     */
+    private TreeSet<String> fetchPropertySet(Filter filter, String pid) {
 
         TreeSet<String> set = new TreeSet<String>();
 
-        airportsContainer.addContainerFilter(filter);
+        if (filter != null) {
+            airportsContainer.addContainerFilter(filter);
+        }
 
         Object id = airportsContainer.firstItemId();
         while (id != null) {
             Item item = airportsContainer.getItem(id);
-            String value = (String) item.getItemProperty(properyId).getValue();
+            String value = (String) item.getItemProperty(pid).getValue();
             set.add(value);
             id = airportsContainer.nextItemId(id);
         }

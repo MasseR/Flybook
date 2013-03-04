@@ -1,8 +1,9 @@
 package hlrv.flybook;
 
-import hlrv.flybook.containers.AirportsContainer;
-import hlrv.flybook.containers.FlightsContainer;
 import hlrv.flybook.db.DBConnection;
+import hlrv.flybook.db.containers.AirportsContainer;
+import hlrv.flybook.db.containers.FlightsContainer;
+import hlrv.flybook.db.containers.UsersContainer;
 
 import java.sql.SQLException;
 
@@ -11,16 +12,14 @@ import com.vaadin.server.VaadinSession;
 public class SessionContext {
 
     /**
-     * Wrapper around jdbc connections.
+     * Database connections manager.
      */
     private DBConnection dbconn;
 
-    // /**
-    // * Current selected FlightItem in table, can be changed so wrap in
-    // property
-    // * others can listen for changes.
-    // */
-    // private ObjectProperty<FlightItem> currentFlightEntry;
+    /**
+     * Container for Users table.
+     */
+    private UsersContainer usersContainer;
 
     /**
      * SQLContainer wrapper for FlightEntries.
@@ -42,6 +41,8 @@ public class SessionContext {
 
         try {
 
+            usersContainer = new UsersContainer(dbconn);
+
             airportsContainer = new AirportsContainer(dbconn);
 
             flightsContainer = new FlightsContainer(dbconn);
@@ -54,12 +55,15 @@ public class SessionContext {
         session.setAttribute("context", this);
     }
 
-    // public ObjectProperty<FlightItem> getCurrentFlightEntry() {
-    // return currentFlightEntry;
-    // }
-
+    /**
+     * Returns DBConnection.
+     */
     public DBConnection getDBConnection() {
         return dbconn;
+    }
+
+    public UsersContainer getUsersContainer() {
+        return usersContainer;
     }
 
     public FlightsContainer getFlightsContainer() {
@@ -75,18 +79,4 @@ public class SessionContext {
         return (SessionContext) VaadinSession.getCurrent().getAttribute(
                 "context");
     }
-
-    // /**
-    // * Helper method that returns true if current selected flight entry has
-    // been
-    // * created/owned by current user.
-    // */
-    // public boolean isCurrentFlightEntryCreatedByUser() {
-    // if (currentFlightEntry.getValue() == null) {
-    // return false;
-    // }
-    //
-    // return currentFlightEntry.getValue().getPilot()
-    // .equals(((FlybookUI) UI.getCurrent()).getUser().getBean().getUsername());
-    // }
 }

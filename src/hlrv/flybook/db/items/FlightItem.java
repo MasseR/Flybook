@@ -1,5 +1,6 @@
-package hlrv.flybook;
+package hlrv.flybook.db.items;
 
+import hlrv.flybook.FlightType;
 import hlrv.flybook.auth.User;
 import hlrv.flybook.db.DBConstants;
 
@@ -10,26 +11,10 @@ import com.vaadin.data.util.PropertysetItem;
 /**
  * Wrapper class of Item to handle flight item set/get.
  */
-public class FlightItem {
+public class FlightItem extends AbstractItem {
 
-    private Item item;
-
-    public FlightItem(Item source) {
-
-        this.item = source;
-    }
-
-    public Item getItem() {
-        return item;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
-
-    }
-
-    public boolean isNull() {
-        return item == null;
+    public FlightItem(Item item) {
+        super(item);
     }
 
     /**
@@ -41,120 +26,55 @@ public class FlightItem {
      * inserted and not yet committed. Otherwise should return value.
      */
     public Integer getFlightID() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (Integer) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_FLIGHT_ID).getValue();
-        }
+        return getInteger(DBConstants.FLIGHTENTRIES_FLIGHT_ID);
     }
 
     public String getUsername() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (String) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_USERNAME).getValue();
-        }
+        return getString(DBConstants.FLIGHTENTRIES_USERNAME);
     }
 
     public Integer getDate() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (Integer) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_DATE).getValue();
-        }
+        return getInteger(DBConstants.FLIGHTENTRIES_DATE);
     }
 
     public String getAircraft() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (String) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_AIRCRAFT).getValue();
-        }
+        return getString(DBConstants.FLIGHTENTRIES_AIRCRAFT);
     }
 
     public Integer getDepartureAirport() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (Integer) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT).getValue();
-        }
+        return getInteger(DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT);
     }
 
     public Integer getDepartureTime() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (Integer) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_DEPARTURE_TIME).getValue();
-        }
+        return getInteger(DBConstants.FLIGHTENTRIES_DEPARTURE_TIME);
     }
 
     public Integer getLandingAirport() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (Integer) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_LANDING_AIRPORT).getValue();
-        }
+        return getInteger(DBConstants.FLIGHTENTRIES_LANDING_AIRPORT);
     }
 
     public Integer getLandingTime() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (Integer) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_LANDING_TIME).getValue();
-        }
+        return getInteger(DBConstants.FLIGHTENTRIES_LANDING_TIME);
     }
 
     public Integer getOnBlockTime() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (Integer) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_ONBLOCK_TIME).getValue();
-        }
+        return getInteger(DBConstants.FLIGHTENTRIES_ONBLOCK_TIME);
     }
 
     public Integer getOffBlockTime() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (Integer) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME).getValue();
-        }
+        return getInteger(DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME);
     }
 
     public Integer getFlightType() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (Integer) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_FLIGHT_TYPE).getValue();
-        }
+        return getInteger(DBConstants.FLIGHTENTRIES_FLIGHT_TYPE);
     }
 
     public Integer getIFRTime() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (Integer) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_IFR_TIME).getValue();
-        }
+        return getInteger(DBConstants.FLIGHTENTRIES_IFR_TIME);
     }
 
     public String getNotes() {
-        if (isNull()) {
-            return null;
-        } else {
-            return (String) item.getItemProperty(
-                    DBConstants.FLIGHTENTRIES_NOTES).getValue();
-        }
+        return getString(DBConstants.FLIGHTENTRIES_NOTES);
     }
 
     /**
@@ -191,64 +111,55 @@ public class FlightItem {
      */
 
     public void setFlightID(Integer id) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_FLIGHT_ID).setValue(id);
+        setValue(DBConstants.FLIGHTENTRIES_FLIGHT_ID, id);
     }
 
     public void setUsername(String username) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_USERNAME).setValue(
-                username);
+        setValue(DBConstants.FLIGHTENTRIES_USERNAME, username);
     }
 
     public void setDate(int time_s) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_DATE).setValue(time_s);
+        setValue(DBConstants.FLIGHTENTRIES_DATE, time_s);
     }
 
     public void setAircraft(String aircraft) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_AIRCRAFT).setValue(
-                aircraft);
+        setValue(DBConstants.FLIGHTENTRIES_AIRCRAFT, aircraft);
     }
 
     public void setDepartureAirport(Integer airport) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT)
-                .setValue(airport);
+        setValue(DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT, airport);
     }
 
     public void setDepartureTime(int time_s) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_DEPARTURE_TIME)
-                .setValue(time_s);
+        setValue(DBConstants.FLIGHTENTRIES_DEPARTURE_TIME, time_s);
     }
 
     public void setLandingAirport(Integer airport) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_LANDING_AIRPORT)
-                .setValue(airport);
+        setValue(DBConstants.FLIGHTENTRIES_LANDING_AIRPORT, airport);
     }
 
     public void setLandingTime(int time_s) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_LANDING_TIME).setValue(
-                time_s);
+        setValue(DBConstants.FLIGHTENTRIES_LANDING_TIME, time_s);
     }
 
     public void setOnBlockTime(int time_s) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_ONBLOCK_TIME).setValue(
-                time_s);
+        setValue(DBConstants.FLIGHTENTRIES_ONBLOCK_TIME, time_s);
     }
 
     public void setOffBlockTime(int time_s) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME).setValue(
-                time_s);
+        setValue(DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME, time_s);
     }
 
     public void setFlightType(int type) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_FLIGHT_TYPE).setValue(
-                type);
+        setValue(DBConstants.FLIGHTENTRIES_FLIGHT_TYPE, type);
     }
 
     public void setIFRTime(int time) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_IFR_TIME).setValue(time);
+        setValue(DBConstants.FLIGHTENTRIES_IFR_TIME, time);
     }
 
     public void setNotes(String notes) {
-        item.getItemProperty(DBConstants.FLIGHTENTRIES_NOTES).setValue(notes);
+        setValue(DBConstants.FLIGHTENTRIES_NOTES, notes);
     }
 
     // /**

@@ -1,4 +1,4 @@
-package hlrv.flybook.containers;
+package hlrv.flybook.db.containers;
 
 import java.util.LinkedList;
 import java.util.TreeMap;

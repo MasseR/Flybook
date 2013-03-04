@@ -1,10 +1,10 @@
-package hlrv.flybook.containers;
+package hlrv.flybook.db.containers;
 
-import hlrv.flybook.FlightItem;
 import hlrv.flybook.FlybookUI;
 import hlrv.flybook.auth.User;
 import hlrv.flybook.db.DBConnection;
 import hlrv.flybook.db.DBConstants;
+import hlrv.flybook.db.items.FlightItem;
 
 import java.sql.SQLException;
 import java.util.Date;
@@ -18,6 +18,9 @@ import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 
+/**
+ * FlightsContainer abstracts SQLContainer to table "FlightEntries".
+ */
 public class FlightsContainer {
 
     /**
@@ -25,8 +28,15 @@ public class FlightsContainer {
      */
     private SQLContainer flightsContainer;
 
+    /**
+     * Keep reference to filters so we can remove/add them from container.
+     */
     private Filter usernameFilter;
 
+    /**
+     * Create new instance of FlightsContainer that uses DBConnection given as
+     * argument.
+     */
     public FlightsContainer(DBConnection dbconn) throws SQLException {
 
         JDBCConnectionPool pool = dbconn.getPool();
@@ -48,15 +58,24 @@ public class FlightsContainer {
         // container.setPageLength(5 * container.size());
     }
 
+    /**
+     * Returns the SQLContainer.
+     */
     public SQLContainer getContainer() {
         return flightsContainer;
     }
 
+    /**
+     * Commit changes to SQLContainer.
+     */
     public void commit() throws SQLException {
 
         flightsContainer.commit();
     }
 
+    /**
+     * Rollback changes.
+     */
     public void rollback() {
 
         try {
@@ -67,6 +86,9 @@ public class FlightsContainer {
         }
     }
 
+    /**
+     * Add username filter. If null, removes filter.
+     */
     public void filterByUser(String username) {
 
         if (usernameFilter != null) {
@@ -76,7 +98,8 @@ public class FlightsContainer {
 
         if (username != null) {
             /**
-             * Must use table prefix for filter to work. Also requires some
+             * Must use table prefix for filter to work with custom implemented
+             * FreeformQuery (NOTE: not used presently). Also requires some
              * trickery in FlightEntriesFSDelegate constructor (something to do
              * with quotes)
              */
