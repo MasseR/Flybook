@@ -235,7 +235,7 @@ public class FlightItem extends AbstractItem {
 
         item.addItemProperty(
                 DBConstants.FLIGHTENTRIES_FLIGHT_TYPE,
-                new ObjectProperty<Integer>(new Integer(FlightType.UNKNOWN
+                new ObjectProperty<Integer>(new Integer(FlightType.UNDEFINED
                         .ordinal()), Integer.class, true));
 
         item.addItemProperty(DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT,

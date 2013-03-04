@@ -2,6 +2,7 @@ package hlrv.flybook;
 
 import hlrv.flybook.db.DBConstants;
 import hlrv.flybook.db.containers.AirportsContainer;
+import hlrv.flybook.db.containers.FlightsContainer;
 import hlrv.flybook.db.items.FlightItem;
 
 import java.text.DateFormat;
@@ -10,7 +11,6 @@ import java.util.TimeZone;
 
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
@@ -157,9 +157,10 @@ public class FlightItemForm extends CustomComponent implements
         fieldOffBlockTime = new TextField("Off-Block Time");
         fieldIFRTime = new TextField("IFR Time");
 
-        comboFlightType = new ComboBox("Flight Type",
-                createFlightTypeContainer("caption"));
-        comboFlightType.setItemCaptionPropertyId("caption");
+        comboFlightType = new ComboBox("Flight Type", SessionContext
+                .getCurrent().getFlightsContainer().getFlightTypesContainer());
+        comboFlightType
+                .setItemCaptionPropertyId(FlightsContainer.PID_FLIGHT_TYPE);
         comboFlightType.setNullSelectionAllowed(false);
         comboFlightType.setInputPrompt("Select Flight Type");
         comboFlightType.setImmediate(true);
@@ -268,30 +269,30 @@ public class FlightItemForm extends CustomComponent implements
         setCompositionRoot(topLayout);
     }
 
-    private IndexedContainer createFlightTypeContainer(String caption) {
-
-        IndexedContainer flightTypeContainer = new IndexedContainer();
-        flightTypeContainer.addContainerProperty(caption, String.class, null);
-
-        flightTypeContainer.addItem(new Integer(FlightType.UNKNOWN.ordinal()))
-                .getItemProperty(caption).setValue("Unknown");
-
-        flightTypeContainer.addItem(new Integer(FlightType.DOMESTIC.ordinal()))
-                .getItemProperty(caption).setValue("Domestic");
-
-        flightTypeContainer.addItem(new Integer(FlightType.HOBBY.ordinal()))
-                .getItemProperty(caption).setValue("Hobby");
-
-        flightTypeContainer
-                .addItem(new Integer(FlightType.TRANSREGIONAL.ordinal()))
-                .getItemProperty(caption).setValue("Transregional");
-
-        flightTypeContainer
-                .addItem(new Integer(FlightType.TRANSCONTINENTAL.ordinal()))
-                .getItemProperty(caption).setValue("Transcontinental");
-
-        return flightTypeContainer;
-    }
+    // private IndexedContainer createFlightTypeContainer(String caption) {
+    //
+    // IndexedContainer flightTypeContainer = new IndexedContainer();
+    // flightTypeContainer.addContainerProperty(caption, String.class, null);
+    //
+    // flightTypeContainer.addItem(new Integer(FlightType.UNDEFINED.ordinal()))
+    // .getItemProperty(caption).setValue("Unknown");
+    //
+    // flightTypeContainer.addItem(new Integer(FlightType.DOMESTIC.ordinal()))
+    // .getItemProperty(caption).setValue("Domestic");
+    //
+    // flightTypeContainer.addItem(new Integer(FlightType.HOBBY.ordinal()))
+    // .getItemProperty(caption).setValue("Hobby");
+    //
+    // flightTypeContainer
+    // .addItem(new Integer(FlightType.TRANSREGIONAL.ordinal()))
+    // .getItemProperty(caption).setValue("Transregional");
+    //
+    // flightTypeContainer
+    // .addItem(new Integer(FlightType.TRANSCONTINENTAL.ordinal()))
+    // .getItemProperty(caption).setValue("Transcontinental");
+    //
+    // return flightTypeContainer;
+    // }
 
     public boolean isEditable() {
         return !fieldGroup.isReadOnly();

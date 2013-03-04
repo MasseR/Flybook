@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import com.vaadin.data.Property;
-import com.vaadin.server.Resource;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Table;
 
@@ -21,17 +20,15 @@ public class FlightsTable extends Table {
     /**
      * Which columns are shown in table?
      */
-    private String[] visibleColumns = {
-            DBConstants.FLIGHTENTRIES_FLIGHT_ID,
-            DBConstants.FLIGHTENTRIES_USERNAME,
-            DBConstants.FLIGHTENTRIES_DATE,
+    private String[] visibleColumns = { DBConstants.FLIGHTENTRIES_FLIGHT_ID,
+            DBConstants.FLIGHTENTRIES_USERNAME, DBConstants.FLIGHTENTRIES_DATE,
             DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT,
             DBConstants.FLIGHTENTRIES_DEPARTURE_TIME,
             DBConstants.FLIGHTENTRIES_LANDING_AIRPORT,
-            DBConstants.FLIGHTENTRIES_LANDING_TIME,
-            // DBConstants.FLIGHTENTRIES_FLIGHT_TIME,
+            DBConstants.FLIGHTENTRIES_LANDING_TIME, GEN_FLIGHT_TIME,
             DBConstants.FLIGHTENTRIES_AIRCRAFT,
             DBConstants.FLIGHTENTRIES_FLIGHT_TYPE,
+            DBConstants.FLIGHTENTRIES_IFR_TIME,
             DBConstants.FLIGHTENTRIES_ONBLOCK_TIME,
             DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME };
 
@@ -39,10 +36,9 @@ public class FlightsTable extends Table {
      * Columns headers matching to visible columns.
      */
     private String[] headers = { "Id", "Pilot", "Date", "Departure Airport",
-            "Departure Time", "Landing Airport", "Landing Time", /*
-                                                                  * "Flight Time",
-                                                                  */
-            "Aircraft", "Type", "On-Block Time", "Off-Block Time" };
+            "Departure Time", "Landing Airport", "Landing Time", "Flight Time",
+            "Aircraft", "Flight Type", "IFR Time", "On-Block Time",
+            "Off-Block Time" };
 
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     // private DateFormat dateFormat = new
@@ -53,6 +49,8 @@ public class FlightsTable extends Table {
      */
     private String[] initialCollapsedColumns = {
             DBConstants.FLIGHTENTRIES_FLIGHT_ID,
+            DBConstants.FLIGHTENTRIES_FLIGHT_TYPE,
+            DBConstants.FLIGHTENTRIES_IFR_TIME,
             DBConstants.FLIGHTENTRIES_ONBLOCK_TIME,
             DBConstants.FLIGHTENTRIES_OFFBLOCK_TIME };
 
@@ -66,6 +64,16 @@ public class FlightsTable extends Table {
 
         // Remember to set data source before setVisibleColumns() etc.
         setContainerDataSource(flightsContainer.getContainer());
+
+        TableColumnGenerator colGenerator = new TableColumnGenerator();
+        addGeneratedColumn(GEN_FLIGHT_TIME, colGenerator);
+        addGeneratedColumn(DBConstants.FLIGHTENTRIES_USERNAME, colGenerator);
+        addGeneratedColumn(DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT,
+                colGenerator);
+        addGeneratedColumn(DBConstants.FLIGHTENTRIES_LANDING_AIRPORT,
+                colGenerator);
+        addGeneratedColumn(DBConstants.FLIGHTENTRIES_FLIGHT_TYPE, colGenerator);
+
         setVisibleColumns(visibleColumns);
         setColumnHeaders(headers);
 
@@ -74,19 +82,11 @@ public class FlightsTable extends Table {
             setColumnCollapsed(col, true);
         }
 
-        TableColumnGenerator colGenerator = new TableColumnGenerator();
-
         // SQLContainer doesn't support column additions
         // addContainerProperty(GEN_FLIGHT_TIME, Integer.class, null,
         // "Flight Time", null, null);
 
-        // addGeneratedColumn(GEN_FULLNAME, colGenerator);
-        addGeneratedColumn(DBConstants.FLIGHTENTRIES_USERNAME, colGenerator);
-        addGeneratedColumn(DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT,
-                colGenerator);
-        addGeneratedColumn(DBConstants.FLIGHTENTRIES_LANDING_AIRPORT,
-                colGenerator);
-        addGeneratedColumn(GEN_FLIGHT_TIME, colGenerator);
+        // setColumnHeader(GEN_FLIGHT_TIME, "Flight Time");
 
         setSelectable(true);
         setImmediate(true);
@@ -179,18 +179,36 @@ public class FlightsTable extends Table {
                     label.setValue(name);
                     label.setDescription(sb.toString());
 
-                    Resource res = (Resource) airportsContainer
-                            .getCountriesContainer()
-                            .getItem(country)
-                            .getItemProperty(
-                                    AirportsContainer.PID_COUNTRIES_ICON)
-                            .getValue();
+                    // Resource res = (Resource) airportsContainer
+                    // .getCountriesContainer()
+                    // .getItem(country)
+                    // .getItemProperty(
+                    // AirportsContainer.PID_COUNTRIES_ICON)
+                    // .getValue();
+                    // label.setIcon(res);
+                    // label.setImmediate(true);
 
-                    label.setIcon(res);
-                    label.setImmediate(true);
+                    // Image img = new Image("", res);
+                    //
+                    // HorizontalLayout layout = new HorizontalLayout();
+                    // layout.setSizeUndefined();
+                    // layout.setSpacing(true);
+                    // layout.addComponent(label);
+                    // layout.addComponent(img);
+                    // layout.setComponentAlignment(img,
+                    // Alignment.MIDDLE_CENTER);
+
+                    return label;
                 }
 
                 return label;
+            }
+
+            if (columnId.equals(DBConstants.FLIGHTENTRIES_FLIGHT_TYPE)) {
+
+                FlightType type = FlightType.toEnum((Integer) prop.getValue());
+
+                return type.getName();
             }
 
             if (columnId.equals(GEN_FLIGHT_TIME)) {
@@ -226,8 +244,10 @@ public class FlightsTable extends Table {
                     timeText = "<E>";
                 }
 
-                Label label = new Label(timeText);
-                return label;
+                return timeText;
+                // Label label = new Label(timeText);
+                // return label;
+
             }
 
             return null;
