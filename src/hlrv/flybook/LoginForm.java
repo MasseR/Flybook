@@ -1,13 +1,18 @@
 package hlrv.flybook;
 
+import hlrv.flybook.auth.Auth;
+import hlrv.flybook.managers.UserManager;
+
+import java.sql.SQLException;
+
 import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.util.PropertysetItem;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -44,10 +49,14 @@ public class LoginForm extends CustomComponent {
      */
     private final FieldGroup form;
 
+    private final Auth auth;
+
     /**
      * The Constructor
+     * 
+     * @throws SQLException
      */
-    public LoginForm() {
+    public LoginForm() throws SQLException {
 
         /*
          * Instantiation
@@ -56,11 +65,13 @@ public class LoginForm extends CustomComponent {
         layout = new VerticalLayout();
         form = new FieldGroup();
         register = new Button("Register");
+        auth = new Auth(new UserManager(FlybookUI.getPool()));
 
         /*
          * Set properties as data source
          */
         form.setItemDataSource(item);
+        form.setBuffered(false);
 
         /*
          * Set properties
@@ -102,12 +113,20 @@ public class LoginForm extends CustomComponent {
             public void buttonClick(ClickEvent event) {
 
                 /*
-                 * Implement the authentication method here in conjunction with
-                 * the form.commit.
+                 * Authenticate the user
                  */
                 try {
-                    form.commit();
-                } catch (CommitException e) {
+
+                    auth.login((String) item.getItemProperty("login")
+                            .getValue(),
+                            (String) item.getItemProperty("password")
+                                    .getValue());
+
+                } catch (Exception e) {
+
+                    Notification
+                            .show("Error with login credentials. Please check your username and password.");
+
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
@@ -128,7 +147,7 @@ public class LoginForm extends CustomComponent {
                 /*
                  * !!! THIS IS A HACK! DO THIS PROPERLY!
                  */
-                FlybookUI.getCurrent().addWindow(new RegisterView());
+                FlybookUI.getCurrent().addWindow(new RegisterView(true));
             }
 
         });

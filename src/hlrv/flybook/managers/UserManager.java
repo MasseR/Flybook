@@ -12,7 +12,7 @@ import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 
 public class UserManager {
-    private SQLContainer container;
+    private final SQLContainer container;
 
     public UserManager(JDBCConnectionPool pool) throws SQLException {
         TableQuery tq = new TableQuery("users", pool);
@@ -27,6 +27,9 @@ public class UserManager {
         if (id == null) {
             throw new Exception("User not found");
         }
+        // TODO:
+        System.err.println(this.container.getItem(id).getItemPropertyIds()
+                .toString());
         return this.container.getItem(id);
     }
 
@@ -44,14 +47,27 @@ public class UserManager {
         return (String) item.getItemProperty("password").getValue();
     }
 
-    public void createUser(User user, Hash password) throws Exception {
-        Item newUser = (Item) this.container.addItem();
+    public void createUser(User user, Hash password) {
+
+        Object itemId = this.container.addItem();
+        Item newUser = this.container.getItem(itemId);
         newUser.getItemProperty("username").setValue(user.getUsername());
         newUser.getItemProperty("firstname").setValue(user.getFirstname());
         newUser.getItemProperty("lastname").setValue(user.getLastname());
         newUser.getItemProperty("email").setValue(user.getEmail());
         newUser.getItemProperty("passwd").setValue(password.raw());
-        this.container.commit();
+
+        try {
+            this.container.commit();
+        } catch (UnsupportedOperationException e) {
+            System.err.println("Unsupported");
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            System.err.println("SQLError");
+            e.printStackTrace();
+        }
     }
 
     public void modifyUser(User user) throws Exception {

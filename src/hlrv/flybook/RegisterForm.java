@@ -1,8 +1,13 @@
 package hlrv.flybook;
 
+import hlrv.flybook.auth.Auth;
+import hlrv.flybook.auth.User;
+import hlrv.flybook.managers.UserManager;
+
+import java.sql.SQLException;
+
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.fieldgroup.FieldGroup;
-import com.vaadin.data.fieldgroup.FieldGroup.CommitException;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
@@ -30,21 +35,30 @@ public class RegisterForm extends CustomComponent {
         public void buttonClick(ClickEvent event) {
 
             try {
+                Auth auth = new Auth(new UserManager(FlybookUI.getPool()));
+                if (register == true) {
 
-                fields.commit();
-                System.err.println(person.toString());
-            } catch (CommitException e) {
+                    auth.register(((BeanItem<User>) fields.getItemDataSource())
+                            .getBean());
+                } else {
+
+                    // modify user. how is it done? UserManager?
+
+                }
+            } catch (SQLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
-
     }
 
     /*
      * Data of the editable user
      */
-    private final PersonPOJO person;
+    private final User user;
 
     /*
      * Layout for the form
@@ -54,7 +68,7 @@ public class RegisterForm extends CustomComponent {
     /*
      * BeanItem for item
      */
-    private final BeanItem<PersonPOJO> item;
+    private final BeanItem<User> item;
 
     /*
      * Fields for the form
@@ -66,18 +80,21 @@ public class RegisterForm extends CustomComponent {
      */
     private final Button save;
 
+    private boolean register;
+
     /*
      * The constructor
      */
-    public RegisterForm() {
+    public RegisterForm(boolean register) {
 
         /*
          * Instantiate
          */
-        person = new PersonPOJO("", "", "", false);
-        layout = new VerticalLayout();
-        fields = new BeanFieldGroup<PersonPOJO>(PersonPOJO.class);
-        save = new Button("Save");
+        this.user = new User("", "", "", "", false);
+        this.layout = new VerticalLayout();
+        this.fields = new BeanFieldGroup<User>(User.class);
+        this.save = new Button("Save");
+        this.register = register;
 
         /*
          * Layout settings
@@ -89,12 +106,13 @@ public class RegisterForm extends CustomComponent {
         /*
          * Wrap person-pojo in BeanItem
          */
-        item = new BeanItem<PersonPOJO>(person);
+        item = new BeanItem<User>(user);
 
         /*
          * Set BeanItem as a data source
          */
         fields.setItemDataSource(item);
+        fields.setBuffered(false);
 
         for (Object propertyID : fields.getUnboundPropertyIds()) {
 
@@ -129,13 +147,10 @@ public class RegisterForm extends CustomComponent {
     }
 
     /**
-     * Getter for registration details
-     * 
-     * @return
+     * Setting this field true makes the class a registration form. Setting it
+     * false makes the class modify user form
      */
-    public PersonPOJO getRegistrationDetails() {
-
-        return person;
-
+    public void setRegister(boolean register) {
+        this.register = register;
     }
 }

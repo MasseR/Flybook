@@ -17,19 +17,6 @@ public class PersonPOJO {
      */
     private String password;
 
-    /*
-     * if admin or not
-     */
-    private final boolean admin;
-
-    /**
-     * Alternate constructor to be used in conjunction with RegisterForm
-     */
-
-    public PersonPOJO(boolean admin) {
-        this.admin = admin;
-    }
-
     /**
      * The constructor used to create a new user
      * 
@@ -40,9 +27,8 @@ public class PersonPOJO {
      * @param password
      * @param admin
      */
-    public PersonPOJO(String email, String name, String password, boolean admin) {
+    public PersonPOJO(String email, String name, String password) {
 
-        this.admin = admin;
         this.email = email;
         this.name = name;
         this.password = password;
@@ -74,15 +60,6 @@ public class PersonPOJO {
      */
     public String getPassword() {
         return password;
-    }
-
-    /**
-     * Check if admin
-     * 
-     * @return
-     */
-    public boolean isAdmin() {
-        return admin;
     }
 
     /**

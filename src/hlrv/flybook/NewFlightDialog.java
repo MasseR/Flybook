@@ -1,5 +1,7 @@
 package hlrv.flybook;
 
+import hlrv.flybook.db.items.FlightItem;
+
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.HorizontalLayout;
@@ -8,21 +10,19 @@ import com.vaadin.ui.Window;
 
 public class NewFlightDialog extends Window implements Button.ClickListener {
 
-    private SessionContext ctx;
+    private final FlightItemForm flightForm;
 
-    private FlightForm flightForm;
+    private final Button closeButton;
+    private final Button createButton;
 
-    private Button closeButton;
-    private Button createButton;
+    private boolean isCommitted;
 
-    public NewFlightDialog(SessionContext ctx) {
+    public NewFlightDialog() {
         super("New Flight");
-
-        this.ctx = ctx;
 
         setModal(true);
 
-        flightForm = new FlightForm(ctx);
+        flightForm = new FlightItemForm();
 
         closeButton = new Button("Close");
         createButton = new Button("Create");
@@ -42,9 +42,19 @@ public class NewFlightDialog extends Window implements Button.ClickListener {
         setContent(topLayout);
     }
 
+    /**
+     * Returns true if user selected "create" option to create new item and the
+     * item is valid.
+     */
+    public boolean isCommitted() {
+        return isCommitted;
+    }
+
     public void setDataSource(FlightItem flightItem) {
 
-        flightForm.setDataSource(flightItem);
+        isCommitted = false;
+
+        flightForm.setItem(flightItem);
     }
 
     @Override
@@ -53,13 +63,18 @@ public class NewFlightDialog extends Window implements Button.ClickListener {
         if (event.getButton() == closeButton) {
 
             flightForm.reset();
-            ctx.getFlightsContainer().rollback();
+            isCommitted = false;
+            close();
         } else {
 
-            flightForm.commit();
-            ctx.getFlightsContainer().commit();
-        }
+            /**
+             * Commit form values so they get set to FlightItem properties.
+             */
+            if (flightForm.commit()) {
+                isCommitted = true;
+                close();
 
-        this.close();
+            }
+        }
     }
 }

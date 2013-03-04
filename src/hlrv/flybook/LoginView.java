@@ -1,5 +1,7 @@
 package hlrv.flybook;
 
+import java.sql.SQLException;
+
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
@@ -36,8 +38,10 @@ public class LoginView extends VerticalLayout {
 
     /**
      * The constructor
+     * 
+     * @throws SQLException
      */
-    public LoginView() {
+    public LoginView() throws SQLException {
 
         /*
          * Instantiation

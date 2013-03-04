@@ -2,14 +2,7 @@ package hlrv.flybook.auth;
 
 import hlrv.flybook.managers.UserManager;
 
-import java.sql.SQLException;
-
-import com.vaadin.data.Item;
 import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.filter.Compare.Equal;
-import com.vaadin.data.util.sqlcontainer.SQLContainer;
-import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
-import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 
 // Some design notes. I'm taking a simpler approach even though I increase
 // coupling. I believe we can be fairly certain in this excercise that we won't
@@ -17,11 +10,10 @@ import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 // method so I'm hardcoding the behaviour here.
 
 public class Auth {
-    private UserManager manager;
+    private final UserManager manager;
     private User user;
 
-    public Auth(UserManager manager)
-    {
+    public Auth(UserManager manager) {
         this.manager = manager;
     }
 
@@ -33,10 +25,9 @@ public class Auth {
      * general exception as I can't be bothered with finding / creating a proper
      * exception at this point in time
      */
-    public User login(String username, String password) throws Exception
-    {
+    public User login(String username, String password) throws Exception {
         User user = this.manager.getFromUsername(username);
-        Hash hash = new Hash(this.manager.getHashCode(username));
+        Hash hash = new Hash(this.manager.getHashCode(password));
         if (hash.check(password)) {
             this.user = user;
             return user;
@@ -44,8 +35,7 @@ public class Auth {
         throw new Exception("Password incorrect");
     }
 
-    public BeanItem<User> getCurrentUser() throws Exception
-    {
+    public BeanItem<User> getCurrentUser() throws Exception {
         if (this.user == null) {
             throw new Exception("User not logged in");
         }
@@ -60,9 +50,8 @@ public class Auth {
         this.user = null;
     }
 
-    public void register(User user, String password) throws SQLException
-    {
-        Hash hash = Hash.hash(password);
+    public void register(User user) throws Exception {
+        Hash hash = Hash.hash(user.getPassword());
         this.manager.createUser(user, hash);
     }
 }
