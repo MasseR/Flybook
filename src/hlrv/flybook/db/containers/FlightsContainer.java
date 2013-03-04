@@ -1,5 +1,6 @@
 package hlrv.flybook.db.containers;
 
+import hlrv.flybook.FlightType;
 import hlrv.flybook.FlybookUI;
 import hlrv.flybook.auth.User;
 import hlrv.flybook.db.DBConnection;
@@ -10,6 +11,8 @@ import java.sql.SQLException;
 import java.util.Date;
 
 import com.vaadin.data.Container.Filter;
+import com.vaadin.data.Item;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.filter.Compare.Equal;
 import com.vaadin.data.util.sqlcontainer.RowId;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
@@ -34,6 +37,13 @@ public class FlightsContainer {
     private Filter usernameFilter;
 
     /**
+     * Container that holds flight types.
+     */
+    private IndexedContainer flightTypesContainer;
+
+    public static final String PID_FLIGHT_TYPE = "type";
+
+    /**
      * Create new instance of FlightsContainer that uses DBConnection given as
      * argument.
      */
@@ -55,6 +65,8 @@ public class FlightsContainer {
         flightsContainer = new SQLContainer(query);
         flightsContainer.setAutoCommit(false);
 
+        flightTypesContainer = createFlightTypesContainer();
+
         // container.setPageLength(5 * container.size());
     }
 
@@ -63,6 +75,10 @@ public class FlightsContainer {
      */
     public SQLContainer getContainer() {
         return flightsContainer;
+    }
+
+    public IndexedContainer getFlightTypesContainer() {
+        return flightTypesContainer;
     }
 
     /**
@@ -185,5 +201,40 @@ public class FlightsContainer {
         RowId id = new RowId(pkey);
 
         return flightsContainer.removeItem(id);
+    }
+
+    private IndexedContainer createFlightTypesContainer() {
+
+        final String caption = PID_FLIGHT_TYPE;
+
+        IndexedContainer flightTypeContainer = new IndexedContainer();
+        flightTypeContainer.addContainerProperty(caption, String.class, null);
+
+        for (FlightType type : FlightType.values()) {
+            Item item = flightTypeContainer
+                    .addItem((new Integer(type.ordinal())));
+            item.getItemProperty(caption).setValue(type.getName());
+        }
+
+        // flightTypeContainer
+        // .addItem(new Integer(FlightType.UNDEFINED.ordinal()))
+        // .getItemProperty(caption).setValue("Undefined");
+        //
+        // flightTypeContainer.addItem(new
+        // Integer(FlightType.DOMESTIC.ordinal()))
+        // .getItemProperty(caption).setValue("Domestic");
+        //
+        // flightTypeContainer.addItem(new Integer(FlightType.HOBBY.ordinal()))
+        // .getItemProperty(caption).setValue("Hobby");
+        //
+        // flightTypeContainer
+        // .addItem(new Integer(FlightType.TRANSREGIONAL.ordinal()))
+        // .getItemProperty(caption).setValue("Transregional");
+        //
+        // flightTypeContainer
+        // .addItem(new Integer(FlightType.TRANSCONTINENTAL.ordinal()))
+        // .getItemProperty(caption).setValue("Transcontinental");
+
+        return flightTypeContainer;
     }
 }
