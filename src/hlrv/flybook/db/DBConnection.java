@@ -12,7 +12,7 @@ import com.vaadin.server.VaadinService;
  */
 public class DBConnection {
 
-    private SimpleJDBCConnectionPool pool;
+    private final SimpleJDBCConnectionPool pool;
 
     public DBConnection() throws SQLException {
 

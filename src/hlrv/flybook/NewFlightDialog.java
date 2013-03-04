@@ -8,12 +8,12 @@ import com.vaadin.ui.Window;
 
 public class NewFlightDialog extends Window implements Button.ClickListener {
 
-    private SessionContext ctx;
+    private final SessionContext ctx;
 
-    private FlightForm flightForm;
+    private final FlightForm flightForm;
 
-    private Button closeButton;
-    private Button createButton;
+    private final Button closeButton;
+    private final Button createButton;
 
     public NewFlightDialog(SessionContext ctx) {
         super("New Flight");

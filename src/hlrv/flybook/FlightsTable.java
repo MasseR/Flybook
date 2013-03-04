@@ -15,9 +15,9 @@ public class FlightsTable extends CustomComponent implements
         Property.ValueChangeListener, Container.ItemSetChangeListener,
         QueryDelegate.RowIdChangeListener {
 
-    private SessionContext ctx;
+    private final SessionContext ctx;
 
-    private Table table;
+    private final Table table;
 
     public FlightsTable(SessionContext ctx) {
 

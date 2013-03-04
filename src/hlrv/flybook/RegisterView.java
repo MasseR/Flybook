@@ -19,12 +19,12 @@ public class RegisterView extends Window {
     /**
      * The constructor
      */
-    public RegisterView() {
+    public RegisterView(boolean registerBoolean) {
 
         /*
          * Instantiate
          */
-        form = new RegisterForm();
+        form = new RegisterForm(registerBoolean);
 
         /*
          * Set components in order

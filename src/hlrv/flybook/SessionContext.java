@@ -6,7 +6,6 @@ import hlrv.flybook.db.DBConnection;
 
 import java.sql.SQLException;
 
-import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.server.VaadinSession;
 import com.vaadin.ui.UI;
@@ -16,14 +15,13 @@ public class SessionContext {
     /**
      * Wrapper around jdbc connections.
      */
-    private DBConnection dbconn;
-
+    private final DBConnection dbconn;
 
     /**
      * Current selected FlightItem in table, can be changed so wrap in property
      * others can listen for changes.
      */
-    private ObjectProperty<FlightItem> currentFlightEntry;
+    private final ObjectProperty<FlightItem> currentFlightEntry;
 
     /**
      * SQLContainer wrapper for FlightEntries.
@@ -88,7 +86,10 @@ public class SessionContext {
             return false;
         }
 
-        return currentFlightEntry.getValue().getPilot()
-                .equals(((FlybookUI) UI.getCurrent()).getUser().getBean().getUsername());
+        return currentFlightEntry
+                .getValue()
+                .getPilot()
+                .equals(((FlybookUI) UI.getCurrent()).getUser().getBean()
+                        .getUsername());
     }
 }

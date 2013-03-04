@@ -21,15 +21,15 @@ import com.vaadin.ui.VerticalLayout;
 public class FlightMap extends CustomComponent implements Runnable,
         Property.ValueChangeListener {
 
-    private SessionContext ctx;
+    private final SessionContext ctx;
 
     // private Item flightItem;
 
-    private Connection connection;
+    private final Connection connection;
 
-    private Image image;
+    private final Image image;
 
-    private ComboBox mapType;
+    private final ComboBox mapType;
 
     public FlightMap(SessionContext ctx) throws Exception {
 

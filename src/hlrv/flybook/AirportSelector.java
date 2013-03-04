@@ -20,13 +20,13 @@ import com.vaadin.ui.VerticalLayout;
 public class AirportSelector extends CustomComponent implements
         Property.ValueChangeListener {
 
-    private ComboBox countryCombo;
+    private final ComboBox countryCombo;
 
-    private ComboBox cityCombo;
+    private final ComboBox cityCombo;
 
-    private ComboBox nameCombo;
+    private final ComboBox nameCombo;
 
-    private TextField textField;
+    private final TextField textField;
 
     public AirportSelector(TextField airportField) {
 

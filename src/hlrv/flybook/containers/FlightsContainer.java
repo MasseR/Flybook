@@ -21,7 +21,7 @@ import com.vaadin.ui.UI;
 
 public class FlightsContainer {
 
-    private SQLContainer container;
+    private final SQLContainer container;
 
     private Filter usernameFilter;
 

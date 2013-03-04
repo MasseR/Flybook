@@ -9,7 +9,7 @@ import com.vaadin.data.Item;
  */
 public class FlightItem {
 
-    private Item item;
+    private final Item item;
 
     public FlightItem(Item source) {
 

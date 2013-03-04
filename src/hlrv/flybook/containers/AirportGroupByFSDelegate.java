@@ -14,7 +14,7 @@ import com.vaadin.data.util.sqlcontainer.query.generator.filter.QueryBuilder;
 
 public class AirportGroupByFSDelegate implements FreeformStatementDelegate {
 
-    private String groupBy;
+    private final String groupBy;
 
     private List<Filter> filters;
 

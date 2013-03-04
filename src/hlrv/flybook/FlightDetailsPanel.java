@@ -12,14 +12,14 @@ import com.vaadin.ui.VerticalLayout;
 public class FlightDetailsPanel extends CustomComponent implements
         Property.ValueChangeListener, Button.ClickListener {
 
-    private SessionContext ctx;
+    private final SessionContext ctx;
 
-    private FlightForm flightForm;
+    private final FlightForm flightForm;
 
-    private FlightMap flightMap;
+    private final FlightMap flightMap;
 
-    private Button applyButton;
-    private Button resetButton;
+    private final Button applyButton;
+    private final Button resetButton;
 
     // private DateFormat dateFormat = new
     // SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

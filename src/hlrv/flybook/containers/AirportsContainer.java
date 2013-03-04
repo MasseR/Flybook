@@ -23,21 +23,21 @@ import com.vaadin.ui.Notification;
 
 public class AirportsContainer {
 
-    private SQLContainer allContainer;
+    private final SQLContainer allContainer;
 
     // private SQLContainer countriesContainer;
 
-    private IndexedContainer countriesContainer;
+    private final IndexedContainer countriesContainer;
 
     /**
      * Keep static list of all countries, assume this won't change.
      */
-    private TreeSet<String> countries;
+    private final TreeSet<String> countries;
 
     /**
      * Keep map of already fetched containers mapped to country.
      */
-    private TreeMap<String, Container> mapCountryToCityContainer = new TreeMap<String, Container>();
+    private final TreeMap<String, Container> mapCountryToCityContainer = new TreeMap<String, Container>();
 
     // private HashSet<String> countries;
 

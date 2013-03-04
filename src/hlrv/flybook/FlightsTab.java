@@ -16,16 +16,16 @@ import com.vaadin.ui.VerticalLayout;
 public class FlightsTab extends AbstractMainViewTab implements
         Property.ValueChangeListener, Button.ClickListener {
 
-    private SessionContext ctx;
+    private final SessionContext ctx;
 
-    private FlightsTable flightsTable;
+    private final FlightsTable flightsTable;
 
-    private FlightDetailsPanel flightDetails;
+    private final FlightDetailsPanel flightDetails;
 
-    private ComboBox pilotCombo;
+    private final ComboBox pilotCombo;
 
-    private Button newButton;
-    private Button deleteButton;
+    private final Button newButton;
+    private final Button deleteButton;
 
     private NewFlightDialog newFlightDialog = null;
 
@@ -51,7 +51,8 @@ public class FlightsTab extends AbstractMainViewTab implements
         /**
          * Create components above table.
          */
-        String username = ((FlybookUI) UI.getCurrent()).getUser().getBean().getUsername();
+        String username = ((FlybookUI) UI.getCurrent()).getUser().getBean()
+                .getUsername();
         pilotCombo = new ComboBox("Pilot");
         pilotCombo.setNullSelectionAllowed(false);
         pilotCombo.addValueChangeListener(this);
@@ -132,7 +133,8 @@ public class FlightsTab extends AbstractMainViewTab implements
 
             String value = (String) event.getProperty().getValue();
 
-            if (value.equals(((FlybookUI) UI.getCurrent()).getUser().getBean().getUsername())) {
+            if (value.equals(((FlybookUI) UI.getCurrent()).getUser().getBean()
+                    .getUsername())) {
                 ctx.getFlightsContainer().filterByUser(value);
                 // flightsTable.filterByUser(value);
             } else if (value.equals("All")) {

@@ -16,26 +16,26 @@ import com.vaadin.ui.VerticalLayout;
 
 public class FlightForm extends CustomComponent {
 
-    private SessionContext context;
+    private final SessionContext context;
 
     private FieldGroup fieldGroup;
 
-    private TextField fieldId;
-    private DateField fieldDate;
+    private final TextField fieldId;
+    private final DateField fieldDate;
 
-    private TextField fieldPilotUsername;
-    private TextField fieldPilotFullname;
+    private final TextField fieldPilotUsername;
+    private final TextField fieldPilotFullname;
 
-    private AirportSelector departurePortSelector;
-    private TextField fieldDeparturePort;
-    private DateField fieldDepartureTime;
+    private final AirportSelector departurePortSelector;
+    private final TextField fieldDeparturePort;
+    private final DateField fieldDepartureTime;
     // private ComboBox comboDeparturePortCountries;
 
-    private AirportSelector landingPortSelector;
-    private TextField fieldLandingPort;
-    private DateField fieldLandingTime;
+    private final AirportSelector landingPortSelector;
+    private final TextField fieldLandingPort;
+    private final DateField fieldLandingTime;
 
-    private TextArea fieldNotes;
+    private final TextArea fieldNotes;
 
     public FlightForm(SessionContext context) {
         super();
