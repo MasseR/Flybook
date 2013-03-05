@@ -59,7 +59,7 @@ public class LoginView extends VerticalLayout {
         panel.setContent(form);
         this.addComponent(panel);
 
-        this.setComponentAlignment(panel, Alignment.BOTTOM_CENTER);
+        this.setComponentAlignment(panel, Alignment.MIDDLE_CENTER);
     }
 
 }
