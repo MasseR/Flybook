@@ -26,4 +26,9 @@ public enum FlightType {
         return values[i];
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
 }

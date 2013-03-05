@@ -29,7 +29,7 @@ public class AirportField extends CustomField<Integer> implements
     private AirportsContainer airportsContainer;
 
     /**
-     * This selects ID quicly.
+     * This can be used to select ID quickly.
      */
     private ComboBox icaoCombo;
 
@@ -42,7 +42,7 @@ public class AirportField extends CustomField<Integer> implements
     private ComboBox nameCombo;
 
     /**
-     * Some flag taht makes the construct work... for now.
+     * Some flag that makes the construct work... for now.
      */
     private boolean valueBeingSet;
 

@@ -16,12 +16,12 @@ import com.vaadin.ui.themes.Reindeer;
 
 public class FlightDetailsPanel extends Panel implements Button.ClickListener {
 
-    private final FlightItemForm flightForm;
+    private FlightItemForm flightForm;
 
     private final Button applyButton;
     private final Button resetButton;
 
-    public FlightDetailsPanel() throws Exception {
+    public FlightDetailsPanel() {
 
         addStyleName(Reindeer.PANEL_LIGHT);
 

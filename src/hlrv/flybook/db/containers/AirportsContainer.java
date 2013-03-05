@@ -58,6 +58,9 @@ public class AirportsContainer {
     private ContainerCache<String, IndexedContainer> cachedNameContainers = new ContainerCache<String, IndexedContainer>(
             100);
 
+    private Filter filterCountry = null;
+    private Filter filterCity = null;
+
     public AirportsContainer(DBConnection dbconn) throws SQLException {
 
         JDBCConnectionPool pool = dbconn.getPool();
@@ -90,9 +93,10 @@ public class AirportsContainer {
 
         Item item = null;
         if (id != null) {
-            airportsContainer.addContainerFilter(new Equal("id", id));
+
+            setTemporaryFilter(new Equal("id", id));
             item = airportsContainer.getItem(airportsContainer.firstItemId());
-            airportsContainer.removeAllContainerFilters();
+            restoreFilters();
         }
         return new AirportItem(item);
     }
@@ -108,11 +112,11 @@ public class AirportsContainer {
         Item item = null;
 
         if (icaoCode != null) {
-            airportsContainer.addContainerFilter(new Equal(
-                    DBConstants.AIRPORTS_ICAO, icaoCode));
+
+            setTemporaryFilter(new Equal(DBConstants.AIRPORTS_ICAO, icaoCode));
             Object id = airportsContainer.firstItemId();
             item = airportsContainer.getItem(id);
-            airportsContainer.removeAllContainerFilters();
+            restoreFilters();
         }
 
         return new AirportItem(item);
@@ -129,13 +133,13 @@ public class AirportsContainer {
         Item item = null;
 
         if (country != null && city != null && name != null) {
-            airportsContainer.addContainerFilter(new And(new And(new Equal(
+            setTemporaryFilter(new And(new And(new Equal(
                     DBConstants.AIRPORTS_COUNTRY, country), new Equal(
                     DBConstants.AIRPORTS_CITY, city)), new Equal(
                     DBConstants.AIRPORTS_NAME, name)));
             Object id = airportsContainer.firstItemId();
             item = airportsContainer.getItem(id);
-            airportsContainer.removeAllContainerFilters();
+            restoreFilters();
         }
 
         return new AirportItem(item);
@@ -230,6 +234,38 @@ public class AirportsContainer {
     }
 
     /**
+     * Add country filter. If null, removes filter.
+     */
+    public void filterByCountry(String country) {
+
+        if (filterCountry != null) {
+            airportsContainer.removeContainerFilter(filterCountry);
+            filterCountry = null;
+        }
+
+        if (country != null) {
+            filterCountry = new Equal(DBConstants.AIRPORTS_COUNTRY, country);
+            airportsContainer.addContainerFilter(filterCountry);
+        }
+    }
+
+    /**
+     * Add city filter. If null, removes filter.
+     */
+    public void filterByCity(String city) {
+
+        if (filterCity != null) {
+            airportsContainer.removeContainerFilter(filterCity);
+            filterCity = null;
+        }
+
+        if (city != null) {
+            filterCity = new Equal(DBConstants.AIRPORTS_CITY, city);
+            airportsContainer.addContainerFilter(filterCity);
+        }
+    }
+
+    /**
      * Returns Container of unique cities for country. If country is null,
      * returned container is empty.
      */
@@ -312,6 +348,31 @@ public class AirportsContainer {
         return container;
     }
 
+    /**
+     * Helper method to replace all current filters with the one given as
+     * argument. One should call resetFilters soon after.
+     */
+    private void setTemporaryFilter(Filter filter) {
+
+        airportsContainer.removeAllContainerFilters();
+        airportsContainer.addContainerFilter(filter);
+    }
+
+    /**
+     * Restores permanent filters.
+     */
+    private void restoreFilters() {
+
+        airportsContainer.removeAllContainerFilters();
+
+        if (filterCountry != null) {
+            airportsContainer.addContainerFilter(filterCountry);
+        }
+        if (filterCity != null) {
+            airportsContainer.addContainerFilter(filterCity);
+        }
+    }
+
     private IndexedContainer createICAOCodesContainer() {
 
         /**
@@ -376,7 +437,7 @@ public class AirportsContainer {
         TreeSet<String> set = new TreeSet<String>();
 
         if (filter != null) {
-            airportsContainer.addContainerFilter(filter);
+            setTemporaryFilter(filter);
         }
 
         Object id = airportsContainer.firstItemId();
@@ -387,7 +448,9 @@ public class AirportsContainer {
             id = airportsContainer.nextItemId(id);
         }
 
-        airportsContainer.removeAllContainerFilters();
+        if (filter != null) {
+            restoreFilters();
+        }
 
         return set;
     }

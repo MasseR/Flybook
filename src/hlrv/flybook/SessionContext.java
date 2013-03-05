@@ -19,7 +19,7 @@ public class SessionContext {
     /**
      * Container for Users table.
      */
-    private UsersContainer usersContainer;
+    private final UsersContainer usersContainer;
 
     /**
      * SQLContainer wrapper for FlightEntries.

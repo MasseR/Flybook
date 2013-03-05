@@ -12,18 +12,18 @@ import com.vaadin.ui.VerticalLayout;
 public class FlightMap extends CustomComponent implements
         Property.ValueChangeListener {
 
-    private final int imageWidth = 250;
-    private final int imageHeight = 150;
+    private int imageWidth = 250;
+    private int imageHeight = 150;
 
     /**
      * Component containing the image.
      */
-    private final Image image;
+    private Image image;
 
     /**
      * Combobox used to change map terrain type.
      */
-    private final ComboBox comboType;
+    private ComboBox comboType;
 
     /**
      * We need departure and landing items.

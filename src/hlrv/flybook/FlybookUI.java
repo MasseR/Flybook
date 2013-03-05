@@ -15,8 +15,6 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.TabSheet;
 import com.vaadin.ui.UI;
 
 /**
@@ -66,24 +64,6 @@ public class FlybookUI extends UI {
             getSession().setLocale(Locale.getDefault());
 
             setContent(new LoginView());
-
-            /*
-             * TabSheet tabs = new TabSheet();
-             * 
-             * tabs.setSizeFull();
-             * 
-             * FlightsTab flightsTab = new FlightsTab(this.context);
-             * 
-             * tabs.addTab(flightsTab, "Flights");
-             * 
-             * tabs.addTab(new Panel(), "Airports");
-             * 
-             * tabs.addTab(new Panel(), "Aircrafts");
-             * 
-             * tabs.addTab(new Panel(), "Account");
-             * 
-             * setContent(tabs);
-             */
 
         } catch (Exception e) {
             System.err.println(e.toString());
