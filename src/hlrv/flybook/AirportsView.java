@@ -10,7 +10,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
-public class AirportsView extends AbstractMainViewTab implements
+public class AirportsView extends AbstractMainView implements
         Property.ValueChangeListener {
 
     /**
@@ -66,7 +66,7 @@ public class AirportsView extends AbstractMainViewTab implements
         layout.addComponent(table);
         layout.setExpandRatio(table, 1.0f);
 
-        setContent(layout);
+        setCompositionRoot(layout);
     }
 
     @Override

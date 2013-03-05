@@ -1,6 +1,7 @@
 package hlrv.flybook;
 
 import hlrv.flybook.db.DBConnection;
+import hlrv.flybook.db.containers.AircraftsContainer;
 import hlrv.flybook.db.containers.AirportsContainer;
 import hlrv.flybook.db.containers.FlightsContainer;
 import hlrv.flybook.db.containers.UsersContainer;
@@ -31,6 +32,11 @@ public class SessionContext {
      */
     private AirportsContainer airportsContainer;
 
+    /**
+     * SQLContainer wrapper for Aircrafts.
+     */
+    private AircraftsContainer aircraftsContainer;
+
     public SessionContext(VaadinSession session, DBConnection connection)
             throws Exception {
 
@@ -46,6 +52,8 @@ public class SessionContext {
             airportsContainer = new AirportsContainer(dbconn);
 
             flightsContainer = new FlightsContainer(dbconn);
+
+            aircraftsContainer = new AircraftsContainer(dbconn);
 
         } catch (SQLException e) {
             throw new Exception("Failed to create session container: "
@@ -72,6 +80,10 @@ public class SessionContext {
 
     public AirportsContainer getAirportsContainer() {
         return airportsContainer;
+    }
+
+    public AircraftsContainer getAircraftsContainer() {
+        return aircraftsContainer;
     }
 
     public static SessionContext getCurrent() {

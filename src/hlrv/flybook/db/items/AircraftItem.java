@@ -10,6 +10,10 @@ public class AircraftItem extends AbstractItem {
         super(item);
     }
 
+    public AircraftItem(Item item, Object iid) {
+        super(item, iid);
+    }
+
     public String getRegister() {
         return getString(DBConstants.AIRCRAFTS_REGISTER);
     }
@@ -49,6 +53,10 @@ public class AircraftItem extends AbstractItem {
 
     public void setRegister(String reg) {
         setValue(DBConstants.AIRCRAFTS_REGISTER, reg);
+    }
+
+    public void setUsername(String username) {
+        setValue(DBConstants.AIRCRAFTS_USERNAME, username);
     }
 
     public void setMakeAndModel(String makeModel) {

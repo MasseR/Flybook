@@ -7,14 +7,35 @@ import com.vaadin.data.Item;
  */
 public abstract class AbstractItem {
 
+    /**
+     * Container item
+     */
     protected Item item;
 
-    public AbstractItem(Item source) {
-        this.item = source;
+    /**
+     * Optional stored itemid.
+     */
+    protected Object itemId;
+
+    public AbstractItem(Item item) {
+        this.item = item;
+    }
+
+    public AbstractItem(Item item, Object iid) {
+        this.item = item;
+        this.itemId = iid;
     }
 
     public Item getItem() {
         return item;
+    }
+
+    public Object getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Object iid) {
+        this.itemId = iid;
     }
 
     public boolean isNull() {

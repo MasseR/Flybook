@@ -1,6 +1,7 @@
 package hlrv.flybook;
 
 import hlrv.flybook.auth.User;
+import hlrv.flybook.db.containers.FlightsContainer;
 import hlrv.flybook.db.items.FlightItem;
 
 import java.sql.SQLException;
@@ -21,7 +22,11 @@ public class FlightDetailsPanel extends Panel implements Button.ClickListener {
     private final Button applyButton;
     private final Button resetButton;
 
+    private FlightsContainer flightsContainer;
+
     public FlightDetailsPanel() {
+
+        flightsContainer = SessionContext.getCurrent().getFlightsContainer();
 
         addStyleName(Reindeer.PANEL_LIGHT);
 
@@ -103,13 +108,20 @@ public class FlightDetailsPanel extends Panel implements Button.ClickListener {
              */
             if (flightForm.commit()) {
                 try {
-                    SessionContext.getCurrent().getFlightsContainer().commit();
-                } catch (SQLException e) {
-                    Notification.show("Commit Failed", e.toString(),
+
+                    flightsContainer.commit();
+                } catch (SQLException ce) {
+
+                    Notification.show("Commit Failed", ce.toString(),
                             Notification.TYPE_ERROR_MESSAGE);
 
-                    SessionContext.getCurrent().getFlightsContainer()
-                            .rollback();
+                    try {
+                        flightsContainer.rollback();
+                    } catch (SQLException re) {
+
+                        Notification.show("Rollback Failed", re.toString(),
+                                Notification.TYPE_ERROR_MESSAGE);
+                    }
                 }
             }
 

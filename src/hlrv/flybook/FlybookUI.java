@@ -53,6 +53,8 @@ public class FlybookUI extends UI {
     @Override
     protected void init(VaadinRequest request) {
         try {
+            getPage().setTitle("Flybook");
+
             FlybookUI.pool = new DBConnection();
 
             this.authenticator = new Auth(new UserManager(

@@ -1,7 +1,6 @@
 package hlrv.flybook;
 
 import com.vaadin.ui.CustomComponent;
-import com.vaadin.ui.Panel;
 import com.vaadin.ui.TabSheet;
 
 public class MainView extends CustomComponent {
@@ -18,7 +17,7 @@ public class MainView extends CustomComponent {
 
         tabs.addTab(new AirportsView(), "Airports");
 
-        tabs.addTab(new Panel(), "Aircrafts");
+        tabs.addTab(new AircraftsView(), "Aircrafts");
 
         setCompositionRoot(tabs);
     }

@@ -20,7 +20,6 @@ import com.vaadin.data.util.sqlcontainer.RowId;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
-import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
 
 /**
@@ -86,27 +85,6 @@ public class FlightsContainer {
      */
     public IndexedContainer getFlightTypesContainer() {
         return flightTypesContainer;
-    }
-
-    /**
-     * Commit changes to SQLContainer.
-     */
-    public void commit() throws SQLException {
-
-        flightsContainer.commit();
-    }
-
-    /**
-     * Rollback changes.
-     */
-    public void rollback() {
-
-        try {
-            flightsContainer.rollback();
-        } catch (SQLException e) {
-            Notification.show("FlightsContainer Rollback Error", e.toString(),
-                    Notification.TYPE_ERROR_MESSAGE);
-        }
     }
 
     /**
@@ -257,6 +235,22 @@ public class FlightsContainer {
         RowId id = new RowId(pkey);
 
         return flightsContainer.removeItem(id);
+    }
+
+    /**
+     * Commit changes to SQLContainer.
+     */
+    public void commit() throws SQLException {
+
+        flightsContainer.commit();
+    }
+
+    /**
+     * Rollback changes.
+     */
+    public void rollback() throws SQLException {
+
+        flightsContainer.rollback();
     }
 
     private IndexedContainer createFlightTypesContainer() {
