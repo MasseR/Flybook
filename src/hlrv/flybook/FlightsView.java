@@ -5,20 +5,25 @@ import hlrv.flybook.db.containers.FlightsContainer;
 import hlrv.flybook.db.items.FlightItem;
 
 import java.sql.SQLException;
+import java.util.Date;
 
 import com.vaadin.data.Container;
 import com.vaadin.data.Container.ItemSetChangeEvent;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.Panel;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
+import com.vaadin.ui.themes.Reindeer;
 
 /**
  * FlightsView is a root component of main view. It contains read-only flight
@@ -47,6 +52,21 @@ public class FlightsView extends AbstractMainViewTab implements
      * Combobox to filter by pilot username.
      */
     private ComboBox comboPilotFilter;
+
+    /**
+     * Combobox to filter by flight type.
+     */
+    private ComboBox comboFlightTypeFilter;
+
+    /**
+     * DateField to filter by date (time range begin).
+     */
+    private DateField dateRangeFromFilter;
+
+    /**
+     * DateField to filter by date (time range end).
+     */
+    private DateField dateRangeToFilter;
 
     /**
      * Table to show some read-only (for now?) columns of filtered flights.
@@ -103,12 +123,38 @@ public class FlightsView extends AbstractMainViewTab implements
                 .getUsername();
         comboPilotFilter = new ComboBox("Pilot");
         comboPilotFilter.setNullSelectionAllowed(false);
+        comboPilotFilter.setWidth(8.0f, Unit.EM);
         comboPilotFilter.addValueChangeListener(this);
         comboPilotFilter.setImmediate(true);
         comboPilotFilter.addItem("All");
         comboPilotFilter.addItem(username);
-
         comboPilotFilter.setValue(username);
+
+        dateRangeFromFilter = new DateField("Date From");
+        dateRangeFromFilter.setResolution(Resolution.MINUTE);
+        // dateRangeFromFilter.setTimeZone(TimeZone.getTimeZone("GMT+0"));
+        dateRangeFromFilter.setValue(new Date(0));
+        dateRangeFromFilter.addValueChangeListener(this);
+        dateRangeFromFilter.setImmediate(true);
+
+        dateRangeToFilter = new DateField("Date To");
+        dateRangeToFilter.setResolution(Resolution.MINUTE);
+        // dateRangeToFilter.setTimeZone(TimeZone.getTimeZone("GMT+0"));
+        // Advance some years from 1970
+        dateRangeToFilter.setValue(new Date(60 * 365 * 24 * 60 * 60 * 1000L));
+        dateRangeToFilter.addValueChangeListener(this);
+        dateRangeToFilter.setImmediate(true);
+
+        comboFlightTypeFilter = new ComboBox("Flight Type");
+        comboFlightTypeFilter.setNullSelectionAllowed(false);
+        comboFlightTypeFilter.addValueChangeListener(this);
+        comboFlightTypeFilter.setImmediate(true);
+        comboFlightTypeFilter.addItem("All");
+        for (FlightType type : FlightType.values()) {
+            comboFlightTypeFilter.addItem(type.getName());
+        }
+        comboFlightTypeFilter.addItem("All");
+        comboFlightTypeFilter.setValue("All");
 
         /**
          * Create components below table.
@@ -130,11 +176,17 @@ public class FlightsView extends AbstractMainViewTab implements
         /**
          * Layout for components above table.
          */
-        HorizontalLayout tableControlsLayout = new HorizontalLayout();
-        tableControlsLayout.setSpacing(true);
-        // tableControlsLayout.setMargin(true);
-        tableControlsLayout.setSizeUndefined();
-        tableControlsLayout.addComponent(comboPilotFilter);
+        HorizontalLayout filtersLayout = new HorizontalLayout();
+        filtersLayout.setSpacing(true);
+        filtersLayout.setSizeUndefined();
+        filtersLayout.addComponent(comboPilotFilter);
+        filtersLayout.addComponent(dateRangeFromFilter);
+        filtersLayout.addComponent(dateRangeToFilter);
+        filtersLayout.addComponent(comboFlightTypeFilter);
+
+        Panel filterPanel = new Panel("Filters", filtersLayout);
+        // filterPanel.setSizeFull();
+        filterPanel.addStyleName(Reindeer.PANEL_LIGHT);
 
         /**
          * Layout for buttons below table.
@@ -150,12 +202,12 @@ public class FlightsView extends AbstractMainViewTab implements
          * Vertical layout on left side.
          */
         VerticalLayout leftLayout = new VerticalLayout();
-        leftLayout.addComponent(tableControlsLayout);
+        leftLayout.addComponent(filterPanel);
         leftLayout.addComponent(table);
         leftLayout.addComponent(bottomButtonLayout);
-        leftLayout.setExpandRatio(tableControlsLayout, 0.0f);
+        // leftLayout.setExpandRatio(filterPanel, 0.0f);
         leftLayout.setExpandRatio(table, 1.0f);
-        leftLayout.setExpandRatio(bottomButtonLayout, 0.0f);
+        // leftLayout.setExpandRatio(bottomButtonLayout, 0.0f);
         leftLayout.setSpacing(true);
         // topLayout.setMargin(true);
         leftLayout.setSizeFull();
@@ -167,7 +219,7 @@ public class FlightsView extends AbstractMainViewTab implements
         horizontalLayout.addComponent(leftLayout);
         horizontalLayout.addComponent(flightDetails);
         horizontalLayout.setExpandRatio(leftLayout, 1.0f);
-        // horizontalLayout.setExpandRatio(flightDetails, 0.1f);
+        // /horizontalLayout.setExpandRatio(flightDetails, 0.1f);
 
         // HorizontalSplitPanel horizontalSplitPanel = new HorizontalSplitPanel(
         // topLayout, flightDetails);
@@ -198,6 +250,15 @@ public class FlightsView extends AbstractMainViewTab implements
 
             valueChangePilotFilter(event);
 
+        } else if (event.getProperty() == dateRangeFromFilter
+                || event.getProperty() == dateRangeToFilter) {
+
+            valueChangeDateFilter(event);
+
+        } else if (event.getProperty() == comboFlightTypeFilter) {
+
+            valueChangeFlightTypeFilter(event);
+
         } else if (event.getProperty() == table) {
 
             valueChangeTableSelection(event);
@@ -224,6 +285,62 @@ public class FlightsView extends AbstractMainViewTab implements
         } else {
 
             flightsContainer.filterByUser(pilot);
+        }
+    }
+
+    /**
+     * Called on date filter value changes.
+     */
+    private void valueChangeDateFilter(ValueChangeEvent event) {
+
+        Date dateFrom = dateRangeFromFilter.getValue();
+        Date dateTo = dateRangeToFilter.getValue();
+
+        /**
+         * Make sure values are valid (from <= to)
+         */
+        if (dateFrom.after(dateTo)) {
+
+            /**
+             * Reset opposing date filter value and use it's valueChange event
+             * to to set the new filters.
+             */
+            if (event.getProperty() == dateRangeFromFilter) {
+                dateRangeToFilter.setValue(dateFrom);
+            } else {
+                dateRangeFromFilter.setValue(dateTo);
+            }
+            return;
+        }
+
+        flightsContainer.filterByDate((int) (dateFrom.getTime() / 1000L),
+                (int) (dateTo.getTime() / 1000L));
+    }
+
+    /**
+     * Called on flight type filter changes.
+     */
+    private void valueChangeFlightTypeFilter(ValueChangeEvent event) {
+
+        String selectedType = (String) event.getProperty().getValue();
+
+        if (selectedType.equals("All")) {
+
+            /**
+             * Disable filters.
+             */
+            flightsContainer.filterByFlightType(null);
+        } else {
+            for (FlightType t : FlightType.values()) {
+                if (t.getName().equals(selectedType)) {
+
+                    /**
+                     * Set filter.
+                     */
+                    flightsContainer.filterByFlightType(t.ordinal());
+                    break;
+                }
+            }
         }
     }
 
@@ -320,24 +437,6 @@ public class FlightsView extends AbstractMainViewTab implements
     }
 
     private void buttonClickDelete(ClickEvent event) {
-
-        // Item item = table.getItem(table.getValue());
-        // if (item == null) {
-        // System.err.println("Null selected flight item being deleted");
-        // }
-        //
-        // if (table.removeItem(item)) {
-        //
-        // try {
-        // flightsContainer.commit();
-        // } catch (SQLException e) {
-        //
-        // Notification.show("Commit Error", e.toString(),
-        // Notification.TYPE_ERROR_MESSAGE);
-        //
-        // flightsContainer.rollback();
-        // }
-        // }
 
         FlightItem item = getSelectedItem();
 

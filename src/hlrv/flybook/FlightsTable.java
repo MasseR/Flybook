@@ -62,6 +62,8 @@ public class FlightsTable extends Table {
         FlightsContainer flightsContainer = SessionContext.getCurrent()
                 .getFlightsContainer();
 
+        // dateFormat.setTimeZone(TimeZone.getTimeZone("GMT+0"));
+
         // Remember to set data source before setVisibleColumns() etc.
         setContainerDataSource(flightsContainer.getContainer());
 

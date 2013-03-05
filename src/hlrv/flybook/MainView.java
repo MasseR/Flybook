@@ -14,15 +14,11 @@ public class MainView extends CustomComponent {
 
         tabs.setSizeFull();
 
-        FlightsView flightsView = new FlightsView();
+        tabs.addTab(new FlightsView(), "Flights");
 
-        tabs.addTab(flightsView, "Flights");
-
-        tabs.addTab(new Panel(), "Airports");
+        tabs.addTab(new AirportsView(), "Airports");
 
         tabs.addTab(new Panel(), "Aircrafts");
-
-        tabs.addTab(new Panel(), "Account");
 
         setCompositionRoot(tabs);
     }

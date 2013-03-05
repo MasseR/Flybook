@@ -13,6 +13,8 @@ import java.util.Date;
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Item;
 import com.vaadin.data.util.IndexedContainer;
+import com.vaadin.data.util.filter.And;
+import com.vaadin.data.util.filter.Compare;
 import com.vaadin.data.util.filter.Compare.Equal;
 import com.vaadin.data.util.sqlcontainer.RowId;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
@@ -35,6 +37,8 @@ public class FlightsContainer {
      * Keep reference to filters so we can remove/add them from container.
      */
     private Filter usernameFilter;
+    private Filter dateFilter;
+    private Filter flightTypeFilter;
 
     /**
      * Container that holds flight types.
@@ -77,6 +81,9 @@ public class FlightsContainer {
         return flightsContainer;
     }
 
+    /**
+     * Returns flight types container.
+     */
     public IndexedContainer getFlightTypesContainer() {
         return flightTypesContainer;
     }
@@ -123,6 +130,55 @@ public class FlightsContainer {
             usernameFilter = new Equal(DBConstants.FLIGHTENTRIES_USERNAME,
                     username);
             flightsContainer.addContainerFilter(usernameFilter);
+        }
+    }
+
+    /**
+     * Add date filter. If either argument is null, removes filter.
+     * 
+     * Filters out all flights not overlapping given time range.
+     */
+    public void filterByDate(Integer timeFrom, Integer timeTo) {
+
+        if (timeFrom > timeTo) {
+            throw new IllegalArgumentException(
+                    "Filter timeFrom must be greater or equal to timeTo");
+        }
+
+        if (dateFilter != null) {
+            flightsContainer.removeContainerFilter(dateFilter);
+            dateFilter = null;
+        }
+
+        /**
+         * Filter: (departure <= to) && (landing >= from)
+         */
+        if (timeFrom != null && timeTo != null) {
+            Filter ge = new Compare.LessOrEqual(
+                    DBConstants.FLIGHTENTRIES_DEPARTURE_TIME, timeTo);
+            Filter le = new Compare.GreaterOrEqual(
+                    DBConstants.FLIGHTENTRIES_LANDING_TIME, timeFrom);
+
+            dateFilter = new And(le, ge);
+            flightsContainer.addContainerFilter(dateFilter);
+        }
+    }
+
+    /**
+     * Add flighttype filter. If null, removes filter.
+     */
+    public void filterByFlightType(Integer type) {
+
+        if (flightTypeFilter != null) {
+            flightsContainer.removeContainerFilter(flightTypeFilter);
+            flightTypeFilter = null;
+        }
+
+        if (type != null) {
+
+            flightTypeFilter = new Equal(DBConstants.FLIGHTENTRIES_FLIGHT_TYPE,
+                    type);
+            flightsContainer.addContainerFilter(flightTypeFilter);
         }
     }
 
