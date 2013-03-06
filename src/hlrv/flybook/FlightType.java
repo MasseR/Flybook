@@ -4,8 +4,12 @@ public enum FlightType {
     /**
      * NOTE: Make sure order ordinals have no holes!
      */
-    UNDEFINED("Undefined"), DOMESTIC("Domestic"), HOBBY("Hobby"), TRANSREGIONAL(
-            "Transregional"), TRANSCONTINENTAL("Transcontinental");
+
+    UNDEFINED("Undefined"), HOBBY("Hobby"), COMMERCIAL("Commercial"), TRAINING(
+            "Training"), SEARCH_AND_RESCUE("Search and Rescue");
+    // UNDEFINED("Undefined"), DOMESTIC("Domestic"), HOBBY("Hobby"),
+    // TRANSREGIONAL(
+    // "Transregional"), TRANSCONTINENTAL("Transcontinental");
 
     /**
      * Ugly, but somehow we need to convert Int -> Enum.

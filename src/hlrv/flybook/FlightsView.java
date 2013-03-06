@@ -29,7 +29,7 @@ import com.vaadin.ui.themes.Reindeer;
  * FlightsView is a root component of main view. It contains read-only flight
  * entry table and details panel.
  */
-public class FlightsView extends AbstractMainViewTab implements
+public class FlightsView extends AbstractMainView implements
         Window.CloseListener, Property.ValueChangeListener,
         Button.ClickListener, Container.ItemSetChangeListener {
 
@@ -225,7 +225,7 @@ public class FlightsView extends AbstractMainViewTab implements
         // topLayout, flightDetails);
         // horizontalSplitPanel.setSplitPosition(50f);
 
-        setContent(horizontalLayout);
+        setCompositionRoot(horizontalLayout);
     }
 
     @Override
@@ -431,7 +431,13 @@ public class FlightsView extends AbstractMainViewTab implements
             /**
              * User cancelled.
              */
-            flightsContainer.rollback();
+            try {
+                flightsContainer.rollback();
+            } catch (SQLException e) {
+                Notification.show("Rollback Failed", e.toString(),
+                        Notification.TYPE_ERROR_MESSAGE);
+            }
+
         }
 
     }
@@ -450,13 +456,20 @@ public class FlightsView extends AbstractMainViewTab implements
             try {
                 flightsContainer.commit();
                 table.sanitizeSelection();
-            } catch (SQLException e) {
+            } catch (SQLException ce) {
 
-                Notification.show("Commit Error", e.toString(),
+                Notification.show("Commit Failed", ce.toString(),
                         Notification.TYPE_ERROR_MESSAGE);
 
-                flightsContainer.rollback();
+                try {
+                    flightsContainer.rollback();
+                } catch (SQLException re) {
+                    Notification.show("Rollback Error", re.toString(),
+                            Notification.TYPE_ERROR_MESSAGE);
+                }
             }
+        } else {
+            Notification.show("Flight Entry can't be removed");
         }
     }
 
