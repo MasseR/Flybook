@@ -17,13 +17,15 @@ public class AirportsTable extends Table {
     private String[] visibleColumns = { DBConstants.AIRPORTS_ICAO,
             DBConstants.AIRPORTS_IATA, DBConstants.AIRPORTS_NAME,
             DBConstants.AIRPORTS_CITY, DBConstants.AIRPORTS_COUNTRY,
-            DBConstants.AIRPORTS_LOCATION };
+            DBConstants.AIRPORTS_LATITUDE,
+            DBConstants.AIRPORTS_LONGITUDE
+    };
 
     /**
      * Columns headers matching to visible columns.
      */
     private String[] headers = { "ICAO", "IATA", "Airport Name", "City",
-            "Country", "Location (Degrees)" };
+            "Country", "Latitude", "Longitude"};
 
     private NumberFormat numberFormat = new DecimalFormat("#.###");
 
