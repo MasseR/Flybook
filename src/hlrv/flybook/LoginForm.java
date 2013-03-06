@@ -14,6 +14,7 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.UI;
 
 /**
  * This class provides the form for LoginView
@@ -65,7 +66,7 @@ public class LoginForm extends CustomComponent {
         layout = new VerticalLayout();
         form = new FieldGroup();
         register = new Button("Register");
-        auth = new Auth(new UserManager(FlybookUI.getPool()));
+        auth = ((FlybookUI) UI.getCurrent()).getAuth();
 
         /*
          * Set properties as data source

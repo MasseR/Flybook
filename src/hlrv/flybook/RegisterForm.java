@@ -14,6 +14,7 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.UI;
 
 /**
  * This class provides the form for RegisterView
@@ -35,7 +36,7 @@ public class RegisterForm extends CustomComponent {
         public void buttonClick(ClickEvent event) {
 
             try {
-                Auth auth = new Auth(new UserManager(FlybookUI.getPool()));
+                Auth auth = ((FlybookUI) UI.getCurrent()).getAuth();
                 if (register == true) {
 
                     auth.register(((BeanItem<User>) fields.getItemDataSource())
