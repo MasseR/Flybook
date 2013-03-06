@@ -50,6 +50,11 @@ public class FlybookUI extends UI {
 
     }
 
+    public Auth getAuth()
+    {
+        return this.authenticator;
+    }
+
     @Override
     protected void init(VaadinRequest request) {
         try {
