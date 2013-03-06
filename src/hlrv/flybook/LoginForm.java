@@ -118,10 +118,10 @@ public class LoginForm extends CustomComponent {
                 try {
 
                     // Temporary bypass
-                    // auth.login((String) item.getItemProperty("login")
-                    // .getValue(),
-                    // (String) item.getItemProperty("password")
-                    // .getValue());
+                    auth.login((String) item.getItemProperty("login")
+                        .getValue(),
+                        (String) item.getItemProperty("password")
+                        .getValue());
 
                     getUI().setContent(new MainView());
 
