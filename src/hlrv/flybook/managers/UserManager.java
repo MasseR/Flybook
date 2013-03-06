@@ -56,6 +56,7 @@ public class UserManager {
         newUser.getItemProperty("lastname").setValue(user.getLastname());
         newUser.getItemProperty("email").setValue(user.getEmail());
         newUser.getItemProperty("passwd").setValue(password.raw());
+        newUser.getItemProperty("admin").setValue(false);
 
         try {
             this.container.commit();
