@@ -44,7 +44,7 @@ public class UserManager {
 
     public String getHashCode(String username) throws Exception {
         Item item = this.getItemFromUsername(username);
-        return (String) item.getItemProperty("password").getValue();
+        return (String) item.getItemProperty("passwd").getValue();
     }
 
     public void createUser(User user, Hash password) {
