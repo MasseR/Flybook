@@ -56,6 +56,7 @@ public class Auth {
     }
 
     public void modify(User user) throws Exception {
-        this.manager.modifyUser(user);
+        Hash hash = Hash.hash(user.getPassword());
+        this.manager.modifyUser(user, hash);
     }
 }
