@@ -7,19 +7,7 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * All views probably share some characteristics so an interface/abstract/parent
- * class could be what we're looking for here. Remember to consult with rest of
- * the group! How the hell are these layouts supposed to be used?!
- * 
- * Fix this:
- * 
- * Vaadin DEBUG - FlybookUI/49518ea7 (height: RELATIVE, 100.0 %) -
- * VerticalLayout/5ddc1674 (height: UNDEFINED) - LoginView/418662d (height:
- * RELATIVE, 100.0 %) Layout problem detected: Component with relative height
- * inside a VerticalLayout with no height defined. Relative sizes were replaced
- * by undefined sizes, components may not render as expected.
- * 
- * But how?!
+ * A class to display the login form
  * 
  * @author Esa Halsti
  * 
@@ -51,8 +39,9 @@ public class LoginView extends VerticalLayout {
 
         panel.setWidth("200px");
         panel.setHeight("180px");
-        this.setSizeFull();
 
+        this.setSizeFull();
+        this.addStyleName("background-style");
         /*
          * Set components
          */

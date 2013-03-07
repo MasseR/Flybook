@@ -13,9 +13,10 @@ import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 
 public class UserManager {
     private final SQLContainer container;
+    private final TableQuery tq;
 
     public UserManager(JDBCConnectionPool pool) throws SQLException {
-        TableQuery tq = new TableQuery("users", pool);
+        tq = new TableQuery("users", pool);
         tq.setVersionColumn("optlock");
         this.container = new SQLContainer(tq);
     }
@@ -44,7 +45,7 @@ public class UserManager {
 
     public String getHashCode(String username) throws Exception {
         Item item = this.getItemFromUsername(username);
-        return (String) item.getItemProperty("passwd").getValue();
+        return (String) item.getItemProperty("password").getValue();
     }
 
     public void createUser(User user, Hash password) {
@@ -55,20 +56,31 @@ public class UserManager {
         newUser.getItemProperty("firstname").setValue(user.getFirstname());
         newUser.getItemProperty("lastname").setValue(user.getLastname());
         newUser.getItemProperty("email").setValue(user.getEmail());
-        newUser.getItemProperty("passwd").setValue(password.raw());
+        newUser.getItemProperty("password").setValue(password.raw());
         newUser.getItemProperty("admin").setValue(false);
 
         try {
+            /*
+             * First user is admin
+             */
+            if (isFirst()) {
+                newUser.getItemProperty("admin").setValue(true);
+            }
             this.container.commit();
         } catch (UnsupportedOperationException e) {
             System.err.println("Unsupported");
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             System.err.println("SQLError");
             e.printStackTrace();
         }
+    }
+
+    /*
+     * Check if row count == 0
+     */
+    private boolean isFirst() throws SQLException {
+        return tq.getCount() == 0;
     }
 
     public void modifyUser(User user) throws Exception {
@@ -86,7 +98,8 @@ public class UserManager {
         item.getItemProperty("firstname").setValue(user.getUsername());
         item.getItemProperty("lastname").setValue(user.getUsername());
         item.getItemProperty("email").setValue(user.getUsername());
-        item.getItemProperty("passwd").setValue(user.getUsername());
+        item.getItemProperty("password").setValue(user.getUsername());
         this.container.commit();
     }
+
 }
