@@ -1,5 +1,7 @@
 package hlrv.flybook;
 
+import java.sql.SQLException;
+
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.MenuBar;
 import com.vaadin.ui.MenuBar.Command;
@@ -14,7 +16,12 @@ public class MenuComponent extends CustomComponent {
         public void menuSelected(MenuItem selectedItem) {
 
             ((FlybookUI) UI.getCurrent()).getAuth().logout();
-            UI.getCurrent().setContent(new MainView());
+
+            try {
+                UI.getCurrent().setContent(new LoginView());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
