@@ -25,12 +25,13 @@ public class UserManager {
         this.container.removeAllContainerFilters();
         this.container.addContainerFilter(new Equal("username", username));
         Object id = this.container.firstItemId();
+        this.container.removeAllContainerFilters();
         if (id == null) {
             throw new Exception("User not found");
         }
         // TODO:
-        System.err.println(this.container.getItem(id).getItemPropertyIds()
-                .toString());
+        // System.err.println(this.container.getItem(id).getItemPropertyIds()
+        // .toString());
         return this.container.getItem(id);
     }
 
@@ -49,7 +50,21 @@ public class UserManager {
         return (String) item.getItemProperty("password").getValue();
     }
 
-    public void createUser(User user, Hash password) {
+    public void createUser(User user, Hash password) throws Exception {
+
+        boolean userExists = false;
+
+        try {
+            if (getItemFromUsername(user.getUsername()) != null) {
+                userExists = true;
+            }
+        } catch (Exception e) {
+            userExists = false;
+        }
+
+        if (userExists) {
+            throw new Exception("User already exists");
+        }
 
         Object itemId = this.container.addItem();
         Item newUser = this.container.getItem(itemId);
@@ -71,9 +86,21 @@ public class UserManager {
         } catch (UnsupportedOperationException e) {
             System.err.println("Unsupported");
             e.printStackTrace();
+            try {
+                this.container.rollback();
+                throw new Exception("Failed to create user");
+            } catch (SQLException er) {
+                er.printStackTrace();
+            }
         } catch (SQLException e) {
             System.err.println("SQLError");
             e.printStackTrace();
+            try {
+                this.container.rollback();
+                throw new Exception("Failed to create user");
+            } catch (SQLException er) {
+                er.printStackTrace();
+            }
         }
     }
 

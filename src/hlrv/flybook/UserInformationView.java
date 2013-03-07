@@ -52,15 +52,31 @@ public class UserInformationView extends Window {
                      * implemented here, but not enough time.
                      */
 
-                    auth.register(((BeanItem<User>) fields.getItemDataSource())
-                            .getBean());
+                    try {
+                        auth.register(((BeanItem<User>) fields
+                                .getItemDataSource()).getBean());
 
-                    /*
-                     * Notify user of registration
-                     */
-                    Notification.show("User "
-                            + ((BeanItem<User>) fields.getItemDataSource())
-                                    .getBean().getUsername() + " registered.");
+                        /*
+                         * Notify user of registration
+                         */
+                        Notification.show("User "
+                                + ((BeanItem<User>) fields.getItemDataSource())
+                                        .getBean().getUsername()
+                                + " registered.");
+                    } catch (Exception e) {
+                        /*
+                         * Notify user of registration
+                         */
+                        Notification.show(
+                                "User "
+                                        + ((BeanItem<User>) fields
+                                                .getItemDataSource()).getBean()
+                                                .getUsername()
+                                        + " registration failed.", e
+                                        .getMessage(),
+                                Notification.TYPE_WARNING_MESSAGE);
+                    }
+
                     close();
                 } else {
 

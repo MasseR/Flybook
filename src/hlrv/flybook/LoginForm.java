@@ -122,7 +122,6 @@ public class LoginForm extends CustomComponent {
                  */
                 try {
 
-                    // Temporary bypass
                     auth.login((String) item.getItemProperty("username")
                             .getValue(),
                             (String) item.getItemProperty("password")
