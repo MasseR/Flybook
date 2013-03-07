@@ -5,12 +5,13 @@ import hlrv.flybook.db.containers.AirportsContainer;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.Reindeer;
 
-public class AirportsView extends AbstractMainView implements
+public class AirportsView extends CustomComponent implements
         Property.ValueChangeListener {
 
     /**
@@ -27,6 +28,7 @@ public class AirportsView extends AbstractMainView implements
     private AirportsTable table;
 
     public AirportsView() {
+        setSizeFull();
 
         airportsContainer = SessionContext.getCurrent().getAirportsContainer();
 
@@ -57,7 +59,7 @@ public class AirportsView extends AbstractMainView implements
         filterLayout.addComponent(filterCountry);
         filterLayout.addComponent(filterCity);
 
-        Panel filterPanel = new Panel("Filters", filterLayout);
+        Panel filterPanel = new Panel("Filter", filterLayout);
         filterPanel.addStyleName(Reindeer.PANEL_LIGHT);
 
         VerticalLayout layout = new VerticalLayout();
@@ -67,11 +69,6 @@ public class AirportsView extends AbstractMainView implements
         layout.setExpandRatio(table, 1.0f);
 
         setCompositionRoot(layout);
-    }
-
-    @Override
-    public void tabSelected() {
-
     }
 
     @Override

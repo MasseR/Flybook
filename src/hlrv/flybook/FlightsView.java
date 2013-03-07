@@ -16,6 +16,7 @@ import com.vaadin.shared.ui.datefield.Resolution;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.DateField;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -29,7 +30,7 @@ import com.vaadin.ui.themes.Reindeer;
  * FlightsView is a root component of main view. It contains read-only flight
  * entry table and details panel.
  */
-public class FlightsView extends AbstractMainView implements
+public class FlightsView extends CustomComponent implements
         Window.CloseListener, Property.ValueChangeListener,
         Button.ClickListener, Container.ItemSetChangeListener {
 
@@ -86,6 +87,8 @@ public class FlightsView extends AbstractMainView implements
 
     public FlightsView() {
         super();
+
+        setSizeFull();
 
         flightsContainer = SessionContext.getCurrent().getFlightsContainer();
 
@@ -228,11 +231,6 @@ public class FlightsView extends AbstractMainView implements
         setCompositionRoot(horizontalLayout);
     }
 
-    @Override
-    public void tabSelected() {
-
-    }
-
     /**
      * Returns selected FlightItem in table.
      */
@@ -240,7 +238,7 @@ public class FlightsView extends AbstractMainView implements
 
         Object rowid = table.getValue();
         Item currentItem = table.getItem(rowid);
-        return new FlightItem(currentItem);
+        return new FlightItem(currentItem, rowid);
     }
 
     @Override
@@ -450,7 +448,6 @@ public class FlightsView extends AbstractMainView implements
             return;
         }
 
-        // TODO: Assert following logic...
         if (flightsContainer.removeEntry(item)) {
 
             try {
@@ -477,7 +474,5 @@ public class FlightsView extends AbstractMainView implements
     public void containerItemSetChange(ItemSetChangeEvent event) {
 
         table.sanitizeSelection();
-
-        Object selectedId = table.getValue();
     }
 }

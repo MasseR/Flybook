@@ -3,9 +3,7 @@ package hlrv.flybook;
 import hlrv.flybook.db.DBConstants;
 import hlrv.flybook.db.containers.AirportsContainer;
 import hlrv.flybook.db.containers.FlightsContainer;
-import hlrv.flybook.db.containers.UsersContainer;
 import hlrv.flybook.db.items.AirportItem;
-import hlrv.flybook.db.items.UserItem;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -120,12 +118,12 @@ public class FlightsTable extends Table {
      */
     private class TableColumnGenerator implements Table.ColumnGenerator {
 
-        private UsersContainer usersContainer;
+        // private UsersContainer usersContainer;
         private AirportsContainer airportsContainer;
 
         public TableColumnGenerator() {
 
-            usersContainer = SessionContext.getCurrent().getUsersContainer();
+            // usersContainer = SessionContext.getCurrent().getUsersContainer();
 
             airportsContainer = SessionContext.getCurrent()
                     .getAirportsContainer();
@@ -136,20 +134,20 @@ public class FlightsTable extends Table {
 
             Property prop = table.getItem(itemId).getItemProperty(columnId);
 
-            if (columnId.equals(DBConstants.AIRCRAFTS_USERNAME)) {
-
-                /**
-                 * Get username and create fullname by accessing UsersContainer.
-                 */
-                String username = (String) prop.getValue();
-
-                UserItem useritem = usersContainer.getItem(username);
-
-                Label label = new Label(username);
-                label.setDescription(useritem.getFirstname() + " "
-                        + useritem.getLastname());
-                return label;
-            }
+            // if (columnId.equals(DBConstants.AIRCRAFTS_USERNAME)) {
+            //
+            // /**
+            // * Get username and create fullname by accessing UsersContainer.
+            // */
+            // String username = (String) prop.getValue();
+            //
+            // UserItem useritem = usersContainer.getItem(username);
+            //
+            // Label label = new Label(username);
+            // label.setDescription(useritem.getFirstname() + " "
+            // + useritem.getLastname());
+            // return label;
+            // }
 
             if (columnId.equals(DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT)
                     || columnId

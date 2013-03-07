@@ -38,7 +38,7 @@ public class AircraftsContainer {
         JDBCConnectionPool pool = dbconn.getPool();
 
         TableQuery tq = new TableQuery(DBConstants.TABLE_AIRCRAFTS, pool);
-        tq.setVersionColumn(DBConstants.USERS_OPTLOCK);
+        tq.setVersionColumn(DBConstants.AIRCRAFTS_OPTLOCK);
         aircraftsContainer = new SQLContainer(tq);
         aircraftsContainer.setAutoCommit(false);
     }
@@ -48,6 +48,13 @@ public class AircraftsContainer {
      */
     public SQLContainer getContainer() {
         return aircraftsContainer;
+    }
+
+    public boolean containsItem(String register) {
+
+        Object[] pkey = { register };
+        RowId id = new RowId(pkey);
+        return aircraftsContainer.getItemUnfiltered(id) != null;
     }
 
     /**
@@ -78,8 +85,8 @@ public class AircraftsContainer {
             customFilter = null;
         }
 
-        if (customFilter != null) {
-            aircraftsContainer.addContainerFilter(customFilter);
+        if (filter != null) {
+            aircraftsContainer.addContainerFilter(filter);
             customFilter = filter;
         }
     }
@@ -94,6 +101,10 @@ public class AircraftsContainer {
      * @return AircraftItem
      */
     public AircraftItem addEntry() {
+
+        /**
+         * Get first unused register.
+         */
 
         /**
          * Create new item and get temporary row id.
@@ -111,10 +122,10 @@ public class AircraftsContainer {
          */
         User curUser = ((FlybookUI) UI.getCurrent()).getUser().getBean();
 
-        acItem.setRegister("");
+        acItem.setRegister(getUniqueRegister());
         acItem.setUsername(curUser.getUsername());
         acItem.setMakeAndModel("");
-        acItem.setCapacity(null);
+        acItem.setCapacity(1);
         acItem.setYear("");
         acItem.setEngineCount(1);
         acItem.setMaxWeight("");
@@ -132,7 +143,7 @@ public class AircraftsContainer {
      */
     public boolean removeEntry(AircraftItem item) {
 
-        Object[] pkey = { new Integer(item.getRegister()) };
+        Object[] pkey = { item.getRegister() };
         RowId id = new RowId(pkey);
 
         return aircraftsContainer.removeItem(id);
@@ -176,4 +187,27 @@ public class AircraftsContainer {
         }
     }
 
+    /**
+     * Finds unique register.
+     * 
+     * @return
+     */
+    private String getUniqueRegister() {
+
+        int regId = 1;
+        while (true) {
+            String reg = "REG-";
+            if (regId < 10) {
+                reg += "00";
+            } else if (regId < 100) {
+                reg += "0";
+            }
+            reg += regId;
+
+            if (!containsItem(reg)) {
+                return reg;
+            }
+            ++regId;
+        }
+    }
 }

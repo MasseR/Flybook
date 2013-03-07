@@ -5,19 +5,27 @@ import hlrv.flybook.db.DBConstants;
 import hlrv.flybook.db.containers.AircraftsContainer;
 import hlrv.flybook.db.items.AircraftItem;
 
+import java.sql.SQLException;
+
 import com.vaadin.annotations.Title;
-import com.vaadin.data.Buffered.SourceException;
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.Validator;
 import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.util.converter.StringToIntegerConverter;
+import com.vaadin.data.util.sqlcontainer.query.QueryDelegate.RowIdChangeEvent;
+import com.vaadin.data.util.sqlcontainer.query.QueryDelegate.RowIdChangeListener;
+import com.vaadin.data.validator.NullValidator;
+import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.event.FieldEvents.TextChangeEvent;
 import com.vaadin.event.FieldEvents.TextChangeListener;
 import com.vaadin.ui.AbstractTextField.TextChangeEventMode;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
+import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Table;
@@ -30,7 +38,8 @@ import com.vaadin.ui.VerticalLayout;
  */
 @SuppressWarnings("serial")
 @Title("FLYBOOK - AIRCRAFTS")
-public class AircraftsView extends AbstractMainView {
+public class AircraftsView extends CustomComponent implements
+        Property.ValueChangeListener, RowIdChangeListener {
 
     /* User interface components are stored in session. */
     private Table table = new Table();
@@ -71,23 +80,28 @@ public class AircraftsView extends AbstractMainView {
     // */
     // IndexedContainer aircraftContainer = createDummyDatasource();
 
+    /**
+     * Reference to aircrafts SQL Container.
+     */
     private AircraftsContainer aircraftContainer;
 
+    private String validatorIgnoresRegister;
+
+    private boolean discardChanges = true;
+
+    /**
+     * Constructs new AircraftsView.
+     */
     public AircraftsView() {
+        setSizeFull();
 
         aircraftContainer = SessionContext.getCurrent().getAircraftsContainer();
 
-        initLayout();
-        initAircraftList();
+        initTable();
         initEditor();
         initSearch();
         initAddRemoveButtons();
-    }
-
-    @Override
-    public void tabSelected() {
-        // TODO Auto-generated method stub
-
+        initLayout();
     }
 
     /*
@@ -150,9 +164,46 @@ public class AircraftsView extends AbstractMainView {
 
     private void initEditor() {
 
+        editorFields.setBuffered(false);
+
         /* User interface created dynamically to reflect underlying data. */
         for (int i = 0; i < headers.length; ++i) {
+
             TextField field = new TextField(headers[i]);
+            field.setImmediate(true);
+            field.addValidator(new NullValidator("Value must be give", false));
+            field.setNullRepresentation("<Unset>");
+            field.addValueChangeListener(this);
+            field.setTextChangeEventMode(TextChangeEventMode.LAZY);
+
+            if (visibleColumns[i].equals(DBConstants.AIRCRAFTS_REGISTER)) {
+                field.setRequired(true);
+                field.addValidator(new RegexpValidator(
+                        "([0-9A-Z]{1,3}-)?[0-9A-Z]+",
+                        "Register is in invalid format"));
+                field.addValidator(new Validator() {
+                    @Override
+                    public void validate(Object value)
+                            throws InvalidValueException {
+
+                        String register = (String) value;
+                        if (validatorIgnoresRegister.equals(register)) {
+                            return;
+                        }
+
+                        if (aircraftContainer.containsItem(register)) {
+                            throw new InvalidValueException("Register "
+                                    + register + " already exists");
+                        }
+
+                    }
+                });
+            } else if (visibleColumns[i]
+                    .equals(DBConstants.AIRCRAFTS_ENGINE_COUNT)
+                    || visibleColumns[i].equals(DBConstants.AIRCRAFTS_CAPACITY)) {
+                field.setConverter(new StringToIntegerConverter());
+            }
+
             editorLayout.addComponent(field);
             field.setWidth("100%");
 
@@ -167,12 +218,15 @@ public class AircraftsView extends AbstractMainView {
         buttonLayout.addComponent(removeAircraftButton);
         buttonLayout.addComponent(applyAircraftButton);
         editorLayout.addComponent(buttonLayout);
+    }
 
-        /*
-         * Data buffered in the user interface. Write the changes automatically
-         * without calling commit().
+    @Override
+    public void valueChange(ValueChangeEvent event) {
+
+        /**
+         * We listen for field value changes.
          */
-        editorFields.setBuffered(false);
+        applyAircraftButton.setEnabled(editorFields.isValid());
     }
 
     private void initSearch() {
@@ -239,30 +293,21 @@ public class AircraftsView extends AbstractMainView {
             @SuppressWarnings("unchecked")
             public void buttonClick(ClickEvent event) {
 
+                maybeDiscardChanges();
+
                 /*
                  * Adding a new row in the beginning of the list.
                  */
                 AircraftItem item = aircraftContainer.addEntry();
 
+                /**
+                 * To show new row content in table.
+                 */
+                table.refreshRowCache();
+
+                discardChanges = false;
                 table.select(item.getItemId());
-
-                /*
-                 * Adding a new row in the beginning of the list.
-                 */
-                // aircraftContainer.removeAllContainerFilters();
-                // Object aircraftId = aircraftContainer.addItemAt(0);
-
-                /*
-                 * Each Item has a set of Properties that hold values. Here we
-                 * set a couple of those.
-                 */
-                // aircraftList.getContainerProperty(aircraftId, REGISTER)
-                // .setValue("New");
-                // aircraftList.getContainerProperty(aircraftId, MAKEMODEL)
-                // .setValue("Aircraft");
-                //
-                // /* The newly created aircraft to edit it. */
-                // aircraftList.select(aircraftId);
+                discardChanges = true;
             }
         });
 
@@ -272,9 +317,9 @@ public class AircraftsView extends AbstractMainView {
                 Object aircraftId = table.getValue();
                 table.removeItem(aircraftId);
                 try {
-                    table.commit();
-                } catch (SourceException e) {
-
+                    aircraftContainer.commit();
+                } catch (SQLException e) {
+                    System.err.println(e.toString());
                 }
 
             }
@@ -285,32 +330,52 @@ public class AircraftsView extends AbstractMainView {
             @Override
             public void buttonClick(ClickEvent event) {
 
-                try {
-                    table.commit();
-                } catch (SourceException e) {
-
+                if (editorFields.isValid()) {
+                    try {
+                        aircraftContainer.commit();
+                    } catch (SQLException e) {
+                        System.err.println(e.toString());
+                    }
                 }
             }
         });
     }
 
-    private void initAircraftList() {
+    private void initTable() {
+
         table.setContainerDataSource(aircraftContainer.getContainer());
         table.setVisibleColumns(visibleColumns);
         table.setColumnHeaders(headers);
+
         table.setColumnCollapsingAllowed(true);
-        for (String id : initialCollapsedColumns) {
-            table.setColumnCollapsed(id, true);
+        for (String pid : initialCollapsedColumns) {
+            table.setColumnCollapsed(pid, true);
         }
 
         table.setSelectable(true);
         table.setImmediate(true);
+        table.setNullSelectionAllowed(true);
+
+        aircraftContainer.getContainer().addRowIdChangeListener(this);
 
         table.addValueChangeListener(new Property.ValueChangeListener() {
             public void valueChange(ValueChangeEvent event) {
+
+                maybeDiscardChanges();
+
                 Object aircraftId = table.getValue();
                 if (aircraftId != null) {
-                    editorFields.setItemDataSource(table.getItem(aircraftId));
+
+                    Item item = table.getItem(aircraftId);
+                    /**
+                     * This is a hack to get register field validator to ignore
+                     * it's own register.
+                     */
+                    validatorIgnoresRegister = (String) item.getItemProperty(
+                            DBConstants.AIRCRAFTS_REGISTER).getValue();
+
+                    editorFields.setItemDataSource(item);
+                    applyAircraftButton.setEnabled(editorFields.isValid());
                 } else {
                     editorFields.setItemDataSource(null);
                 }
@@ -320,31 +385,21 @@ public class AircraftsView extends AbstractMainView {
         });
     }
 
-    /*
-     * Generate some example data.
-     */
-    // @SuppressWarnings("unchecked")
-    // private static IndexedContainer createDummyDatasource() {
-    // IndexedContainer ac = new IndexedContainer();
-    //
-    // for (String p : fieldNames) {
-    // ac.addContainerProperty(p, String.class, "");
-    // }
-    //
-    // /* Create dummy data by randomly combining first and last names */
-    // String[] acrafts = { "AAA", "CCC", "FFF", "HHH", "LLL", "NNN", "PPP",
-    // "RRR", "UUU", "VVV" };
-    // String[] mmodels = { "Cessna 206 H", "Cessna 172 P", "Beech C-90",
-    // "Piper PA-28-181" };
-    // for (int i = 0; i < 40; i++) {
-    // Object id = ac.addItem();
-    // ac.getContainerProperty(id, REGISTER).setValue(
-    // acrafts[(int) (acrafts.length * Math.random())]);
-    // ac.getContainerProperty(id, MAKEMODEL).setValue(
-    // mmodels[(int) (mmodels.length * Math.random())]);
-    // }
-    //
-    // return ac;
-    // }
+    private void maybeDiscardChanges() {
 
+        if (discardChanges) {
+            try {
+                aircraftContainer.rollback();
+            } catch (SQLException e) {
+                System.err.println(e.toString());
+            }
+        }
+    }
+
+    @Override
+    public void rowIdChange(RowIdChangeEvent event) {
+
+        table.select(event.getNewRowId());
+
+    }
 }

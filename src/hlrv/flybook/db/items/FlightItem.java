@@ -13,8 +13,8 @@ import com.vaadin.data.util.PropertysetItem;
  */
 public class FlightItem extends AbstractItem {
 
-    public FlightItem(Item item) {
-        super(item);
+    public FlightItem(Item item, Object id) {
+        super(item, id);
     }
 
     /**
@@ -251,6 +251,6 @@ public class FlightItem extends AbstractItem {
 
         item.addItemProperty(DBConstants.FLIGHTENTRIES_NOTES, nullString);
 
-        return new FlightItem(item);
+        return new FlightItem(item, null);
     }
 }

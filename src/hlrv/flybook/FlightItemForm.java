@@ -326,7 +326,8 @@ public class FlightItemForm extends CustomComponent implements
         }
 
         /**
-         * If id is null, there is no why id field should be visible at all.
+         * If id is null, there is no reason why id field should be visible at
+         * all.
          */
         if (flightItem.getFlightID() == null) {
             fieldId.setVisible(false);

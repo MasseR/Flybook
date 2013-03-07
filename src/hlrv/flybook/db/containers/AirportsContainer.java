@@ -19,11 +19,10 @@ import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.Notification;
 
 /**
  * AirportsContainer wraps primary Airport SQLContainer and provides other
- * helper methods to create containers generated from the primary container.
+ * helper methods to create from the primary container.
  * 
  * .classConstraint (getContainer() contains no filters or orderBys)
  */
@@ -94,9 +93,14 @@ public class AirportsContainer {
         Item item = null;
         if (id != null) {
 
-            setTemporaryFilter(new Equal("id", id));
-            item = airportsContainer.getItem(airportsContainer.firstItemId());
-            restoreFilters();
+            Object[] pkey = { new Integer(id) };
+            RowId rowId = new RowId(pkey);
+            item = airportsContainer.getItemUnfiltered(rowId);
+
+            // setTemporaryFilter(new Equal("id", id));
+            // item =
+            // airportsContainer.getItem(airportsContainer.firstItemId());
+            // restoreFilters();
         }
         return new AirportItem(item);
     }
@@ -166,7 +170,9 @@ public class AirportsContainer {
         item.setName("");
         item.setCity("");
         item.setCountry("");
-        item.setLocation("0:0");
+        item.setLatitude(0.0);
+        item.setLongitude(0.0);
+        // item.setLocation("0:0");
 
         return item;
     }
@@ -195,25 +201,25 @@ public class AirportsContainer {
         return new RowId(pkey);
     }
 
-    public void commit() {
-
-        try {
-            airportsContainer.commit();
-        } catch (SQLException e) {
-            Notification.show("AirportsContainer Commit Error", e.toString(),
-                    Notification.TYPE_ERROR_MESSAGE);
-        }
-    }
-
-    public void rollback() {
-
-        try {
-            airportsContainer.rollback();
-        } catch (SQLException e) {
-            Notification.show("AirportsContainer Rollback Error", e.toString(),
-                    Notification.TYPE_ERROR_MESSAGE);
-        }
-    }
+    // public void commit() {
+    //
+    // try {
+    // airportsContainer.commit();
+    // } catch (SQLException e) {
+    // Notification.show("AirportsContainer Commit Error", e.toString(),
+    // Notification.TYPE_ERROR_MESSAGE);
+    // }
+    // }
+    //
+    // public void rollback() {
+    //
+    // try {
+    // airportsContainer.rollback();
+    // } catch (SQLException e) {
+    // Notification.show("AirportsContainer Rollback Error", e.toString(),
+    // Notification.TYPE_ERROR_MESSAGE);
+    // }
+    // }
 
     /**
      * Returns Container of all ICAO codes.

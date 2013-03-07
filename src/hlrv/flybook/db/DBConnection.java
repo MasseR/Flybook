@@ -1,7 +1,5 @@
 package hlrv.flybook.db;
 
-import hlrv.flybook.db.Migrations;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -36,7 +34,7 @@ public class DBConnection {
         logger.log(new LogRecord(Level.INFO, "Database: " + filePath));
 
         pool = new SimpleJDBCConnectionPool("org.sqlite.JDBC", "jdbc:sqlite:"
-                + filePath, "anon", "", 1, 1);
+                + filePath, "anon", "", 1, 5);
         Migrations migrations = new Migrations(this.pool);
         migrations.runMigrations();
     }

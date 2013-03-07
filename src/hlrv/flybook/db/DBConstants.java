@@ -15,7 +15,7 @@ public final class DBConstants {
     public final static String USERS_PASSWORD                           = "password";
     public final static String USERS_FIRSTNAME                          = "firstname";
     public final static String USERS_LASTNAME                           = "lastname";
-    public final static String USERS_ROLE                               = "role";
+    public final static String USERS_ADMIN                              = "admin";
     public final static String USERS_EMAIL                              = "email";
     public final static String USERS_OPTLOCK                            = "optlock";
 
@@ -45,7 +45,9 @@ public final class DBConstants {
     public final static String AIRPORTS_COUNTRY                         = "country";
     public final static String AIRPORTS_CITY                            = "city";
     public final static String AIRPORTS_NAME                            = "name";
-    public final static String AIRPORTS_LOCATION                        = "location";
+//    public final static String AIRPORTS_LOCATION                        = "location";
+    public final static String AIRPORTS_LATITUDE                        = "latitude";
+    public final static String AIRPORTS_LONGITUDE                               = "longitude";
     public final static String AIRPORTS_OPTLOCK                         = "optlock";
 
     public final static String AIRCRAFTS_REGISTER                       = "register";

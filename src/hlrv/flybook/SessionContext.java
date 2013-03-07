@@ -4,7 +4,6 @@ import hlrv.flybook.db.DBConnection;
 import hlrv.flybook.db.containers.AircraftsContainer;
 import hlrv.flybook.db.containers.AirportsContainer;
 import hlrv.flybook.db.containers.FlightsContainer;
-import hlrv.flybook.db.containers.UsersContainer;
 
 import java.sql.SQLException;
 
@@ -20,7 +19,7 @@ public class SessionContext {
     /**
      * Container for Users table.
      */
-    private final UsersContainer usersContainer;
+    // private final UsersContainer usersContainer;
 
     /**
      * SQLContainer wrapper for FlightEntries.
@@ -47,7 +46,7 @@ public class SessionContext {
 
         try {
 
-            usersContainer = new UsersContainer(dbconn);
+            // usersContainer = new UsersContainer(dbconn);
 
             airportsContainer = new AirportsContainer(dbconn);
 
@@ -70,9 +69,9 @@ public class SessionContext {
         return dbconn;
     }
 
-    public UsersContainer getUsersContainer() {
-        return usersContainer;
-    }
+    // public UsersContainer getUsersContainer() {
+    // return usersContainer;
+    // }
 
     public FlightsContainer getFlightsContainer() {
         return flightsContainer;

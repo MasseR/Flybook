@@ -17,13 +17,13 @@ public class AirportsTable extends Table {
     private String[] visibleColumns = { DBConstants.AIRPORTS_ICAO,
             DBConstants.AIRPORTS_IATA, DBConstants.AIRPORTS_NAME,
             DBConstants.AIRPORTS_CITY, DBConstants.AIRPORTS_COUNTRY,
-            DBConstants.AIRPORTS_LOCATION };
+            DBConstants.AIRPORTS_LATITUDE, DBConstants.AIRPORTS_LONGITUDE };
 
     /**
      * Columns headers matching to visible columns.
      */
     private String[] headers = { "ICAO", "IATA", "Airport Name", "City",
-            "Country", "Location (Degrees)" };
+            "Country", "Latitude", "Longitude" };
 
     private NumberFormat numberFormat = new DecimalFormat("#.###");
 
@@ -42,15 +42,20 @@ public class AirportsTable extends Table {
     protected String formatPropertyValue(Object rowId, Object colId,
             Property<?> property) {
 
-        if (colId.equals(DBConstants.AIRPORTS_LOCATION)) {
+        if (colId.equals(DBConstants.AIRPORTS_LATITUDE)
+                || colId.equals(DBConstants.AIRPORTS_LONGITUDE)) {
 
-            String[] parts = ((String) property.getValue()).split(":");
+            // String[] parts = ((String) property.getValue()).split(":");
 
-            double latitude = Double.valueOf(parts[0]);
-            double longitude = Double.valueOf(parts[1]);
+            double value = (Double) property.getValue();
 
-            return "Latitude: " + numberFormat.format(latitude)
-                    + " Longitude: " + numberFormat.format(longitude);
+            // double value = Double.valueOf((String) property.getValue());
+            // double latitude = Double.valueOf(parts[0]);
+            // double longitude = Double.valueOf(parts[1]);
+
+            return numberFormat.format(value);
+            // return "Latitude: " + numberFormat.format(latitude)
+            // + " Longitude: " + numberFormat.format(longitude);
         }
 
         return super.formatPropertyValue(rowId, colId, property);

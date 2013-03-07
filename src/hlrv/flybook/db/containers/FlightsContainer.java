@@ -16,7 +16,6 @@ import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.data.util.filter.And;
 import com.vaadin.data.util.filter.Compare;
 import com.vaadin.data.util.filter.Compare.Equal;
-import com.vaadin.data.util.sqlcontainer.RowId;
 import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
@@ -171,13 +170,13 @@ public class FlightsContainer {
      */
     public FlightItem addEntry() {
 
-        Object obj = flightsContainer.addItem(); // returns temporary row id
+        Object tempId = flightsContainer.addItem(); // returns temporary row id
 
         /**
          * getItem() ignores filtered objects, so must use this one.
          */
         FlightItem flightItem = new FlightItem(
-                flightsContainer.getItemUnfiltered(obj));
+                flightsContainer.getItemUnfiltered(tempId), tempId);
 
         /**
          * Initialize item with some sane values.
@@ -231,10 +230,10 @@ public class FlightsContainer {
      */
     public boolean removeEntry(FlightItem item) {
 
-        Object[] pkey = { new Integer(item.getFlightID()) };
-        RowId id = new RowId(pkey);
+        // Object[] pkey = { new Integer(item.getFlightID()) };
+        // RowId id = new RowId(pkey);
 
-        return flightsContainer.removeItem(id);
+        return flightsContainer.removeItem(item.getItemId());
     }
 
     /**

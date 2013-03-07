@@ -50,6 +50,22 @@ public abstract class AbstractItem {
         }
     }
 
+    protected Double getDouble(String pid) {
+        if (isNull()) {
+            return null;
+        } else {
+            return (Double) item.getItemProperty(pid).getValue();
+        }
+    }
+
+    protected Boolean getBoolean(String pid) {
+        if (isNull()) {
+            return null;
+        } else {
+            return 1 == (Integer) (item.getItemProperty(pid).getValue());
+        }
+    }
+
     protected String getString(String pid) {
         if (isNull()) {
             return null;

@@ -33,8 +33,15 @@ public class AirportItem extends AbstractItem {
         return getString(DBConstants.AIRPORTS_ICAO);
     }
 
-    public String getLocation() {
-        return getString(DBConstants.AIRPORTS_LOCATION);
+    // public String getLocation() {
+    // return getString(DBConstants.AIRPORTS_LOCATION);
+    // }
+    public Double getLatitude() {
+        return getDouble(DBConstants.AIRPORTS_LATITUDE);
+    }
+
+    public Double getLongitude() {
+        return getDouble(DBConstants.AIRPORTS_LONGITUDE);
     }
 
     public void setID(int id) {
@@ -57,8 +64,16 @@ public class AirportItem extends AbstractItem {
         setValue(DBConstants.AIRPORTS_ICAO, code);
     }
 
-    public void setLocation(String location) {
-        setValue(DBConstants.AIRPORTS_LOCATION, location);
+    // public void setLocation(String location) {
+    // setValue(DBConstants.AIRPORTS_LOCATION, location);
+    // }
+
+    public void setLatitude(Double latitude) {
+        setValue(DBConstants.AIRPORTS_LATITUDE, latitude);
+    }
+
+    public void setLongitude(Double longitude) {
+        setValue(DBConstants.AIRPORTS_LONGITUDE, longitude);
     }
 
 }
