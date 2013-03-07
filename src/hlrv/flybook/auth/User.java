@@ -112,15 +112,4 @@ public class User {
         return this.password;
     }
 
-    /*
-     * TODO: toString method for debugging; remove before going live
-     */
-
-    @Override
-    public String toString() {
-        return "password: " + this.password + " username:" + this.username
-                + " first name: " + this.firstname + " lastname : "
-                + this.lastname + " email: " + this.email + " is admin: "
-                + this.admin;
-    }
 }
