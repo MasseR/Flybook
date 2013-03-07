@@ -62,7 +62,7 @@ public class UserManager {
             /*
              * First user is admin
              */
-            if (tq.getCount() == 0) {
+            if (isFirst()) {
                 newUser.getItemProperty("admin").setValue(true);
             }
             this.container.commit();
@@ -73,6 +73,13 @@ public class UserManager {
             System.err.println("SQLError");
             e.printStackTrace();
         }
+    }
+
+    /*
+     * Check if row count == 0
+     */
+    private boolean isFirst() throws SQLException {
+        return tq.getCount() == 0;
     }
 
     public void modifyUser(User user) throws Exception {
@@ -93,4 +100,5 @@ public class UserManager {
         item.getItemProperty("passwd").setValue(user.getUsername());
         this.container.commit();
     }
+
 }
