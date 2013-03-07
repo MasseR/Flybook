@@ -11,16 +11,30 @@ import com.vaadin.data.util.sqlcontainer.SQLContainer;
 import com.vaadin.data.util.sqlcontainer.connection.JDBCConnectionPool;
 import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 
+/** A kind of wrapper for sqlcontainer
+ *
+ * Abstracts operations to users
+ */
 public class UserManager {
     private final SQLContainer container;
     private final TableQuery tq;
 
+    /** Creates a new manager
+     *
+     * @param JDBCConnectionPool pool A connection pool
+     */
     public UserManager(JDBCConnectionPool pool) throws SQLException {
         tq = new TableQuery("users", pool);
         tq.setVersionColumn("optlock");
         this.container = new SQLContainer(tq);
     }
 
+    /** Find user
+     *
+     * Helper function for finding user and returning the raw item from it
+     *
+     * @param String username The users username
+     */
     private Item getItemFromUsername(String username) throws Exception {
         this.container.removeAllContainerFilters();
         this.container.addContainerFilter(new Equal("username", username));
@@ -34,6 +48,12 @@ public class UserManager {
         return this.container.getItem(id);
     }
 
+    /** Find user with username
+     *
+     * Finds a user that has the specified username. Throws an exception if no such user is found
+     *
+     * @param String user Username
+     */
     public User getFromUsername(String username) throws Exception {
         Item item = this.getItemFromUsername(username);
         String firstname = (String) item.getItemProperty("firstname")
@@ -44,11 +64,29 @@ public class UserManager {
         return new User(username, firstname, lastname, email, admin == 1);
     }
 
+    /** Returns the users password hash
+     *
+     * Returns the users raw hash code. Tries to find the user from the
+     * username and if the user is not found throws an exception. Otherwise
+     * returns that users password hash
+     *
+     * @param String username Username
+     *
+     */
     public String getHashCode(String username) throws Exception {
         Item item = this.getItemFromUsername(username);
         return (String) item.getItemProperty("password").getValue();
     }
 
+    /** Create a new user
+     *
+     * Creates a new user from a User object and a hash. The user and hash were
+     * originally separated so that by no accident the hash code is shown in
+     * the UI if the user model is used.
+     *
+     * @param User user The new user
+     * @param Hash password The hashed password
+     */
     public void createUser(User user, Hash password) {
 
         Object itemId = this.container.addItem();
@@ -84,6 +122,14 @@ public class UserManager {
         return tq.getCount() == 0;
     }
 
+    /** Modifies user
+     *
+     * Tries to modify an existing user. The users username is used to finding
+     * the original user, and if that user is not found a generic exception is
+     * thrown
+     *
+     * @param User user The new user
+     */
     public void modifyUser(User user) throws Exception {
         Item item = this.getItemFromUsername(user.getUsername());
         item.getItemProperty("username").setValue(user.getUsername());
@@ -93,6 +139,15 @@ public class UserManager {
         this.container.commit();
     }
 
+    /** Modifies user
+     *
+     * Tries to modify an existing user. The users username is used to finding
+     * the original user, and if that user is not found a generic exception is
+     * thrown
+     *
+     * @param User user The new user
+     * @param Hash hash The new password
+     */
     public void modifyUser(User user, Hash hash) throws Exception {
         Item item = this.getItemFromUsername(user.getUsername());
         item.getItemProperty("username").setValue(user.getUsername());
