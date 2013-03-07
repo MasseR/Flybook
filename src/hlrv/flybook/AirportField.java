@@ -197,11 +197,17 @@ public class AirportField extends CustomField<Integer> implements
             String icao = getSelectedValue(icaoCombo, DBConstants.AIRPORTS_ICAO);
 
             if (!valueBeingSet) {
-                AirportItem item = airportsContainer.getItemFromCode(icao);
+                AirportItem apItem = airportsContainer.getItemFromCode(icao);
 
-                Integer apId = item.getID();
+                Integer apId = apItem.getID();
 
+                valueBeingSet = true;
                 setValue(apId, false);
+
+                countryCombo.select(apItem.getCountry());
+                cityCombo.select(apItem.getCity());
+                nameCombo.select(apItem.getName());
+                valueBeingSet = false;
             }
 
         } else if (event.getProperty() == countryCombo) {

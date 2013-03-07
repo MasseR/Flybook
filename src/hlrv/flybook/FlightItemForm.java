@@ -89,7 +89,7 @@ public class FlightItemForm extends CustomComponent implements
         // fieldDeparturePort = new TextField("Port");
         // fieldDeparturePort.setColumns(30);
         fieldDepartureAirport = new AirportField();
-        fieldDepartureAirport.setValidationVisible(true);
+        // fieldDepartureAirport.setValidationVisible(true);
         fieldDepartureAirport.addValidator(new NullValidator(
                 "Departure Airport must be selected", false));
         fieldDepartureAirport.addValueChangeListener(this);
@@ -126,7 +126,7 @@ public class FlightItemForm extends CustomComponent implements
         // fieldLandingPort.setColumns(30);
 
         fieldLandingAirport = new AirportField();
-        fieldLandingAirport.setValidationVisible(true);
+        // fieldLandingAirport.setValidationVisible(true);
         fieldLandingAirport.addValidator(new NullValidator(
                 "Landing Airport must be selected", false));
         fieldLandingAirport.addValueChangeListener(this);

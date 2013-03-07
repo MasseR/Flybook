@@ -65,15 +65,13 @@ public class NewFlightDialog extends Window implements Button.ClickListener {
             flightForm.reset();
             isCommitted = false;
             close();
-        } else {
-
+        } else if (event.getButton() == createButton) {
             /**
              * Commit form values so they get set to FlightItem properties.
              */
             if (flightForm.commit()) {
                 isCommitted = true;
                 close();
-
             }
         }
     }

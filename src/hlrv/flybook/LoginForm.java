@@ -1,7 +1,6 @@
 package hlrv.flybook;
 
 import hlrv.flybook.auth.Auth;
-import hlrv.flybook.managers.UserManager;
 
 import java.sql.SQLException;
 
@@ -13,8 +12,8 @@ import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Notification;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.UI;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * This class provides the form for LoginView
@@ -120,11 +119,9 @@ public class LoginForm extends CustomComponent {
 
                     // Temporary bypass
                     auth.login((String) item.getItemProperty("login")
-                        .getValue(),
-                        (String) item.getItemProperty("password")
-                        .getValue());
-
-                    getUI().setContent(new MainView());
+                            .getValue(),
+                            (String) item.getItemProperty("password")
+                                    .getValue());
 
                 } catch (Exception e) {
 
@@ -134,6 +131,8 @@ public class LoginForm extends CustomComponent {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
+
+                getUI().setContent(new MainView());
 
             }
 

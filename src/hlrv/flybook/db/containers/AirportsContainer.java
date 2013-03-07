@@ -93,14 +93,13 @@ public class AirportsContainer {
         Item item = null;
         if (id != null) {
 
-            Object[] pkey = { new Integer(id) };
-            RowId rowId = new RowId(pkey);
-            item = airportsContainer.getItemUnfiltered(rowId);
+            // Object[] pkey = { new Integer(id) };
+            // RowId rowId = new RowId(pkey);
+            // item = airportsContainer.getItemUnfiltered(rowId);
 
-            // setTemporaryFilter(new Equal("id", id));
-            // item =
-            // airportsContainer.getItem(airportsContainer.firstItemId());
-            // restoreFilters();
+            setTemporaryFilter(new Equal("id", id));
+            item = airportsContainer.getItem(airportsContainer.firstItemId());
+            restoreFilters();
         }
         return new AirportItem(item);
     }
