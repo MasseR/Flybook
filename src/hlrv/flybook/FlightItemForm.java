@@ -1,16 +1,21 @@
 package hlrv.flybook;
 
 import hlrv.flybook.db.DBConstants;
+import hlrv.flybook.db.containers.AircraftsContainer;
 import hlrv.flybook.db.containers.AirportsContainer;
 import hlrv.flybook.db.containers.FlightsContainer;
+import hlrv.flybook.db.items.AircraftItem;
 import hlrv.flybook.db.items.FlightItem;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TimeZone;
 
+import com.vaadin.data.Item;
 import com.vaadin.data.Property;
 import com.vaadin.data.fieldgroup.FieldGroup;
+import com.vaadin.data.util.converter.Converter;
 import com.vaadin.data.validator.NullValidator;
 import com.vaadin.shared.ui.MarginInfo;
 import com.vaadin.shared.ui.datefield.Resolution;
@@ -35,7 +40,8 @@ public class FlightItemForm extends CustomComponent implements
     // private TextField fieldPilotFullname;
     private TextField fieldPilotUsername;
 
-    private TextField fieldAircraft;
+    // private TextField fieldAircraft;
+    private ComboBox comboAircraft;
 
     private AirportField fieldDepartureAirport;
     // private TextField fieldDeparturePort;
@@ -58,8 +64,13 @@ public class FlightItemForm extends CustomComponent implements
 
     private FlightMap flightMap;
 
+    private AircraftsContainer aircraftsContainer;
+
     public FlightItemForm() {
         super();
+
+        aircraftsContainer = SessionContext.getCurrent()
+                .getAircraftsContainer();
 
         // /**
         // * Create id and date
@@ -78,7 +89,22 @@ public class FlightItemForm extends CustomComponent implements
         fieldPilotUsername = new TextField("Username");
         fieldPilotUsername.setColumns(10);
 
-        fieldAircraft = new TextField("Aircraft");
+        comboFlightType = new ComboBox("Flight Type", SessionContext
+                .getCurrent().getFlightsContainer().getFlightTypesContainer());
+        comboFlightType
+                .setItemCaptionPropertyId(FlightsContainer.PID_FLIGHT_TYPE);
+        comboFlightType.setNullSelectionAllowed(false);
+        comboFlightType.setInputPrompt("Select Flight Type");
+        comboFlightType.setImmediate(true);
+
+        comboAircraft = new ComboBox("Aircraft",
+                aircraftsContainer.getUnfilteredContainer());
+        // comboAircraft.setItemCaptionPropertyId(DBConstants.AIRCRAFTS_REGISTER);
+        comboAircraft.setImmediate(true);
+        comboAircraft.setNullSelectionAllowed(false);
+        comboAircraft.setConverter(new AircraftComboConverter());
+
+        // fieldAircraft = new TextField("Aircraft");
 
         /**
          * Create departure panel
@@ -157,14 +183,6 @@ public class FlightItemForm extends CustomComponent implements
         fieldOffBlockTime = new TextField("Off-Block Time");
         fieldIFRTime = new TextField("IFR Time");
 
-        comboFlightType = new ComboBox("Flight Type", SessionContext
-                .getCurrent().getFlightsContainer().getFlightTypesContainer());
-        comboFlightType
-                .setItemCaptionPropertyId(FlightsContainer.PID_FLIGHT_TYPE);
-        comboFlightType.setNullSelectionAllowed(false);
-        comboFlightType.setInputPrompt("Select Flight Type");
-        comboFlightType.setImmediate(true);
-
         fieldNotes = new TextArea("Notes");
         // fieldNotes.setColumns(30);
 
@@ -197,7 +215,7 @@ public class FlightItemForm extends CustomComponent implements
         typeAndAircraftLayout.setSpacing(true);
         typeAndAircraftLayout.setSizeUndefined();
         typeAndAircraftLayout.addComponent(comboFlightType);
-        typeAndAircraftLayout.addComponent(fieldAircraft);
+        typeAndAircraftLayout.addComponent(comboAircraft);
 
         HorizontalLayout airportSelectorLayout = new HorizontalLayout();
         airportSelectorLayout.setSpacing(true);
@@ -392,6 +410,8 @@ public class FlightItemForm extends CustomComponent implements
 
         try {
 
+            Object value = comboAircraft.getValue();
+
             fieldGroup.commit();
 
             return true;
@@ -430,7 +450,7 @@ public class FlightItemForm extends CustomComponent implements
         // DBConstants.FLIGHTENTRIES_PILOT_FULLNAME);
 
         fg.bind(comboFlightType, DBConstants.FLIGHTENTRIES_FLIGHT_TYPE);
-        fg.bind(fieldAircraft, DBConstants.FLIGHTENTRIES_AIRCRAFT);
+        fg.bind(comboAircraft, DBConstants.FLIGHTENTRIES_AIRCRAFT);
 
         fg.bind(fieldDepartureAirport,
                 DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT);
@@ -554,6 +574,43 @@ public class FlightItemForm extends CustomComponent implements
             flightMap.setPorts(container.getItem(departurePort),
                     container.getItem(landingPort));
 
+        }
+    }
+
+    private class AircraftComboConverter implements Converter<Object, String> {
+
+        @Override
+        public String convertToModel(Object value, Locale locale)
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
+
+            Item item = comboAircraft.getItem(value);
+            if (item == null) {
+                return "";
+            }
+
+            return (String) item
+                    .getItemProperty(DBConstants.AIRCRAFTS_REGISTER).getValue();
+        }
+
+        @Override
+        public Object convertToPresentation(String value, Locale locale)
+                throws com.vaadin.data.util.converter.Converter.ConversionException {
+
+            AircraftItem item = aircraftsContainer.getItem(value);
+            if (item.isNull()) {
+                return null;
+            }
+            return item.getItemId();
+        }
+
+        @Override
+        public Class<String> getModelType() {
+            return String.class;
+        }
+
+        @Override
+        public Class<Object> getPresentationType() {
+            return Object.class;
         }
     }
 

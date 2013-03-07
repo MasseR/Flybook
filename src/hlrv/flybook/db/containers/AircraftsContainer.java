@@ -29,6 +29,11 @@ public class AircraftsContainer {
     private SQLContainer aircraftsContainer;
 
     /**
+     * Unfiltered container.
+     */
+    private SQLContainer unfilteredAircraftsContainer;
+
+    /**
      * Custom permanent filter.
      */
     private Filter customFilter;
@@ -41,6 +46,9 @@ public class AircraftsContainer {
         tq.setVersionColumn(DBConstants.AIRCRAFTS_OPTLOCK);
         aircraftsContainer = new SQLContainer(tq);
         aircraftsContainer.setAutoCommit(false);
+
+        unfilteredAircraftsContainer = new SQLContainer(tq);
+        unfilteredAircraftsContainer.setAutoCommit(false);
     }
 
     /**
@@ -48,6 +56,13 @@ public class AircraftsContainer {
      */
     public SQLContainer getContainer() {
         return aircraftsContainer;
+    }
+
+    /**
+     * Returns the SQLContainer.
+     */
+    public SQLContainer getUnfilteredContainer() {
+        return unfilteredAircraftsContainer;
     }
 
     public boolean containsItem(String register) {
@@ -66,13 +81,18 @@ public class AircraftsContainer {
     public AircraftItem getItem(String register) {
 
         Item item = null;
+        Object id = null;
         if (register != null) {
-            setTemporaryFilter(new Equal(DBConstants.AIRCRAFTS_REGISTER,
-                    register));
-            item = aircraftsContainer.getItem(aircraftsContainer.firstItemId());
-            restoreFilters();
+            // setTemporaryFilter(new Equal(DBConstants.AIRCRAFTS_REGISTER,
+            // register));
+            unfilteredAircraftsContainer.addContainerFilter(new Equal(
+                    DBConstants.AIRCRAFTS_REGISTER, register));
+            id = unfilteredAircraftsContainer.firstItemId();
+            item = unfilteredAircraftsContainer.getItem(id);
+            unfilteredAircraftsContainer.removeAllContainerFilters();
+            // restoreFilters();
         }
-        return new AircraftItem(item);
+        return new AircraftItem(item, id);
     }
 
     /**
