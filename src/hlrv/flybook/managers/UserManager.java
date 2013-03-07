@@ -40,7 +40,8 @@ public class UserManager {
                 .getValue();
         String lastname = (String) item.getItemProperty("lastname").getValue();
         String email = (String) item.getItemProperty("email").getValue();
-        return new User(username, firstname, lastname, email, false);
+        Integer admin = (Integer) item.getItemProperty("admin").getValue();
+        return new User(username, firstname, lastname, email, admin == 1);
     }
 
     public String getHashCode(String username) throws Exception {
@@ -57,14 +58,14 @@ public class UserManager {
         newUser.getItemProperty("lastname").setValue(user.getLastname());
         newUser.getItemProperty("email").setValue(user.getEmail());
         newUser.getItemProperty("password").setValue(password.raw());
-        newUser.getItemProperty("admin").setValue(false);
+        newUser.getItemProperty("admin").setValue(new Integer(0));
 
         try {
             /*
              * First user is admin
              */
             if (isFirst()) {
-                newUser.getItemProperty("admin").setValue(true);
+                newUser.getItemProperty("admin").setValue(new Integer(1));
             }
             this.container.commit();
         } catch (UnsupportedOperationException e) {

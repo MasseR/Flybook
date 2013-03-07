@@ -38,9 +38,7 @@ public class FlightsView extends CustomComponent implements
      * Reference to fligths SQLContainer wrapper object.
      * 
      * NOTE: At the moment this is created in SessionContext and we fetch it in
-     * out constructor. This may require rethinking, because containers seem to
-     * not like being shared. Sharing can introduce subtle bugs, as was the case
-     * in AirportsContainer...
+     * constructor.
      */
     private FlightsContainer flightsContainer;
 
@@ -81,7 +79,7 @@ public class FlightsView extends CustomComponent implements
     private Button deleteButton;
 
     /**
-     * Lazy dialog to create new entry.
+     * Lazy dialog tha is used to create new entry.
      */
     private NewFlightDialog newFlightDialog = null;
 
@@ -107,17 +105,6 @@ public class FlightsView extends CustomComponent implements
         // table.setWidth("");
         // table.setHeight("100%");
         table.setSizeFull();
-        // table.setSizeUndefined();
-
-        //
-
-        /**
-         * Create components above table.
-         */
-
-        /**
-         * Create filters.
-         */
 
         /**
          * Filter by pilot username.
@@ -133,6 +120,9 @@ public class FlightsView extends CustomComponent implements
         comboPilotFilter.addItem(username);
         comboPilotFilter.setValue(username);
 
+        /**
+         * Filter by dat.
+         */
         dateRangeFromFilter = new DateField("Date From");
         dateRangeFromFilter.setResolution(Resolution.MINUTE);
         // dateRangeFromFilter.setTimeZone(TimeZone.getTimeZone("GMT+0"));
@@ -148,6 +138,9 @@ public class FlightsView extends CustomComponent implements
         dateRangeToFilter.addValueChangeListener(this);
         dateRangeToFilter.setImmediate(true);
 
+        /**
+         * Filter by flight type.
+         */
         comboFlightTypeFilter = new ComboBox("Flight Type");
         comboFlightTypeFilter.setNullSelectionAllowed(false);
         comboFlightTypeFilter.addValueChangeListener(this);
@@ -169,6 +162,15 @@ public class FlightsView extends CustomComponent implements
         deleteButton.addClickListener(this);
 
         /**
+         * Only admin can delete entries.
+         */
+        if (((FlybookUI) UI.getCurrent()).getUser().getBean().isAdmin()) {
+            deleteButton.setVisible(true);
+        } else {
+            deleteButton.setVisible(false);
+        }
+
+        /**
          * Details panel on view right side.
          */
         flightDetails = new FlightDetailsPanel();
@@ -187,7 +189,7 @@ public class FlightsView extends CustomComponent implements
         filtersLayout.addComponent(dateRangeToFilter);
         filtersLayout.addComponent(comboFlightTypeFilter);
 
-        Panel filterPanel = new Panel("Filters", filtersLayout);
+        Panel filterPanel = new Panel("Filter By", filtersLayout);
         // filterPanel.setSizeFull();
         filterPanel.addStyleName(Reindeer.PANEL_LIGHT);
 

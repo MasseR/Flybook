@@ -33,8 +33,13 @@ public class MainView extends CustomComponent {
          * Instantiation
          */
         menu = new MenuComponent();
+        menu.setWidth("100%");
+
         tabs = new TabSheet();
+        tabs.setSizeFull();
+
         rootLayout = new VerticalLayout();
+        rootLayout.setSizeFull();
 
         /*
          * Size modifiers
@@ -54,6 +59,7 @@ public class MainView extends CustomComponent {
          */
         rootLayout.addComponent(menu);
         rootLayout.addComponent(tabs);
+        rootLayout.setExpandRatio(tabs, 1.0f);
 
         /*
          * set rootLayout as composition root
