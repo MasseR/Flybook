@@ -1,0 +1,11 @@
+@import "../reindeer/legacy-styles.css";
+
+.v-panel {
+	border: none;
+}
+
+.background-style {
+	background-image: url(../images/bg.png);
+	background-repeat: no-repeat; 
+	background-position: center center;	
+}

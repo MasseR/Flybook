@@ -1,18 +1,19 @@
 package hlrv.flybook;
 
 import hlrv.flybook.auth.Auth;
-import hlrv.flybook.managers.UserManager;
 
 import java.sql.SQLException;
 
 import com.vaadin.data.fieldgroup.FieldGroup;
 import com.vaadin.data.util.ObjectProperty;
 import com.vaadin.data.util.PropertysetItem;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.Notification;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
@@ -26,8 +27,7 @@ public class LoginForm extends CustomComponent {
 
     /*
      * A set for individual properties which are fed to the propertyitemset to
-     * form a datasource which in turn will feed the data to an sqlcontainer
-     * which updates the underlying database. Do it the Vaadin way!
+     * form a datasource Do it the Vaadin way!
      */
     private final PropertysetItem item;
 
@@ -51,6 +51,8 @@ public class LoginForm extends CustomComponent {
 
     private final Auth auth;
 
+    private final Button login;
+
     /**
      * The Constructor
      * 
@@ -65,7 +67,8 @@ public class LoginForm extends CustomComponent {
         layout = new VerticalLayout();
         form = new FieldGroup();
         register = new Button("Register");
-        auth = new Auth(new UserManager(FlybookUI.getPool()));
+        auth = ((FlybookUI) UI.getCurrent()).getAuth();
+        login = new Button("Login");
 
         /*
          * Set properties as data source
@@ -76,8 +79,8 @@ public class LoginForm extends CustomComponent {
         /*
          * Set properties
          */
-        item.addItemProperty("login", new ObjectProperty<String>("login"));
-        item.addItemProperty("password", new ObjectProperty<String>("password"));
+        item.addItemProperty("username ", new ObjectProperty<String>(""));
+        item.addItemProperty("password ", new ObjectProperty<String>(""));
 
         /*
          * Set layout properties
@@ -102,15 +105,17 @@ public class LoginForm extends CustomComponent {
             layout.addComponent(form.buildAndBind(propertyID));
         }
 
-        /*
-         * Add buttons to the layout and implement anonymous listeners:
-         * register, submit
-         */
         layout.addComponent(register);
-        layout.addComponent(new Button("Submit", new ClickListener() {
+        layout.addComponent(login);
+        layout.setComponentAlignment(login, Alignment.MIDDLE_RIGHT);
+
+        /*
+         * Implement anonymous listeners
+         */
+        login.addClickListener(new ClickListener() {
 
             @Override
-            public void buttonClick(ClickEvent event) {
+            public void buttonClick(final ClickEvent event) {
 
                 /*
                  * Authenticate the user
@@ -122,18 +127,19 @@ public class LoginForm extends CustomComponent {
                             (String) item.getItemProperty("password")
                                     .getValue());
 
-                } catch (Exception e) {
+                    UI.getCurrent().getUI().setContent(new MainView());
+
+                } catch (final Exception e) {
 
                     Notification
                             .show("Error with login credentials. Please check your username and password.");
 
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
 
             }
 
-        }));
+        });
 
         /*
          * Implement listener for the register button to open modal window for
@@ -144,10 +150,7 @@ public class LoginForm extends CustomComponent {
             @Override
             public void buttonClick(ClickEvent event) {
 
-                /*
-                 * !!! THIS IS A HACK! DO THIS PROPERLY!
-                 */
-                FlybookUI.getCurrent().addWindow(new RegisterView(true));
+                UI.getCurrent().addWindow(new UserInformationView(true));
             }
 
         });

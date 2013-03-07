@@ -2,7 +2,6 @@ package hlrv.flybook;
 
 import hlrv.flybook.auth.Auth;
 import hlrv.flybook.auth.User;
-import hlrv.flybook.managers.UserManager;
 
 import java.sql.SQLException;
 
@@ -13,14 +12,17 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.CustomComponent;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.Notification;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
 /**
- * This class provides the form for RegisterView
+ * This class performs two functions and is in direct violation of SRP, I know.
  * 
  * @author Esa Halsti
  */
-public class RegisterForm extends CustomComponent {
+public class UserInformationForm extends CustomComponent {
 
     /*
      * This listener is provided to commit changes to the underlying BeanItem
@@ -31,26 +33,51 @@ public class RegisterForm extends CustomComponent {
      */
     private class SaveListener implements ClickListener {
 
+        private final Auth auth;
+
+        public SaveListener() throws SQLException {
+
+            auth = ((FlybookUI) UI.getCurrent()).getAuth();
+
+        }
+
         @Override
         public void buttonClick(ClickEvent event) {
 
             try {
-                Auth auth = new Auth(new UserManager(FlybookUI.getPool()));
+
                 if (register == true) {
+
+                    /*
+                     * Backend registration process, validators should be
+                     * implemented here, but not enough time.
+                     */
 
                     auth.register(((BeanItem<User>) fields.getItemDataSource())
                             .getBean());
+
+                    /*
+                     * Notify user of registration
+                     */
+                    Notification.show("User "
+                            + ((BeanItem<User>) fields.getItemDataSource())
+                                    .getBean().getUsername() + " registered.");
                 } else {
 
-                    // modify user. how is it done? UserManager?
+                    auth.modify(((BeanItem<User>) fields.getItemDataSource())
+                            .getBean());
 
                 }
             } catch (SQLException e) {
-                // TODO Auto-generated catch block
+
+                Notification
+                        .show("Error writing user information to database.");
                 e.printStackTrace();
+
             } catch (Exception e) {
-                // TODO Auto-generated catch block
+
                 e.printStackTrace();
+
             }
         }
     }
@@ -80,17 +107,18 @@ public class RegisterForm extends CustomComponent {
      */
     private final Button save;
 
-    private boolean register;
+    private final boolean register;
 
     /*
      * The constructor
      */
-    public RegisterForm(boolean register) {
+    public UserInformationForm(boolean register) {
 
         /*
          * Instantiate
          */
         this.user = new User("", "", "", "", false);
+        user.setPassword("");
         this.layout = new VerticalLayout();
         this.fields = new BeanFieldGroup<User>(User.class);
         this.save = new Button("Save");
@@ -114,20 +142,35 @@ public class RegisterForm extends CustomComponent {
         fields.setItemDataSource(item);
         fields.setBuffered(false);
 
+        /*
+         * Display username if modify form
+         */
+        if (register == false) {
+            layout.addComponent(new Label("Username: "
+                    + ((FlybookUI) UI.getCurrent()).getUser().getBean()
+                            .getUsername()));
+        }
+
         for (Object propertyID : fields.getUnboundPropertyIds()) {
 
             /*
-             * !!! This is a hack. We do not want show the admin field in the
-             * registration form. How to implement this robustly?
+             * We do not want show the admin field in the registration form.
              */
             if (!propertyID.toString().equals("admin")) {
-
-                /*
-                 * Add a component to form
-                 */
-                layout.addComponent(fields.buildAndBind(propertyID));
+                if (register == false) {
+                    if (!propertyID.toString().equals("username")) {
+                        /*
+                         * Add a components to form
+                         */
+                        layout.addComponent(fields.buildAndBind(propertyID));
+                    }
+                } else {
+                    /*
+                     * Add components to form
+                     */
+                    layout.addComponent(fields.buildAndBind(propertyID));
+                }
             }
-
         }
 
         /*
@@ -138,19 +181,20 @@ public class RegisterForm extends CustomComponent {
         /*
          * Add a listener to save button
          */
-        save.addClickListener(new SaveListener());
+        try {
+
+            save.addClickListener(new SaveListener());
+
+        } catch (SQLException e) {
+
+            Notification
+                    .show("Error connecting to the database. Please contact admin Markku Liljeroos.");
+            e.printStackTrace();
+        }
 
         /*
          * Remember to setCompositionRoot for CustomComponent
          */
         this.setCompositionRoot(layout);
-    }
-
-    /**
-     * Setting this field true makes the class a registration form. Setting it
-     * false makes the class modify user form
-     */
-    public void setRegister(boolean register) {
-        this.register = register;
     }
 }

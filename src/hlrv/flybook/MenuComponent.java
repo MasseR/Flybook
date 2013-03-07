@@ -13,33 +13,50 @@ public class MenuComponent extends CustomComponent {
         @Override
         public void menuSelected(MenuItem selectedItem) {
 
-            // Open user window
-
+            ((FlybookUI) UI.getCurrent()).getAuth().logout();
+            UI.getCurrent().setContent(new MainView());
         }
-
     }
 
+    /*
+     * This command opens a modal window for user modification
+     */
     private class UserCommand implements Command {
 
         @Override
         public void menuSelected(MenuItem selectedItem) {
 
-            UI.getCurrent().getUI().addWindow(new RegisterView(false));
-
+            UI.getCurrent().getUI().addWindow(new UserInformationView(false));
         }
-
     }
 
+    /*
+     * This command opens the AircraftView-class
+     */
+    private class AircraftCommand implements Command {
+
+        @Override
+        public void menuSelected(MenuItem selectedItem) {
+
+            // Aircrafts
+
+        }
+    }
+
+    private final boolean admin;
     private final MenuBar menubar;
 
     /**
-     * Create a menu with the following menu objects:
-     * 
+     * Create a menu with the following menu objects: User settings, logout and
+     * aircraft settings for the admin
      */
     public MenuComponent() {
 
         menubar = new MenuBar();
+        menubar.setWidth("100%");
         initializeMenu();
+        admin = ((FlybookUI) UI.getCurrent()).getUser().getBean().isAdmin();
+        this.setCompositionRoot(menubar);
 
     }
 
@@ -51,12 +68,15 @@ public class MenuComponent extends CustomComponent {
         final MenuBar.MenuItem flybook = menubar.addItem("Flybook", null);
         final MenuBar.MenuItem settings = menubar.addItem("Settings", null);
 
-        Command logoutCommand = null;
-        Command userCommand = null;
+        Command logoutCommand = new LogoutCommand();
+        Command userCommand = new UserCommand();
+        Command adminCommand = new AircraftCommand();
 
         flybook.addItem("Logout", logoutCommand);
+
+        if (admin) {
+            settings.addItem("Aircraft", adminCommand);
+        }
         settings.addItem("User", userCommand);
-
     }
-
 }

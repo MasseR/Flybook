@@ -27,8 +27,6 @@ public class Auth {
      */
     public User login(String username, String password) throws Exception {
         User user = this.manager.getFromUsername(username);
-        // TODO:remove this before going live
-        System.err.println(user.toString());
         Hash hash = new Hash(this.manager.getHashCode(password));
         if (hash.check(password)) {
             this.user = user;
@@ -53,8 +51,12 @@ public class Auth {
     }
 
     public void register(User user) throws Exception {
-        user.toString();
         Hash hash = Hash.hash(user.getPassword());
         this.manager.createUser(user, hash);
     }
+
+    public void modify(User user) throws Exception {
+        this.manager.modifyUser(user);
+    }
+
 }
