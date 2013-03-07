@@ -18,8 +18,8 @@ public class FlightsTable extends Table {
     /**
      * Which columns are shown in table?
      */
-    private String[] visibleColumns = { DBConstants.FLIGHTENTRIES_FLIGHT_ID,
-            DBConstants.FLIGHTENTRIES_USERNAME, DBConstants.FLIGHTENTRIES_DATE,
+    private String[] visibleColumns = { DBConstants.FLIGHTENTRIES_USERNAME,
+            DBConstants.FLIGHTENTRIES_DATE,
             DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT,
             DBConstants.FLIGHTENTRIES_DEPARTURE_TIME,
             DBConstants.FLIGHTENTRIES_LANDING_AIRPORT,
@@ -33,7 +33,7 @@ public class FlightsTable extends Table {
     /**
      * Columns headers matching to visible columns.
      */
-    private String[] headers = { "Id", "Pilot", "Date", "Departure Airport",
+    private String[] headers = { "Pilot", "Date", "Departure Airport",
             "Departure Time", "Landing Airport", "Landing Time", "Flight Time",
             "Aircraft", "Flight Type", "IFR Time", "On-Block Time",
             "Off-Block Time" };
@@ -46,7 +46,6 @@ public class FlightsTable extends Table {
      * Table columns that are initially collapsed.
      */
     private String[] initialCollapsedColumns = {
-            DBConstants.FLIGHTENTRIES_FLIGHT_ID,
             DBConstants.FLIGHTENTRIES_FLIGHT_TYPE,
             DBConstants.FLIGHTENTRIES_IFR_TIME,
             DBConstants.FLIGHTENTRIES_ONBLOCK_TIME,
@@ -67,7 +66,7 @@ public class FlightsTable extends Table {
 
         TableColumnGenerator colGenerator = new TableColumnGenerator();
         addGeneratedColumn(GEN_FLIGHT_TIME, colGenerator);
-        addGeneratedColumn(DBConstants.FLIGHTENTRIES_USERNAME, colGenerator);
+        // addGeneratedColumn(DBConstants.FLIGHTENTRIES_USERNAME, colGenerator);
         addGeneratedColumn(DBConstants.FLIGHTENTRIES_DEPARTURE_AIRPORT,
                 colGenerator);
         addGeneratedColumn(DBConstants.FLIGHTENTRIES_LANDING_AIRPORT,

@@ -29,7 +29,7 @@ public class FlightItemForm extends CustomComponent implements
 
     private FieldGroup fieldGroup;
 
-    private TextField fieldId; // is this even needed ?
+    // private TextField fieldId; // is this even needed ?
     private DateField fieldDate;
 
     // private TextField fieldPilotFullname;
@@ -61,11 +61,11 @@ public class FlightItemForm extends CustomComponent implements
     public FlightItemForm() {
         super();
 
-        /**
-         * Create id and date
-         */
-        fieldId = new TextField("Flight ID");
-        fieldId.setColumns(5);
+        // /**
+        // * Create id and date
+        // */
+        // fieldId = new TextField("Flight ID");
+        // fieldId.setColumns(5);
 
         fieldDate = new DateField("Date Added");
         fieldDate.setResolution(Resolution.SECOND);
@@ -179,7 +179,7 @@ public class FlightItemForm extends CustomComponent implements
         idAndDateLayout.addComponent(fieldPilotUsername);
         // idAndDateLayout.addComponent(fieldPilotFullname);
         idAndDateLayout.addComponent(fieldDate);
-        idAndDateLayout.addComponent(fieldId);
+        // idAndDateLayout.addComponent(fieldId);
 
         // Panel pilotPanel = new Panel("Pilot");
         // HorizontalLayout pilotLayout = new HorizontalLayout();
@@ -329,13 +329,13 @@ public class FlightItemForm extends CustomComponent implements
          * If id is null, there is no reason why id field should be visible at
          * all.
          */
-        if (flightItem.getFlightID() == null) {
-            fieldId.setVisible(false);
-        } else {
-            fieldId.setReadOnly(false);
-            fieldId.setValue(flightItem.getFlightID().toString());
-            fieldId.setVisible(true);
-        }
+        // if (flightItem.getFlightID() == null) {
+        // fieldId.setVisible(false);
+        // } else {
+        // fieldId.setReadOnly(false);
+        // fieldId.setValue(flightItem.getFlightID().toString());
+        // fieldId.setVisible(true);
+        // }
 
         /**
          * We set time fields to null to make sure valueChange() works right
@@ -453,7 +453,7 @@ public class FlightItemForm extends CustomComponent implements
 
     private void setReadOnlyComponents() {
 
-        fieldId.setReadOnly(true);
+        // fieldId.setReadOnly(true);
         fieldDate.setReadOnly(true);
         fieldPilotUsername.setReadOnly(true);
         // fieldPilotFullname.setReadOnly(true);
