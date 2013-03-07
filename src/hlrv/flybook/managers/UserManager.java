@@ -13,9 +13,10 @@ import com.vaadin.data.util.sqlcontainer.query.TableQuery;
 
 public class UserManager {
     private final SQLContainer container;
+    private final TableQuery tq;
 
     public UserManager(JDBCConnectionPool pool) throws SQLException {
-        TableQuery tq = new TableQuery("users", pool);
+        tq = new TableQuery("users", pool);
         tq.setVersionColumn("optlock");
         this.container = new SQLContainer(tq);
     }
@@ -58,13 +59,17 @@ public class UserManager {
         newUser.getItemProperty("passwd").setValue(password.raw());
 
         try {
+            /*
+             * First user is admin
+             */
+            if (tq.getCount() == 0) {
+                newUser.getItemProperty("admin").setValue(true);
+            }
             this.container.commit();
         } catch (UnsupportedOperationException e) {
             System.err.println("Unsupported");
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
             System.err.println("SQLError");
             e.printStackTrace();
         }
